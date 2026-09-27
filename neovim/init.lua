@@ -1,244 +1,407 @@
--- ~/.config/nvim/init.lua  (Neovim 0.12+ 架构)
--- ~/.local/share/nvim/site/pack/plugins/start/  (Default)
+-- ~/.config/nvim/init.lua  (Neovim 0.12+)
+--
+-- ╔══════════════════════════════ PLUGINS ══════════════════════════════════
+-- ║ 插件共 3 个: mini.nvim / multicursor.nvim / overseer.nvim
+-- ║ 目录: ~/.local/share/nvim/site/pack/plugins/start/
+-- ║
+-- ║ mkdir -p ~/.local/share/nvim/site/pack/plugins/start
+-- ║ cd ~/.local/share/nvim/site/pack/plugins/start
+-- ║
+-- ║ # 清理可能下载失败留下的残破目录
+-- ║ rm -rf mini.nvim multicursor.nvim overseer.nvim
+-- ║
+-- ║ # 使用加速镜像下载这 3 个插件（如无需镜像可去掉前缀 ghfast.top/）
+-- ║ git clone --depth 1 https://ghfast.top/https://github.com/echasnovski/mini.nvim mini.nvim
+-- ║ git clone --depth 1 https://ghfast.top/https://github.com/jake-stewart/multicursor.nvim multicursor.nvim
+-- ║ git clone --depth 1 https://ghfast.top/https://github.com/stevearc/overseer.nvim overseer.nvim
+-- ╚═════════════════════════════════════════════════════════════════════════
+--
+-- ╔══════════════════════════════ CHEATSHEET ═════════════════════════════
+-- ║ <Space> 为 Leader。按下 <Space> / g / m / z / [ / ] 后停顿，会弹出按键提示
+-- ╟─ 文件 / 查找 ─────────────────────────────────────────────────────────
+-- ║ <C-s> 保存   <Space>w 写入   <Space>q 退出   -  文件浏览(netrw)
+-- ║ <Space>ff 文件   fg 全文搜索   fb 缓冲区   fo 最近文件   fh 帮助
+-- ║ <Space>fl 当前文件行   fd 诊断   fr 恢复上次查找
+-- ╟─ 包围 (Helix 风格, mini.surround) ────────────────────────────────────
+-- ║ msiw"  给单词加 "        可视模式选中后 ms(  加括号 (不加空格)
+-- ║ md(    删除包围 ()       mr"'  把 " 换成 '     msiwt / msiwf  标签/函数
+-- ║ mm 跳到配对括号         mi( / ma"  选中括号内 / 连引号选中
+-- ║ 文本对象(mini.ai): ( [ { " ' ` 之外还有 f=函数调用 a=参数 t=标签 q=引号
+-- ╟─ 多光标 (Helix 风格, multicursor.nvim) ────────────────────────────────
+-- ║ C / <M-C>       在下方 / 上方加光标 (也可用 <C-Down> / <C-Up>)
+-- ║ <C-n> / <M-n>   加下一个相同词 / 跳过      <C-p> / <M-p> 向上找
+-- ║ <Space>A        选中全部相同词             gaip  段落每行一个光标
+-- ║ 可视 s / S      选区内按正则选中 / 按正则拆分  (最常用: vip → s → 正则)
+-- ║ 可视 I / A      每行行首插入 / 行尾追加    <C-q> 在此处放置/暂停光标
+-- ║ ── 以下仅在有多光标时生效 ──
+-- ║ ( )  切换主光标   <M-,> 删除主光标   &  对齐各列   <M-(> <M-)> 轮换选区内容
+-- ║ ,  或 <Esc>  回到单光标           <Space>gv  找回刚清除的光标
+-- ╟─ 任务 (Overseer) / LaTeX ──────────────────────────────────────────────
+-- ║ <Space>or 运行任务(make/npm/cargo/tasks.json…)   oo 任务面板   ol 重跑最近任务
+-- ║ <Space>oa 对任务执行操作(重启/停止/打开输出)       os 把 shell 命令作为任务运行
+-- ║ <Space>tt 编译   te 完全重建   tc 清理辅助文件   tv 打开 PDF
+-- ╟─ LSP / Git ─────────────────────────────────────────────────────────────
+-- ║ gd 跳到定义   K 悬停文档   grr 引用   gri 实现   gO 符号列表
+-- ║ <Space>rn 重命名   <Space>ca 代码操作   [d ]d 上/下一个诊断
+-- ║ ]h [h 下/上一个修改块  gh 暂存修改块  gH 撤销修改块  <Space>go 显示差异  gs 提交信息
+-- ╟─ 编辑 / 其他 ───────────────────────────────────────────────────────────
+-- ║ gc / gcc 注释(内置)   <M-j>/<M-k> 上下移动行   <C-h/j/k/l> 切换窗口
+-- ║ \  替换光标下单词   <Esc> 清除搜索高亮   插入模式 <C-d> 插入时间
+-- ║ F9 深/浅色   F10 拼写检查   F11 分隔线   F12 文件头
+-- ║ :PluginUpdate 更新插件   :PluginClean 删除不在列表中的插件
+-- ╚═════════════════════════════════════════════════════════════════════════
 
-----------------------------------------------------------------------
--- 1. 基础选项 (Options)
-----------------------------------------------------------------------
 vim.g.mapleader      = " "
 vim.g.maplocalleader = " "
+local map = vim.keymap.set
 
+----------------------------------------------------------------------
+-- 0. 插件引导 (可选国内镜像；本地记录的始终是真实 GitHub 地址)
+----------------------------------------------------------------------
+local USE_MIRROR = true                    -- 已有全局代理就设为 false
+local MIRROR     = "https://ghfast.top/"
+
+local plugins = {
+  { name = "mini.nvim",        src = "https://github.com/nvim-mini/mini.nvim" },
+  { name = "multicursor.nvim", src = "https://github.com/jake-stewart/multicursor.nvim" },
+  { name = "overseer.nvim",    src = "https://github.com/stevearc/overseer.nvim" },
+}
+
+local pack_dir = vim.fn.stdpath("data") .. "/site/pack/plugins/start/"
+vim.fn.mkdir(pack_dir, "p")
+
+-- 组装 git 命令：网速低于 1KB/s 持续 20 秒就自动放弃；开启镜像时临时替换地址
+local function git(args)
+  local cmd = { "git", "-c", "http.lowSpeedLimit=1000", "-c", "http.lowSpeedTime=20" }
+  if USE_MIRROR then
+    vim.list_extend(cmd, { "-c", ("url.%shttps://github.com/.insteadOf=https://github.com/"):format(MIRROR) })
+  end
+  return vim.list_extend(cmd, args)
+end
+
+for _, p in ipairs(plugins) do
+  local path = pack_dir .. p.name
+  if vim.fn.isdirectory(path) == 0 then
+    vim.notify("正在下载插件: " .. p.name .. " ...")
+    vim.fn.system(git({ "clone", "--depth", "1", p.src, path }))
+    if vim.v.shell_error ~= 0 then
+      vim.fn.delete(path, "rf")            -- 删掉残缺目录，下次启动会重新下载
+      vim.notify("下载失败: " .. p.name .. "（重启 Neovim 会再试）", vim.log.levels.WARN)
+    else
+      vim.opt.runtimepath:append(path)     -- 只有刚装的插件需要手动加入
+      pcall(vim.cmd.helptags, path .. "/doc")
+    end
+  end
+end
+
+vim.api.nvim_create_user_command("PluginUpdate", function()
+  local pending = #plugins
+  local function done()
+    pending = pending - 1
+    if pending == 0 then
+      pcall(vim.cmd, "helptags ALL")
+      vim.notify("🎉 插件更新完成，重启 Neovim 生效")
+    end
+  end
+  for _, p in ipairs(plugins) do
+    local dir = pack_dir .. p.name
+    if vim.fn.isdirectory(dir) == 0 then
+      vim.notify(p.name .. " 未安装，重启 Neovim 即可安装", vim.log.levels.WARN)
+      done()
+    else
+      -- 把旧的地址 (echasnovski / 带镜像前缀的) 统一改回真实地址
+      vim.fn.system({ "git", "-C", dir, "remote", "set-url", "origin", p.src })
+      vim.system(git({ "-C", dir, "pull", "--ff-only" }), { text = true }, function(r)
+        vim.schedule(function()
+          if r.code ~= 0 then
+            vim.notify("更新失败 " .. p.name .. ":\n" .. (r.stderr or ""), vim.log.levels.ERROR)
+          end
+          done()
+        end)
+      end)
+    end
+  end
+end, {})
+
+vim.api.nvim_create_user_command("PluginClean", function()
+  local keep = {}
+  for _, p in ipairs(plugins) do keep[p.name] = true end
+  for name, type in vim.fs.dir(pack_dir) do
+    if type == "directory" and not keep[name] then
+      vim.fn.delete(pack_dir .. name, "rf")
+      vim.notify("已删除: " .. name)
+    end
+  end
+end, {})
+
+----------------------------------------------------------------------
+-- 1. 选项 (hlsearch/incsearch/autoread/wildmenu/showcmd/termguicolors 已默认开启)
+----------------------------------------------------------------------
 local o = vim.o
 
--- 显示与交互
-o.number, o.relativenumber = true, true
-o.cursorline   = true
+o.number       = true                     -- 绝对行号
+o.cursorline, o.cursorcolumn = true, true
 o.signcolumn   = "yes"
 o.scrolloff    = 6
-o.showmatch    = true
-o.matchtime    = 2
+o.showmatch, o.matchtime = true, 2
 o.colorcolumn  = "+1"
-o.termguicolors = true
 o.list         = true
 o.listchars    = "tab:│ ,trail:·,extends:#,nbsp:."
+o.winborder    = "rounded"
 
--- 折行
-o.wrap         = true
-o.linebreak    = true                    -- 折行不切断单词
-o.whichwrap    = "b,s,<,>,[,],h,l"       -- 行首/尾自动跨行
+o.wrap, o.linebreak = true, true
+o.whichwrap    = "b,s,<,>,[,],h,l"
 
--- 缩进
 o.expandtab, o.shiftwidth, o.tabstop, o.softtabstop = true, 4, 4, 4
-o.smartindent  = true
-o.shiftround   = true                    -- 缩进对齐到 shiftwidth 倍数
+o.smartindent, o.shiftround = true, true
 
--- 搜索
 o.ignorecase, o.smartcase = true, true
-o.hlsearch     = true
-o.incsearch    = true
 
--- 文件与备份
-o.autoread     = true
 o.undofile     = true
 o.confirm      = true
 o.fileencoding = "utf-8"
 o.fileencodings = "utf-8,gbk,big5,ucs-bom"
 
--- 折叠
-o.foldmethod   = "indent"
-o.foldlevel    = 99
+o.foldmethod, o.foldlevel = "indent", 99
 
--- 其他性能与体验优化
-o.showcmd = true
-o.cursorcolumn = true
-o.timeoutlen = 400
-o.wildmenu = true
-o.switchbuf="useopen,usetab,newtab"
-
+o.timeoutlen   = 400
+o.switchbuf    = "useopen,usetab,newtab"
 o.clipboard    = "unnamedplus"
 o.splitright, o.splitbelow = true, true
-o.completeopt  = "menu,menuone,noselect,popup"
+o.completeopt  = "menu,menuone,noselect,popup,fuzzy"
 o.path         = o.path .. ",**"
 o.wildignore   = "*/node_modules/*,*/.git/*,*/target/*,*/dist/*,*.o,*.pyc"
 o.wildoptions  = "pum,fuzzy"
 o.wildmode     = "longest:full,full"
 
--- 列表/段落格式化
 o.formatlistpat = [[^\s*\(\d\+\|[-*]\)\+[\]:.)}\t ]\s*]]
 vim.opt.formatoptions:append("n")
 
+vim.g.netrw_banner, vim.g.netrw_liststyle = 0, 3
+vim.g.netrw_browse_split, vim.g.netrw_winsize = 0, 25
+
 ----------------------------------------------------------------------
--- 2. 内置插件管理 (本地化极速挂载，彻底免疫超时)
+-- 2. 主题：内置 retrobox (Gruvbox 风格，深浅两色)；备选 default / habamax / unokai
 ----------------------------------------------------------------------
-local plugins = {
-  { name = "fzf-lua",             src = "https://github.com/ibhagwan/fzf-lua" },
-  { name = "tokyonight.nvim",     src = "https://github.com/folke/tokyonight.nvim" },
-  { name = "nvim-surround",       src = "https://github.com/kylechui/nvim-surround" },
-  { name = "mini.comment",        src = "https://github.com/nvim-mini/mini.comment" },
-  { name = "multicursor.nvim",    src = "https://github.com/jake-stewart/multicursor.nvim" },
-  { name = "gitsigns.nvim",       src = "https://github.com/lewis6991/gitsigns.nvim" },
-  { name = "mini.starter",        src = "https://github.com/nvim-mini/mini.starter", },
-}
+vim.cmd.colorscheme("retrobox")
+map("n", "<F9>", function()
+  o.background = o.background == "dark" and "light" or "dark"
+end, { desc = "Toggle dark/light" })
 
-local data_path = vim.fn.stdpath("data")
-local start_dir = data_path .. "/site/pack/plugins/start/"
+----------------------------------------------------------------------
+-- 3. mini.nvim
+----------------------------------------------------------------------
+require("mini.starter").setup()
+require("mini.pairs").setup()
+require("mini.ai").setup({ n_lines = 500 })
+require("mini.extra").setup()
+require("mini.git").setup()
+require("mini.diff").setup({ view = { style = "sign" } })
+require("mini.statusline").setup({ use_icons = false })
 
--- 智能检测：如果未下载过，进行全自动深度下载
-if vim.fn.isdirectory(start_dir .. "fzf-lua") == 0 then
-  vim.notify("首次启动，正在全自动下载精选核心插件，请稍候...", vim.log.levels.INFO)
-  vim.fn.mkdir(start_dir, "p")
-  for _, p in ipairs(plugins) do
-    local target_path = start_dir .. p.name
-    print("正在克隆标准包: " .. p.name)
-    vim.fn.system({ "git", "clone", "--depth", "1", p.src, target_path })
-  end
-  vim.notify("🎉 插件已全部同步到位！", vim.log.levels.INFO)
-end
+-- 查找 + 接管 vim.ui.select (Overseer 的选择框也用它)
+require("mini.pick").setup()
+vim.ui.select = MiniPick.ui_select
 
--- for _, p in ipairs(plugins) do
---     local path = start_dir .. p.name
---
---     if vim.fn.isdirectory(path) == 0 then
---         print("Installing " .. p.name)
---         vim.fn.system({"git", "clone", "--depth", "1", p.src, path,})
---     end
---
---     vim.opt.runtimepath:append(path)
--- end
+-- 包围：只用 ms / md / mr 三个键，其余全部关闭，少占按键
+require("mini.surround").setup({
+  mappings = {
+    add = "ms", delete = "md", replace = "mr",
+    find = "", find_left = "", highlight = "", update_n_lines = "",
+  },
+  custom_surroundings = {   -- 同 Helix：左括号也不加内侧空格
+    ["("] = { output = { left = "(", right = ")" } },
+    ["["] = { output = { left = "[", right = "]" } },
+    ["{"] = { output = { left = "{", right = "}" } },
+    ["<"] = { output = { left = "<", right = ">" } },
+  },
+  search_method = "cover_or_next",
+})
+map({ "n", "x" }, "mm", "%",  { desc = "Goto matching bracket" })
+map("n", "mi", "vi", { remap = true, desc = "Select inside" })
+map("n", "ma", "va", { remap = true, desc = "Select around" })
 
--- 核心修复点：绕过容易超时的 vim.pack.add，直接用原生 runtimepath 秒级挂载本地路径
-for _, p in ipairs(plugins) do
-  local path = start_dir .. p.name
-  vim.opt.runtimepath:append(path)
-end
+-- 按键提示
+local clue = require("mini.clue")
+clue.setup({
+  triggers = {
+    { mode = "n", keys = "<Leader>" }, { mode = "x", keys = "<Leader>" },
+    { mode = "n", keys = "g" },        { mode = "x", keys = "g" },
+    { mode = "n", keys = "m" },        { mode = "x", keys = "m" },
+    { mode = "n", keys = "z" },        { mode = "x", keys = "z" },
+    { mode = "n", keys = "[" },        { mode = "n", keys = "]" },
+    { mode = "n", keys = "<C-w>" },
+  },
+  clues = {
+    clue.gen_clues.g(), clue.gen_clues.z(), clue.gen_clues.windows(),
+    { mode = "n", keys = "<Leader>f", desc = "+Find" },
+    { mode = "n", keys = "<Leader>o", desc = "+Overseer" },
+    { mode = "n", keys = "<Leader>t", desc = "+LaTeX" },
+    { mode = "n", keys = "<Leader>g", desc = "+Git" },
+  },
+  window = { delay = 300 },
+})
 
--- 2.1 基础外观与核心插件初始化
-vim.cmd.colorscheme("tokyonight-night")
-require("nvim-surround").setup()
-require("mini.comment").setup()
-require("gitsigns").setup()
-
--- 原生 Netrw 文件浏览器精细调优 (极轻量)
-vim.g.netrw_banner = 0
-vim.g.netrw_liststyle = 3
-vim.g.netrw_browse_split = 0
-vim.g.netrw_winsize = 25
-
--- 2.2 Multicursor (多光标) 配置与快捷键
+----------------------------------------------------------------------
+-- 4. 多光标 (Helix 风格)
+----------------------------------------------------------------------
 local mc = require("multicursor-nvim")
 mc.setup()
 
--- 添加/跳过下一个匹配光标 (避开 <C-s> 与保存键冲突)
-vim.keymap.set({"n", "v"}, "<C-n>",     function() mc.matchAddCursor(1)  end)
-vim.keymap.set({"n", "v"}, "<leader>S", function() mc.matchSkipCursor(1) end)
-vim.keymap.set({"n", "v"}, "<leader>x", mc.deleteCursor)
+map({ "n", "x" }, "C",        function() mc.lineAddCursor(1)  end, { desc = "Cursor below" })
+map({ "n", "x" }, "<M-C>",    function() mc.lineAddCursor(-1) end, { desc = "Cursor above" })
+map({ "n", "x" }, "<C-Down>", function() mc.lineAddCursor(1)  end, { desc = "Cursor below" })
+map({ "n", "x" }, "<C-Up>",   function() mc.lineAddCursor(-1) end, { desc = "Cursor above" })
 
--- 使用官方推荐的 keymap layer：仅在存在多光标时才接管 <Esc>，
--- 这样不会与 :nohl 等单光标下的常规行为冲突
-mc.addKeymapLayer(function(layerSet)
-  layerSet("n", "<esc>", function()
-    if not mc.cursorsEnabled() then
-      mc.enableCursors()
-    else
-      mc.clearCursors()
-    end
+map({ "n", "x" }, "<C-n>", function() mc.matchAddCursor(1)   end, { desc = "Add next match" })
+map({ "n", "x" }, "<M-n>", function() mc.matchSkipCursor(1)  end, { desc = "Skip next match" })
+map({ "n", "x" }, "<C-p>", function() mc.matchAddCursor(-1)  end, { desc = "Add prev match" })
+map({ "n", "x" }, "<M-p>", function() mc.matchSkipCursor(-1) end, { desc = "Skip prev match" })
+map({ "n", "x" }, "<leader>A", mc.matchAllAddCursors,             { desc = "Add all matches" })
+
+map("x", "s", mc.matchCursors, { desc = "Select regex in selection" })
+map("x", "S", mc.splitCursors, { desc = "Split selection by regex" })
+map("x", "I", mc.insertVisual, { desc = "Insert each line" })
+map("x", "A", mc.appendVisual, { desc = "Append each line" })
+map({ "n", "x" }, "ga", mc.addCursorOperator, { desc = "Cursors over motion" })
+
+map({ "n", "x" }, "<C-q>", mc.toggleCursor,   { desc = "Toggle cursor" })
+map("n", "<leader>gv",     mc.restoreCursors, { desc = "Restore cursors" })
+
+map("n", "<C-LeftMouse>",   mc.handleMouse)
+map("n", "<C-LeftDrag>",    mc.handleMouseDrag)
+map("n", "<C-LeftRelease>", mc.handleMouseRelease)
+
+-- 仅在存在多光标时生效
+mc.addKeymapLayer(function(set)
+  set({ "n", "x" }, ")", mc.nextCursor)
+  set({ "n", "x" }, "(", mc.prevCursor)
+  set({ "n", "x" }, "<M-,>", mc.deleteCursor)
+  set("n", ",", mc.clearCursors)
+  set("n", "&", mc.alignCursors)
+  set("x", "<M-)>", function() mc.transposeCursors(1)  end)
+  set("x", "<M-(>", function() mc.transposeCursors(-1) end)
+  set("n", "<Esc>", function()
+    if not mc.cursorsEnabled() then mc.enableCursors() else mc.clearCursors() end
   end)
 end)
 
--- 2.3 开启 Neovim 内置的高效原生语法高亮
-vim.cmd("syntax on")
-vim.cmd("filetype plugin indent on")
+local function mc_hl()
+  local hl = vim.api.nvim_set_hl
+  hl(0, "MultiCursorCursor",         { reverse = true })
+  hl(0, "MultiCursorVisual",         { link = "Visual" })
+  hl(0, "MultiCursorSign",           { link = "SignColumn" })
+  hl(0, "MultiCursorMatchPreview",   { link = "Search" })
+  hl(0, "MultiCursorDisabledCursor", { reverse = true })
+  hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
+  hl(0, "MultiCursorDisabledSign",   { link = "SignColumn" })
+end
+mc_hl()
+vim.api.nvim_create_autocmd("ColorScheme", { callback = mc_hl })
 
--- ctrl+G 退出各种模式
-local map = vim.keymap.set
---
-map("n", "<C-g>", "<Esc>")
-map("i", "<C-g>", "<Esc>")
-map("v", "<C-g>", "<Esc>")
-map("s", "<C-g>", "<Esc>")
+----------------------------------------------------------------------
+-- 5. Overseer (v2)
+----------------------------------------------------------------------
+local overseer = require("overseer")
+overseer.setup({
+  task_list = { direction = "right", min_width = 35, max_width = 45 },
+})
+
+map("n", "<leader>or", "<cmd>OverseerRun<cr>",        { desc = "Run task" })
+map("n", "<leader>oo", "<cmd>OverseerToggle<cr>",     { desc = "Task list" })
+map("n", "<leader>oa", "<cmd>OverseerTaskAction<cr>", { desc = "Task action" })
+map("n", "<leader>os", ":OverseerShell ",             { desc = "Shell cmd as task" })
+map("n", "<leader>ol", function()
+  local last
+  for _, t in ipairs(overseer.list_tasks()) do
+    if not last or t.id > last.id then last = t end
+  end
+  if last then overseer.run_action(last, "restart")
+  else vim.notify("No tasks", vim.log.levels.WARN) end
+end, { desc = "Restart last task" })
+
+----------------------------------------------------------------------
+-- 6. 通用快捷键
+----------------------------------------------------------------------
+map("n", "<Esc>", "<cmd>nohlsearch<cr><Esc>")          -- 有多光标时由上面的按键层接管
+map({ "n", "i", "v", "s" }, "<C-g>", "<Esc>")
 map("c", "<C-g>", "<C-c>")
-
--- Ctrl+Z 等于 ：
-map("n", "<C-z>", ":")
-map("x", "<C-z>", ":")
+map({ "n", "x" }, "<C-z>", ":")
 map("i", "<C-z>", "<C-o>:")
-
--- 关闭一个窗口
 map("n", "<C-F4>", "<C-w>c")
-map("i", "<C-F4>", "<C-o><C-w>c")
+map("i", "<C-F4>", "<Esc><C-w>c")
 map("c", "<C-F4>", "<C-c><C-w>c")
 
-----------------------------------------------------------------------
--- 3. 快捷键映射 (Keymaps)
-----------------------------------------------------------------------
-local map = vim.keymap.set
-
--- 核心与文件操作
-map("n", "<leader>w", "<cmd>w<cr>")
-map("n", "<leader>q", "<cmd>q<cr>")
-map({"n", "v"}, "<C-s>", "<cmd>update<cr>")
-map("i", "<C-s>", "<C-o><cmd>update<cr>")
-
--- 使用原生高级文件管理器 Explore，按下 - 键直接在当前窗口展开目录
+map("n", "<leader>w", "<cmd>w<cr>", { desc = "Write" })
+map("n", "<leader>q", "<cmd>q<cr>", { desc = "Quit" })
+map({ "n", "v", "i" }, "<C-s>", "<cmd>update<cr>")
 map("n", "-", "<cmd>Explore<cr>")
 
--- 光标与文本移动增强
-map({"n", "x"}, "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
-map({"n", "x"}, "k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
-map({"n", "x"}, "<Down>", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
-map({"n", "x"}, "<Up>",   "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+map({ "n", "x" }, "<Down>", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+map({ "n", "x" }, "<Up>",   "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 map("i", "<Down>", "<C-o>gj")
 map("i", "<Up>",   "<C-o>gk")
-
-map({"n", "v"}, "<Home>", "^")
-map({"n", "v"}, "<End>", "$")
+map({ "n", "v" }, "<Home>", "^")
+map({ "n", "v" }, "<End>",  "$")
 map("n", "<PageUp>", "{")
 map("n", "<PageDown>", "}")
 
--- 命令行与辅助快捷键
--- map({"n", "x"}, ";", ":")
--- map({"n", "x"}, ";;", ";")
-map("n", "<leader>/", "<cmd>noh<cr>", { silent = true })
-map("n", "\\", ":%s/%/gc", { desc = "Global replace with confirm" })
-map("n", "<leader>cd", "<cmd>cd %:p:h<cr><cmd>pwd<cr>")
-map("n", "<leader>pp", "<cmd>setlocal paste!<cr>")
+map("n", "\\", [[:%s/\<<C-r><C-w>\>//gc<Left><Left><Left>]], { desc = "Replace word" })
+map("n", "<leader>cd", "<cmd>cd %:p:h<cr><cmd>pwd<cr>", { desc = "cd to file dir" })
 map("n", "<F10>", "<cmd>setlocal spell!<cr>")
 
--- ctrl+backspace/delete 快速删除前后的一个单词
-map("i","<C-BS>","<C-W>")
-map("i","<C-Del>","<C-o>dw")
+map("i", "<C-BS>", "<C-w>")
+map("i", "<C-Del>", "<C-o>dw")
 
--- 窗口切换
 map("n", "<C-h>", "<C-w>h")
 map("n", "<C-j>", "<C-w>j")
 map("n", "<C-k>", "<C-w>k")
 map("n", "<C-l>", "<C-w>l")
 
--- 文本行编辑与调整
 map("n", "<M-j>", "<cmd>m .+1<cr>==")
 map("n", "<M-k>", "<cmd>m .-2<cr>==")
 map("v", "<M-j>", ":m '>+1<cr>gv=gv")
 map("v", "<M-k>", ":m '<-2<cr>gv=gv")
-map("n", "<leader><bs>", [[<cmd>%s/\s\+$//e<cr>]])
 map("x", "p", "P")
 map("x", "P", "p")
-map("n", "Y", "y$")
 
--- 工具函数：动态内容插入
 map("i", "<C-d>", function() return os.date("%Y-%m-%d %H:%M:%S") end, { expr = true })
+map("i", "<M-=>", "<Esc>A;<CR>")
+map("i", "<M-->", "<Esc>A:<CR>")
 
--- ============================================================================
--- 注释装饰工具（F11 分界线 / F12 文件头 共用底层）
--- ============================================================================
-local DECO = {
-  width  = 80,
-  author = "the one",
-  rule   = "-", -- F11 分界线填充字符
-  head   = "=", -- F12 文件头填充字符
-}
+-- 查找
+map("n", "<leader>ff", "<cmd>Pick files<cr>",      { desc = "Files" })
+map("n", "<leader>fg", "<cmd>Pick grep_live<cr>",  { desc = "Live grep" })
+map("n", "<leader>fb", "<cmd>Pick buffers<cr>",    { desc = "Buffers" })
+map("n", "<leader>fh", "<cmd>Pick help<cr>",       { desc = "Help" })
+map("n", "<leader>fo", "<cmd>Pick oldfiles<cr>",   { desc = "Recent files" })
+map("n", "<leader>fd", "<cmd>Pick diagnostic<cr>", { desc = "Diagnostics" })
+map("n", "<leader>fl", "<cmd>Pick buf_lines<cr>",  { desc = "Buffer lines" })
+map("n", "<leader>fr", "<cmd>Pick resume<cr>",     { desc = "Resume" })
 
+-- Git
+map("n", "<leader>go", function() MiniDiff.toggle_overlay() end, { desc = "Diff overlay" })
+map({ "n", "x" }, "<leader>gs", function() MiniGit.show_at_cursor() end, { desc = "Git at cursor" })
+
+-- Tab 补全：菜单中→下一项；行首/空白后→缩进；否则→LSP 或关键字补全
+map("i", "<Tab>", function()
+  if vim.fn.pumvisible() == 1 then return "<C-n>" end
+  local col = vim.fn.col(".") - 1
+  if col == 0 or vim.fn.getline("."):sub(col, col):match("%s") then return "<Tab>" end
+  return vim.bo.omnifunc ~= "" and "<C-x><C-o>" or "<C-n>"
+end, { expr = true })
+map("i", "<S-Tab>", function()
+  return vim.fn.pumvisible() == 1 and "<C-p>" or "<S-Tab>"
+end, { expr = true })
+
+----------------------------------------------------------------------
+-- 7. 注释装饰 (F11 分隔线 / F12 文件头)
+----------------------------------------------------------------------
+local DECO = { width = 80, author = "the one", rule = "-", head = "=" }
 local dw = vim.fn.strdisplaywidth
 
--- 1. 解析 commentstring -> prefix, suffix（均已 trim）
 local function comment_parts()
   local cs = vim.bo.commentstring
   if cs == nil or cs == "" then cs = "# %s" end
@@ -246,497 +409,232 @@ local function comment_parts()
   return vim.trim(prefix or "#"), vim.trim(suffix or "")
 end
 
--- 2a. 分隔线： prefix ------------------------------ suffix
 local function rule_line(char)
   local p, s = comment_parts()
   local p_str = p ~= "" and (p .. " ") or ""
   local s_str = s ~= "" and (" " .. s) or ""
-  local n = DECO.width - dw(p_str .. s_str)
-  if n < 3 then n = 3 end -- 前后缀本身超宽时保底
-  return p_str .. string.rep(char, n) .. s_str
+  return p_str .. string.rep(char, math.max(3, DECO.width - dw(p_str .. s_str))) .. s_str
 end
 
--- 2b. 文本行： prefix Text                          suffix（suffix 右对齐）
 local function text_line(text)
   local p, s = comment_parts()
   local left = (p ~= "" and (p .. " ") or "") .. text
   if s == "" then return left end
-  local pad = DECO.width - dw(left) - dw(s)
-  if pad < 1 then pad = 1 end
-  return left .. string.rep(" ", pad) .. s
+  return left .. string.rep(" ", math.max(1, DECO.width - dw(left) - dw(s))) .. s
 end
 
--- 3. 统一写入：空行覆盖 / 非空行插入下方，光标停在最后一行
-local function put_lines(lines)
-  local insert_mode = vim.api.nvim_get_mode().mode:sub(1, 1) == "i"
-  local row = vim.api.nvim_win_get_cursor(0)[1] -- 1-based
-  local start, finish
-
-  if not insert_mode and vim.trim(vim.api.nvim_get_current_line()) == "" then
-    start, finish = row - 1, row -- 覆盖当前空行
-  else
-    start, finish = row, row     -- 插到当前行下方
-  end
-
-  vim.api.nvim_buf_set_lines(0, start, finish, false, lines)
-  vim.api.nvim_win_set_cursor(0, { start + #lines, 0 })
-end
-
--- ----------------------------------------------------------------------------
--- F11: 插入标准分界线
--- ----------------------------------------------------------------------------
 map({ "n", "i" }, "<F11>", function()
-  put_lines({ rule_line(DECO.rule) })
-end, { desc = "Insert separator line" })
+  local row = vim.api.nvim_win_get_cursor(0)[1]
+  local insert = vim.api.nvim_get_mode().mode:sub(1, 1) == "i"
+  local blank = vim.trim(vim.api.nvim_get_current_line()) == ""
+  local start, finish = row, row
+  if not insert and blank then start = row - 1 end      -- 普通模式空行：直接替换该行
+  vim.api.nvim_buf_set_lines(0, start, finish, false, { rule_line(DECO.rule) })
+  vim.api.nvim_win_set_cursor(0, { start + 1, 0 })
+end, { desc = "Separator line" })
 
--- ----------------------------------------------------------------------------
--- F12: 插入文件头说明
--- ----------------------------------------------------------------------------
 map({ "n", "i" }, "<F12>", function()
   local prefix = comment_parts()
   local first  = vim.api.nvim_buf_get_lines(0, 0, 1, false)[1] or ""
-
-  -- 已有 header 则不重复插入
   if first:match("^%s*" .. vim.pesc(prefix) .. "%s*" .. DECO.head) then
-    vim.notify("File header already exists", vim.log.levels.WARN)
-    return
+    return vim.notify("File header already exists", vim.log.levels.WARN)
   end
-
-  local filename = vim.fn.expand("%:t")
-  if filename == "" then filename = "[No Name]" end
-
+  local name = vim.fn.expand("%:t")
   local bar = rule_line(DECO.head)
   local header = {
     bar,
-    text_line("File    : " .. filename),
+    text_line("File    : " .. (name ~= "" and name or "[No Name]")),
     text_line("Created : " .. os.date("%Y-%m-%d %H:%M:%S")),
     text_line("Author  : " .. DECO.author),
     bar,
     "",
   }
-
-  -- shebang / <!DOCTYPE> / <?xml?> 必须留在第一行
-  local start = (first:match("^#!") or first:match("^%s*<[!?]")) and 1 or 0
-
+  local start = (first:match("^#!") or first:match("^%s*<[!?]")) and 1 or 0  -- 跳过 shebang / <?xml
   vim.api.nvim_buf_set_lines(0, start, start, false, header)
   vim.api.nvim_win_set_cursor(0, { start + #header, 0 })
-end, { desc = "Insert file header" })
-
--- Tab 键智能补全映射：在输入模式下如果前方有内容，按 Tab 唤醒内置 LSP/Omni 菜单
-map("i", "<Tab>", function()
-  return vim.fn.pumvisible() == 1 and "<C-n>" or "<C-x><C-o>"
-end, { expr = true })
-
--- fzf-lua 模糊搜索
-map("n", "<leader>ff", "<cmd>FzfLua files<cr>")
-map("n", "<leader>fg", "<cmd>FzfLua live_grep<cr>")
-map("n", "<leader>fb", "<cmd>FzfLua buffers<cr>")
-map("n", "<leader>fh", "<cmd>FzfLua help_tags<cr>")
-
-require("mini.starter").setup()
-
--- F9 切换theme黑白
-local dark = true
-
-map("n","<F9>",function()
-    dark = not dark
-
-    if dark then
-        vim.cmd.colorscheme("tokyonight-night")
-    else
-        vim.cmd.colorscheme("tokyonight-day")
-    end
-
-end)
+end, { desc = "File header" })
 
 ----------------------------------------------------------------------
--- 4. 自动化行为 (Autocmds) & 括号智能处理
+-- 8. 自动命令
 ----------------------------------------------------------------------
 local au = vim.api.nvim_create_autocmd
+local group = vim.api.nvim_create_augroup("UserConfig", { clear = true })
 
--- 高亮 Yank
-au("TextYankPost", { callback = function() vim.hl.on_yank({ timeout = 200 }) end })
+au("TextYankPost", { group = group, callback = function() vim.hl.on_yank({ timeout = 200 }) end })
 
 -- 恢复上次光标位置
 au("BufReadPost", {
-  callback = function()
-    local mark = vim.api.nvim_buf_get_mark(0, '"')
-    if mark[1] > 0 and mark[1] <= vim.api.nvim_buf_line_count(0) then
+  group = group,
+  callback = function(args)
+    local mark = vim.api.nvim_buf_get_mark(args.buf, '"')
+    if mark[1] > 0 and mark[1] <= vim.api.nvim_buf_line_count(args.buf) then
       pcall(vim.api.nvim_win_set_cursor, 0, mark)
-      pcall(vim.cmd, "normal! zz")
+      vim.cmd("normal! zz")
     end
   end,
 })
 
--- 创建一个自动命令组，避免重复加载时叠加
-local autocd_group = vim.api.nvim_create_augroup("AutoCDGroup", { clear = true })
-
-vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
-  group = autocd_group,
-  pattern = "*",
-  callback = function()
-    -- 获取当前缓冲区的类型和文件路径
-    local buftype = vim.api.nvim_get_option_value("buftype", { buf = 0 })
-    local file_path = vim.api.nvim_buf_get_name(0)
-
-    -- 排除非特殊文件缓冲区（如 terminal, nofile）并确保文件路径不为空
-    if buftype == "" and file_path ~= "" then
-      -- 提取文件所在的目录
-      local dir = vim.fs.dirname(file_path)
-      -- 检查目录是否存在，并切换
-      if vim.fn.isdirectory(dir) == 1 then
-        vim.api.nvim_set_current_dir(dir)
-      end
+-- 自动切换到项目根目录 (找不到就用文件所在目录)；Overseer / Pick 都依赖 cwd
+local root_markers = { ".git", "Makefile", "justfile", "package.json", "pyproject.toml",
+                       "Cargo.toml", "pubspec.yaml", ".vscode" }
+au("BufEnter", {
+  group = group,
+  callback = function(args)
+    if vim.bo[args.buf].buftype ~= "" then return end
+    local name = vim.api.nvim_buf_get_name(args.buf)
+    if name == "" then return end
+    local root = vim.fs.root(args.buf, root_markers) or vim.fs.dirname(name)
+    if root and root ~= vim.fn.getcwd() and vim.fn.isdirectory(root) == 1 then
+      vim.fn.chdir(root)
     end
   end,
 })
 
--- 保存时自动清理尾随空格
+-- 保存时去掉行尾空白 (markdown / diff 除外)
 au("BufWritePre", {
-  pattern = "*",
-  callback = function()
-    local cur = vim.api.nvim_win_get_cursor(0)
-    pcall(vim.cmd, [[keeppatterns %s/\s\+$//e]])
-    pcall(vim.api.nvim_win_set_cursor, 0, cur)
-  end,
-})
-
--- 大文件性能优化方案 (> 5MB 自动关闭重度功能)
-au({ "BufReadPre", "BufNewFile" }, {
-  pattern = "*",
-  callback = function(args)
-    local max_size = 5 * 1024 * 1024 -- 5MB
-    local ok, stats = pcall(vim.uv.fs_stat, args.file)
-    if ok and stats and stats.size > max_size then
-      vim.bo[args.buf].undofile = false
-      vim.bo[args.buf].swapfile = false
-      vim.cmd("syntax off")
-    end
-  end,
-})
-
--- 自动化括号闭合与行尾分号/冒号映射
--- 注意：变量名避开 Lua 内置全局函数 pairs，否则会抹掉迭代器导致启动报错
--- 自动化括号闭合与行尾分号/冒号映射
-local pair_match_map = { ["("] = ")", ["["] = "]", ["{"] = "}" }
-
-for open, close in pairs(pair_match_map) do
-  vim.keymap.set('i', open, function()
-    -- 获取当前行内容和当前光标的列号 (从 0 开始计数)
-    local line = vim.api.nvim_get_current_line()
-    local col = vim.api.nvim_win_get_cursor(0)[2]
-
-    -- 截取光标之后的文本
-    local after_cursor = string.sub(line, col + 1)
-
-    -- 使用 Lua 正则判断光标后是否全为空格/制表符，或者已经到行尾
-    -- ^%s*$ 匹配纯空白字符或空字符串
-    if string.match(after_cursor, "^%s*$") then
-      -- 在行尾：自动闭合，并将光标向左移动一格放到括号中间
-      return open .. close .. "<Left>"
-    else
-      -- 在行中：仅插入左括号，不自动闭合
-      return open
-    end
-  end, { expr = true, noremap = true, silent = true })
-end
-
--- 快捷在行尾补齐常规符号并换行 (Alt + 符号)
-map("i", "<M-=>", "<Esc>A;<Cr>")
-map("i", "<M-->", "<Esc>A:<Cr>")
-
--- leader+左括号时，自动补全右括号
-local surround_pairs = {
-    ["("] = { "(", ")" },
-    ["["] = { "[", "]" },
-    ["{"] = { "{", "}" },
-    ['"'] = { '"', '"' },
-    ["'"] = { "'", "'" },
-    ["`"] = { "`", "`" },
-    ["$"] = { "$", "$" },
-    ["|"] = { "|", "|" },
-}
-
-for key, pair in pairs(surround_pairs) do
-    map("x", "<leader>" .. key, function()
-        local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-        vim.api.nvim_feedkeys(
-            esc .. "`>a" .. pair[2] .. esc .. "`<i" .. pair[1] .. esc,
-            "n",
-            false
-        )
-    end)
-end
-
-----------------------------------------------------------------------
--- 5. 内置 LSP 配置 (基于 0.12+ 标准原生架构，函数式结构彻底规避结合歧义)
-----------------------------------------------------------------------
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-
--- 创建 LSP 挂载后的核心快捷键与自动补全行为
-vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(args)
-    local b = args.buf
-
-    -- 改用最纯净、永不报接口失效错误的标准 omnifunc 补全挂载
-    vim.bo[b].omnifunc = "v:lua.vim.lsp.omnifunc"
-
-    local opts = { buffer = b }
-    vim.keymap.set("n", "gd", vim.lsp.buf.definition,          opts)
-    vim.keymap.set("n", "gr", vim.lsp.buf.references,          opts)
-    vim.keymap.set("n", "K",  vim.lsp.buf.hover,               opts)
-    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename,      opts)
-    vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-
-    -- 使用 0.11+ 推荐的现代 API，规避 goto_prev/goto_next 弃用警告
-    vim.keymap.set("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, opts)
-    vim.keymap.set("n", "]d", function() vim.diagnostic.jump({ count =  1, float = true }) end, opts)
-  end,
-})
-
--- 将配置改成动态函数返回，彻底摧毁局部变量在语法边界上的连读歧义
-local function get_server_config(server_name)
-  if server_name == "basedpyright" then
-    return { cmd = { "basedpyright-langserver", "--stdio" }, filetypes = { "python" } }
-  elseif server_name == "luals" then
-    return { cmd = { "lua-language-server" }, filetypes = { "lua" } }
-  elseif server_name == "bashls" then
-    return { cmd = { "bash-language-server", "start" }, filetypes = { "sh", "bash" } }
-  elseif server_name == "dartls" then
-    return { cmd = { "dart", "language-server", "--protocol=lsp" }, filetypes = { "dart" } }
-  end
-  return nil
-end
-
--- 智能按需挂载启动 (纯指令式调用，绝对无法产生 table 混淆)
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "python", "lua", "sh", "bash", "dart" },
+  group = group,
   callback = function(args)
     local ft = vim.bo[args.buf].filetype
-    local server_name = ft == "python" and "basedpyright"
-      or (ft == "sh" and "bashls"
-      or (ft == "bash" and "bashls"
-      or ft .. "ls"))
+    if ft == "markdown" or ft == "diff" then return end
+    local view = vim.fn.winsaveview()
+    vim.cmd([[keeppatterns silent! %s/\s\+$//e]])
+    vim.fn.winrestview(view)
+  end,
+})
 
-    local config = get_server_config(server_name)
-    if config then
-      config.capabilities = capabilities
-      config.name = server_name
-      vim.lsp.start(config, { bufnr = args.buf })
+-- 大文件 (>5MB) 降级
+au("BufReadPre", {
+  group = group,
+  callback = function(args)
+    local st = vim.uv.fs_stat(args.file)
+    if st and st.size > 5 * 1024 * 1024 then
+      vim.b[args.buf].bigfile = true
+      vim.b[args.buf].minidiff_disable = true
+      vim.bo[args.buf].undofile = false
+      vim.bo[args.buf].swapfile = false
     end
   end,
 })
 
-----------------------------------------------------------------------
--- 6. LaTeX 构建与跨平台 PDF 智能预览
-----------------------------------------------------------------------
--- LaTeX 异步编译
-----------------------------------------------------------------------
--- Run latexmk asynchronously.
---
--- args    : latexmk command line arguments (without the executable).
--- success : message shown when compilation succeeds.
---
--- Always compiles in the directory of the current TeX file so that
--- auxiliary files (.aux/.toc/.out/...) stay beside the source file.
-----------------------------------------------------------------------
-local function latexmk(args, success)
-    local file = vim.fn.expand("%:p")
-
-    vim.notify("LaTeX is on the way...")
-    if file == "" then
-        vim.notify("No current file.", vim.log.levels.ERROR)
-        return
+-- 有 treesitter 解析器就用它高亮，没有就用传统 syntax；大文件关闭高亮
+au("FileType", {
+  group = group,
+  callback = function(args)
+    if vim.b[args.buf].bigfile then
+      vim.schedule(function() vim.bo[args.buf].syntax = "OFF" end)
+      return
     end
+    pcall(vim.treesitter.start, args.buf)
+  end,
+})
 
-    if vim.fn.filereadable(file) == 0 then
-        vim.notify("Current file does not exist.", vim.log.levels.ERROR)
-        return
-    end
+----------------------------------------------------------------------
+-- 9. LSP (vim.lsp.config / enable)；grr gri grn gra gO K 为内置默认键
+----------------------------------------------------------------------
+vim.diagnostic.config({ virtual_text = true, severity_sort = true })
 
-    local cwd = vim.fs.dirname(file)
-
-    vim.system(
-        vim.list_extend({ "latexmk" }, args),
-        {
-            cwd = cwd,
-            detach = true,
-
-            -- XeLaTeX can produce huge outputs. Swallow them completely.
-            stdout = function() end,
-            stderr = function() end,
-        },
-        function(obj)
-            vim.schedule(function()
-                if obj.code == 0 then
-                    vim.notify(success, vim.log.levels.INFO)
-                else
-                    vim.notify(
-                        "LaTeX failed (exit code " .. obj.code .. ").",
-                        vim.log.levels.ERROR
-                    )
-                end
-            end)
-        end
-    )
+local servers = {
+  basedpyright = {
+    cmd = { "basedpyright-langserver", "--stdio" }, filetypes = { "python" },
+    root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" },
+  },
+  lua_ls = {
+    cmd = { "lua-language-server" }, filetypes = { "lua" },
+    root_markers = { ".luarc.json", ".luarc.jsonc", ".git" },
+    settings = { Lua = {
+      runtime = { version = "LuaJIT" },
+      workspace = { library = { vim.env.VIMRUNTIME }, checkThirdParty = false },
+    } },
+  },
+  bashls = {
+    cmd = { "bash-language-server", "start" }, filetypes = { "sh", "bash" },
+    root_markers = { ".git" },
+  },
+  dartls = {
+    cmd = { "dart", "language-server", "--protocol=lsp" }, filetypes = { "dart" },
+    root_markers = { "pubspec.yaml", ".git" },
+  },
+}
+for name, cfg in pairs(servers) do
+  if vim.fn.executable(cfg.cmd[1]) == 1 then       -- 没装的服务器直接跳过
+    vim.lsp.config(name, cfg)
+    vim.lsp.enable(name)
+  end
 end
 
-----------------------------------------------------------------------
--- Normal build.
--- Incremental compilation using latexmk.
-----------------------------------------------------------------------
-map("n", "<leader>tt", function()
-    latexmk({
-        "-xelatex",
-        "-interaction=nonstopmode",
-        "-halt-on-error",
-        vim.fn.expand("%:p"),
-    }, "✨ LaTeX compiled.")
-end)
+au("LspAttach", {
+  group = group,
+  callback = function(args)
+    local b = args.buf
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client and client:supports_method("textDocument/completion") then
+      vim.lsp.completion.enable(true, client.id, b, { autotrigger = true })
+    end
+    local opts = { buffer = b }
+    map("n", "gd", vim.lsp.buf.definition, opts)
+    map("n", "<leader>rn", vim.lsp.buf.rename, opts)
+    map("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+    map("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, opts)
+    map("n", "]d", function() vim.diagnostic.jump({ count =  1, float = true }) end, opts)
+  end,
+})
 
 ----------------------------------------------------------------------
--- Force rebuild.
---
--- Equivalent to:
---     latexmk -gg -xelatex
---
--- Ignores all dependency information and regenerates .aux/.toc/.out...
--- Useful when mysterious LaTeX errors appear.
+-- 10. LaTeX (交给 Overseer 运行：输出可在 <Space>oo 查看，完成后自动通知)
 ----------------------------------------------------------------------
-map("n", "<leader>te", function()
-    latexmk({
-        "-gg",
-        "-xelatex",
-        "-interaction=nonstopmode",
-        "-halt-on-error",
-        vim.fn.expand("%:p"),
-    }, "✨ LaTeX entirely rebuilt.")
-end)
+local function latexmk(args, title)
+  local file = vim.api.nvim_buf_get_name(0)
+  if file == "" or vim.fn.filereadable(file) == 0 then
+    return vim.notify("Current file does not exist.", vim.log.levels.ERROR)
+  end
+  vim.cmd("silent update")
+  local cmd = vim.list_extend({ "latexmk" }, args)
+  table.insert(cmd, file)
+  overseer.new_task({
+    name = title, cmd = cmd, cwd = vim.fs.dirname(file), components = { "default" },
+  }):start()
+end
 
-----------------------------------------------------------------------
--- Clean auxiliary files.
---
--- Equivalent to:
---     latexmk -C
---
--- Removes auxiliary files while keeping the generated PDF.
-----------------------------------------------------------------------
-map("n", "<leader>tc", function()
-    latexmk({
-        "-C",
-        vim.fn.expand("%:p"),
-    }, "🧹 LaTeX auxiliary files cleaned.")
-end)
-
-----------------------------------------------------------------------
--- View the generated PDF.
---
--- Searches for an available PDF viewer in the following order:
---     okular -> evince -> zathura -> xdg-open
-----------------------------------------------------------------------
+local tex = { "-xelatex", "-interaction=nonstopmode", "-halt-on-error" }
+map("n", "<leader>tt", function() latexmk(tex, "LaTeX compile") end, { desc = "Compile" })
+map("n", "<leader>te", function() latexmk(vim.list_extend({ "-gg" }, tex), "LaTeX rebuild") end, { desc = "Full rebuild" })
+map("n", "<leader>tc", function() latexmk({ "-C" }, "LaTeX clean") end, { desc = "Clean aux" })
 map("n", "<leader>tv", function()
-    local pdf = vim.fn.expand("%:p:r") .. ".pdf"
-
-    if vim.fn.filereadable(pdf) == 0 then
-        vim.notify(
-            "PDF not found. Compile first (<leader>tt).",
-            vim.log.levels.WARN
-        )
-        return
+  local pdf = vim.fn.expand("%:p:r") .. ".pdf"
+  if vim.fn.filereadable(pdf) == 0 then
+    return vim.notify("PDF not found. Compile first (<Space>tt).", vim.log.levels.WARN)
+  end
+  for _, v in ipairs({ "okular", "evince", "zathura", "xdg-open" }) do
+    if vim.fn.executable(v) == 1 then
+      vim.system({ v, pdf }, { detach = true })
+      return vim.notify("Opening PDF with " .. v)
     end
-
-    local viewers = {
-        "okular",
-        "evince",
-        "zathura",
-        "xdg-open",
-    }
-
-    local viewer = nil
-
-    for _, v in ipairs(viewers) do
-        if vim.fn.executable(v) == 1 then
-            viewer = v
-            break
-        end
-    end
-
-    if not viewer then
-        vim.notify(
-            "No PDF viewer found.",
-            vim.log.levels.ERROR
-        )
-        return
-    end
-
-    vim.system(
-        { viewer, pdf },
-        { detach = true }
-    )
-
-    vim.notify(
-        "Opening PDF with " .. viewer .. ".",
-        vim.log.levels.INFO
-    )
-
-end)
+  end
+  vim.notify("No PDF viewer found.", vim.log.levels.ERROR)
+end, { desc = "View PDF" })
 
 ----------------------------------------------------------------------
--- 7. Neovide / GUI 渲染特化增强
+-- 11. Neovide
 ----------------------------------------------------------------------
-vim.o.guifont = "Hack:h14"
+o.guifont = "Hack:h14"
 
 if vim.g.neovide then
-  vim.o.linespace = 2
+  o.linespace = 2
   vim.g.neovide_padding_top, vim.g.neovide_padding_bottom = 8, 8
   vim.g.neovide_padding_left, vim.g.neovide_padding_right = 8, 8
-
-  -- 高刷屏帧率同步与能效平衡
-  vim.g.neovide_refresh_rate = 60
-  vim.g.neovide_refresh_rate_idle = 5
-
-  -- 核心响应速度调优
+  vim.g.neovide_refresh_rate, vim.g.neovide_refresh_rate_idle = 60, 5
   vim.g.neovide_scroll_animation_length = 0.1
   vim.g.neovide_scroll_animation_far_lines = 0
   vim.g.neovide_cursor_animation_length = 0.05
   vim.g.neovide_cursor_trail_size = 0.1
   vim.g.neovide_cursor_vfx_mode = ""
-
-  -- 窗口模糊与透明度视效
-  vim.g.neovide_opacity = 0.95
+  vim.g.neovide_opacity = 0.985
   vim.g.neovide_window_blurred = true
-  vim.g.neovide_floating_blur_amount_x = 1.0
-  vim.g.neovide_floating_blur_amount_y = 1.0
+  vim.g.neovide_floating_blur_amount_x, vim.g.neovide_floating_blur_amount_y = 1.0, 1.0
 
-  -- 动态字号热调节组
-  local font_size = 14
-  local function set_font(size) vim.o.guifont = ("Hack:h%d"):format(size) end
-  map("n", "<C-=>", function() font_size = font_size + 1; set_font(font_size) end)
-  map("n", "<C-->", function() font_size = math.max(6, font_size - 1); set_font(font_size) end)
-  map("n", "<C-0>", function() font_size = 14; set_font(font_size) end)
+  local size = 14
+  local function font(n) size = n; o.guifont = ("Hack:h%d"):format(n) end
+  map("n", "<C-=>", function() font(size + 1) end)
+  map("n", "<C-->", function() font(math.max(6, size - 1)) end)
+  map("n", "<C-0>", function() font(14) end)
 end
-
-----------------------------------------------------------------------
--- 8. 扩展工具命令：一键更新所有原生插件 (采用现代安全 API)
-----------------------------------------------------------------------
-vim.api.nvim_create_user_command("PluginUpdate", function()
-  local plugin_dir = vim.fn.stdpath("data") .. "/site/pack/plugins/start/"
-  local handle = vim.uv.fs_scandir(plugin_dir)
-  if not handle then
-    vim.notify("未找到标准插件安装目录！", vim.log.levels.ERROR)
-    return
-  end
-
-  vim.notify("开始检查并异步更新所有本地标准插件...", vim.log.levels.INFO)
-
-  while true do
-    local name, type = vim.uv.fs_scandir_next(handle)
-    if not name then break end
-    if type == "directory" then
-      print("正在同步更新: " .. name)
-      vim.fn.system({ "git", "-C", plugin_dir .. name, "pull" })
-    end
-  end
-
-  vim.notify("🎉 所有本地标准插件已成功同步至最新版本！", vim.log.levels.INFO)
-end, {})
