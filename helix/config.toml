@@ -1,0 +1,210 @@
+# ==============================================================================
+# File    : ~/.config/helix/config.toml
+#
+# Summary : Modern Helix Config (Synced with Emacs 30 & Neovim 0.12+)
+# ==============================================================================
+#
+# 原则：能用 Helix 原生键就用原生键；只在"和 Neovim 同一个键做同一件事"时才改。
+# 完整说明见同目录 README.md。  Leader = <Space>，按下后停顿会弹出按键提示。
+#
+# ── 文件 / 查找 ──────────────────────────────────────────────────────────────
+#  C-s 保存(有改动才写)   <Space>w 写入   <Space>q 退出   - 当前文件目录的浏览器
+#  <Space>ff 文件  fg 全文  fb 缓冲区  fd 诊断  fD 项目诊断  fr 恢复上次  fj 跳转历史
+#  <Space>fh 命令面板  f. 当前目录文件  fs 保存      (原生: <Space>f / F / e / E / / 仍可用)
+# ── 缓冲区 / 窗口 ────────────────────────────────────────────────────────────
+#  <Space>bb / <Space><Tab> 缓冲区列表   bd 关闭   bn bp 下/上一个   (原生 gn gp 同)
+#  C-h/j/k/l 切窗口     分屏用原生 C-w v / C-w s / C-w q / C-w o（与 Vim 相同）
+# ── LSP / 诊断 / Git ─────────────────────────────────────────────────────────
+#  gd gr gi gy 定义/引用/实现/类型   K 文档   <Space>ca 代码操作  cr 重命名  cf 格式化  ce 诊断
+#  原生: <Space>a 操作  <Space>r 重命名  <Space>s / S 符号  <Space>d 诊断  [d ]d [D ]D
+#  ]g [g 下/上一个修改块    :reset-diff-change 撤销当前修改块
+# ── 多光标（原生，Neovim 配置照此设计）────────────────────────────────────────
+#  C-Down / C-Up 上下加光标(同原生 C / A-C)   \ 选中全文所有光标词(接着按 c 改)
+#  s 按正则选中  S 拆分   , 只留主光标   ( ) 切主光标   & 对齐   Esc 回到单光标
+# ── 编辑 ─────────────────────────────────────────────────────────────────────
+#  gc 注释   A-j / A-k 上下移动行   ms" 加包围  mr"' 替换  md" 删除
+#  插入: C-a C-e 行首/尾   C-h C-l 左右移   A-d 插入时间
+# ── 开关 ─────────────────────────────────────────────────────────────────────
+#  <Space>uw 保存去行尾空白   uh 内联提示   us 软换行   un 相对/绝对行号
+# ── LaTeX ────────────────────────────────────────────────────────────────────
+#  <Space>tt 编译  tw 后台持续编译  tk 停止持续编译  te 完全重建  tc 清理  tv 打开 PDF
+# ==============================================================================
+
+theme = "tokyonight"
+# 较新版本（开发版文档已有）可以跟随终端深浅色，用下面三行替换上一行：
+# [theme]
+# dark  = "tokyonight"
+# light = "tokyonight_day"
+
+# ------------------------------------------------------------------------------
+# 1. 编辑器
+# ------------------------------------------------------------------------------
+[editor]
+line-number            = "relative"
+scrolloff              = 6
+cursorline             = true
+cursorcolumn           = true          # 十字光标线（同 Neovim）
+color-modes            = true
+true-color             = true
+# rulers               = [81]          # 同 Neovim colorcolumn = width + 1
+bufferline             = "multiple"
+auto-save              = false
+completion-trigger-len = 1
+auto-info              = true
+idle-timeout           = 150
+popup-border           = "all"         # 补全 / 文档弹窗加边框（同 Neovim winborder）
+
+default-yank-register    = "+"         # 复制/删除/粘贴走系统剪贴板（同 Neovim unnamedplus）
+trim-trailing-whitespace = true        # 保存时去行尾空白；<Space>uw 临时开关
+end-of-line-diagnostics  = "hint"      # 行尾显示诊断（类似 Neovim virtual_text）
+# editor-config          = true        # 较新版本：遵守 .editorconfig
+
+[editor.inline-diagnostics]
+cursor-line = "warning"                # 光标所在行：warning 以上在行内完整显示
+
+[editor.cursor-shape]
+normal = "block"
+insert = "bar"
+select = "underline"
+
+[editor.indent-guides]
+render      = true
+character   = "│"
+skip-levels = 1
+
+[editor.soft-wrap]
+enable             = true
+max-wrap           = 25
+max-indent-retain  = 40
+wrap-indicator     = "↪ "
+wrap-at-text-width = false
+
+[editor.whitespace.render]
+space   = "none"
+tab     = "all"
+nbsp    = "all"                        # 显示不间断空格（同 Neovim listchars nbsp）
+newline = "none"
+# trailing = "all"                     # 较新版本：只显示行尾空格（同 Neovim listchars trail）
+
+[editor.whitespace.characters]
+tab    = "│"
+tabpad = "·"
+
+[editor.statusline]
+left   = ["mode", "spinner", "file-name", "read-only-indicator", "file-modification-indicator"]
+center = []
+right  = [
+  "diagnostics",
+  "version-control",
+  "spacer",
+  "selections",
+  "primary-selection-length",
+  "position",
+  "file-encoding",
+  "file-type",
+]
+separator = "│"
+
+[editor.lsp]
+display-messages    = true
+display-inlay-hints = false            # <Space>uh 切换
+
+# ------------------------------------------------------------------------------
+# 2. Normal 模式
+# ------------------------------------------------------------------------------
+[keys.normal]
+esc   = ["collapse_selection", "keep_primary_selection"]   # 取消：收起选区 + 回到单光标
+"C-s" = ":update"
+"-"   = "file_explorer_in_current_buffer_directory"        # 同 Neovim 的 - (netrw)
+
+"C-h" = "jump_view_left"
+"C-j" = "jump_view_down"
+"C-k" = "jump_view_up"
+"C-l" = "jump_view_right"
+
+# 多光标：上下加光标（同 Neovim <C-Down>/<C-Up>）
+"C-down" = "copy_selection_on_next_line"
+"C-up"   = "copy_selection_on_prev_line"
+
+# 移动行：宏经 z 寄存器中转，不会冲掉剪贴板
+"A-j" = '@X"zd"zp'
+"A-k" = '@X"zdk"zP'
+
+# 选中全文所有光标下的词，接着按 c 统一修改（对应 Neovim 的 \ 替换光标词）
+"\\" = "@miw*%s<ret>"
+
+# K = "hover"                            # 原生 K(keep_selections) 让位；原生 <Space>k 也是 hover
+
+[keys.normal.g]
+c = "toggle_comments"                  # 原生 gc(窗口居中) 让位
+
+# ------------------------------------------------------------------------------
+# 3. Leader (<Space>)
+# ------------------------------------------------------------------------------
+[keys.normal.space]
+w     = ":write"
+q     = ":quit"
+tab   = "buffer_picker"
+
+[keys.normal.space.f]
+f   = "file_picker"
+g   = "global_search"
+b   = "buffer_picker"
+d   = "diagnostics_picker"
+D   = "workspace_diagnostics_picker"
+r   = "last_picker"
+j   = "jumplist_picker"
+h   = "command_palette"
+"." = "file_picker_in_current_buffer_directory"
+s   = ":write"
+
+[keys.normal.space.b]
+b = "buffer_picker"
+d = ":buffer-close"
+n = ":buffer-next"
+p = ":buffer-previous"
+
+[keys.normal.space.c]
+a = "code_action"
+r = "rename_symbol"
+f = ":format"
+e = "diagnostics_picker"
+
+[keys.normal.space.u]
+w = ":toggle trim-trailing-whitespace"
+h = ":toggle lsp.display-inlay-hints"
+s = ":toggle soft-wrap.enable"
+n = ":toggle line-number relative absolute"
+
+# LaTeX：-cd 让 latexmk 进入 tex 所在目录；输出只保留报错行和 latexmk 结论
+[keys.normal.space.t]
+t = [":update", ':sh latexmk -cd -xelatex -synctex=1 -file-line-error -interaction=nonstopmode -halt-on-error "%{buffer_name}" 2>&1 | grep -E ":[0-9]+: |^Latexmk:" | tail -n 20']
+e = [":update", ':sh latexmk -cd -gg -xelatex -synctex=1 -file-line-error -interaction=nonstopmode -halt-on-error "%{buffer_name}" 2>&1 | grep -E ":[0-9]+: |^Latexmk:" | tail -n 20']
+w = [":update", ':sh (latexmk -cd -pvc -view=none -xelatex -synctex=1 -file-line-error -interaction=nonstopmode "%{buffer_name}" >/dev/null 2>&1 &); echo "持续编译已在后台运行，<Space>tk 停止"']
+k = ':sh pkill -f "latexmk.*-pvc" && echo "已停止持续编译" || echo "没有正在运行的持续编译"'
+c = ':sh latexmk -cd -c "%{buffer_name}" >/dev/null 2>&1 && echo "已清理辅助文件（保留 PDF）"'
+v = ':sh f="%{buffer_name}"; p="${f%%.tex}.pdf"; [ -f "$p" ] || { echo "找不到 $p，请先 <Space>tt"; exit 0; }; if command -v xdg-open >/dev/null; then o=xdg-open; else o=open; fi; ($o "$p" >/dev/null 2>&1 &)'
+
+# ------------------------------------------------------------------------------
+# 4. Insert 模式
+# ------------------------------------------------------------------------------
+[keys.insert]
+"C-s" = [":update", "normal_mode"]
+"C-h" = "move_char_left"               # 原生 C-h(退格) 让位，退格用 Backspace
+"C-l" = "move_char_right"
+"C-a" = "goto_line_start"
+"C-e" = "goto_line_end_newline"
+"A-d" = ':insert-output printf "%%s" "$(date "+%%F %%T")"'   # 插入时间（同 Neovim <M-d>）
+
+# ------------------------------------------------------------------------------
+# 5. Select 模式
+# ------------------------------------------------------------------------------
+[keys.select]
+"C-s"    = [":update", "normal_mode"]
+"C-down" = "copy_selection_on_next_line"
+"C-up"   = "copy_selection_on_prev_line"
+"A-j"    = '@X"zd"zp'
+"A-k"    = '@X"zdk"zP'
+
+[keys.select.g]
+c = "toggle_comments"
