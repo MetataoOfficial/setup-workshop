@@ -1,4 +1,4 @@
--- ~/.config/nvim/init.lua  (仅支持 Neovim 0.12+)      完整说明见同目录 README.md
+-- ~/.config/nvim/init.lua  (仅支持 Neovim 0.12+)
 --
 -- ╔══════════════════════════════ PLUGINS ══════════════════════════════════
 -- ║ 插件共 3 个: mini.nvim / multicursor.nvim / overseer.nvim
@@ -17,25 +17,28 @@
 -- ╟─ 包围 / 文本对象 ──────────────────────────────────────────────────────
 -- ║ ysiw" 加包围  yss) 整行  可视 S( 选区  ds( 删除  cs"' 替换  (t=标签 f=函数)
 -- ║ 文本对象(mini.ai): f=函数调用 a=参数 t=标签 q=引号 b=括号
--- ╟─ 多光标 ───────────────────────────────────────────────────────────────
--- ║ <C-Down>/<C-Up> 或 <Space>mj/mk 上下加光标   <C-n>/<C-p> 加下/上一个相同词
--- ║ <M-n>/<M-p> 跳过   <Space>ma 全部相同词   gaip 段落每行   <C-q> 放置/暂停光标
--- ║ 可视: s 按正则选中  <M-s> 按正则拆分  I/A 每行插入/追加
--- ║ 有多光标时: ( ) 切换主光标  <M-,> 删除  & 对齐  <M-(>/<M-)> 轮换  , 或 <Esc> 退出
--- ║ <Space>mv 找回刚清除的光标
+-- ╟─ 多光标（只用 Q；与 Neovim 0.13 内置多光标同键） ─────────────────────
+-- ║ Q 放置/删除光标  5Q 在后 5 个搜索匹配处加光标  gQ 找回刚清除的光标
+-- ║ 有多光标时: <Esc> 恢复暂停的光标 / 清除所有光标
+-- ║ 注意: Q 不再重放宏，改用 @@（录制后首次用 @q）
 -- ╟─ 任务 / LaTeX ─────────────────────────────────────────────────────────
 -- ║ <Space>or 运行  oo 面板  ol 重跑最近  oa 操作  os shell 命令
 -- ║ <Space>tt 编译  tw 持续编译  te 完全重建  tc 清理  tv 打开 PDF
+-- ╟─ Python ───────────────────────────────────────────────────────────────
+-- ║ <Space>pr 运行  pa 带参数  pw 保存即重跑  pd 终端运行(交互/pdb)  pb 切换 breakpoint()
+-- ║ <Space>pt 最近测试  pf 本文件  pT 全部   pi 整理 import  px ruff 修复  pv 选解释器
+-- ║ <Space>pp REPL  ps 发送行/选区   <Space>cf 格式化(ruff)  <Space>uf 保存时格式化
 -- ╟─ LSP / 诊断 / Git（大多为 0.12 内置键） ─────────────────────────────
 -- ║ gd 定义  K 文档  grn 重命名  gra 代码操作  grr 引用  gri 实现  grt 类型定义  gO 符号
 -- ║ <Space>cf 格式化   插入模式 <M-s> 签名帮助   [d ]d 诊断(自动弹窗)  <C-w>d 诊断浮窗
 -- ║ ]h [h 修改块  ghgh 暂存  gHgh 撤销  <Space>go 差异  <Space>gs 提交信息
 -- ╟─ 开关 / 其他 ──────────────────────────────────────────────────────────
--- ║ <Space>uu 撤销树  uh 内联提示  uw 保存时去行尾空白   F9 深浅色  F10 拼写
+-- ║ <Space>uu 撤销树  uh 内联提示  uw 保存时去行尾空白  uf 保存时格式化   F9 深浅色  F10 拼写
 -- ║ gc/gcc 注释  <M-j>/<M-k> 移动行  <C-h/j/k/l> 切窗口  \ 替换光标词
 -- ║ 终端 <Esc><Esc> 回普通模式   插入 <M-d> 时间   F11 分隔线  F12 文件头
 -- ╚═════════════════════════════════════════════════════════════════════════
 
+-- 0.12是推动开箱即用OOTB的里程碑版本
 if vim.fn.has("nvim-0.12") == 0 then
   vim.api.nvim_echo({ { "此配置需要 Neovim 0.12+，已停止加载", "ErrorMsg" } }, true, {})
   return
@@ -65,7 +68,13 @@ local USER = {
   latex_engine = "-xelatex",                 -- latexmk 引擎: -xelatex / -lualatex / -pdf
   pdf_viewers  = { "okular", "evince", "zathura" },  -- 按顺序尝试，都没有就用系统默认程序
   bigfile_mb   = 5,                          -- 超过此大小：关高亮 / 折叠 / LSP / diff / undo 文件
-  -- LSP 服务器列表见第 9 节
+  -- PATH 里找不到 LSP / ruff 时，再到这些目录找（conda base 的 bin 会自动加入）
+  -- 用途：conda activate 到别的环境、或从桌面菜单启动 Neovide 时 PATH 不完整
+  extra_path   = { "~/.local/bin" },
+  python            = nil,                   -- 强制指定解释器路径；nil = 自动探测（见第 9 节）
+  py_typecheck      = "standard",            -- basedpyright: off / basic / standard / strict / recommended / all
+  py_format_on_save = true,                  -- 有 ruff 时保存自动格式化（<Space>uf 切换）
+  py_line_length    = 88,                    -- Python 参考线位置（ruff/black 默认 88）
 }
 
 vim.g.mapleader      = " "
@@ -202,7 +211,7 @@ end
 o.number       = true
 o.cursorline, o.cursorcolumn = true, true
 o.signcolumn   = "yes"
-o.scrolloff    = 6
+o.scrolloff    = 4
 o.colorcolumn  = tostring(USER.width + 1)
 o.list         = true
 o.listchars    = "tab:│ ,trail:·,nbsp:."
@@ -236,7 +245,9 @@ o.autocomplete = USER.autocomplete
 
 -- 命令行补全：0.12 的 wildtrigger() 实现边输入边弹出菜单（: / ? 都有效）
 o.path        = o.path .. ",**"
-o.wildignore  = "*/node_modules/*,*/.git/*,*/target/*,*/dist/*,*.o,*.pyc"
+-- 【新】加入 Python 缓存 / 虚拟环境目录
+o.wildignore  = "*/node_modules/*,*/.git/*,*/target/*,*/dist/*,*.o,*.pyc,"
+             .. "*/__pycache__/*,*/.venv/*,*/.mypy_cache/*,*/.ruff_cache/*,*/.pytest_cache/*"
 o.wildoptions = "pum,fuzzy"
 if vim.fn.exists("*wildtrigger") == 1 and pcall(function() o.wildmode = "noselect:lastused,full" end) then
   au("CmdlineChanged", { group = group, pattern = { ":", "/", "?" },
@@ -378,9 +389,9 @@ use("mini.clue", function(clue)
       { mode = "n", keys = "<Leader>c", desc = "+Code / 目录" },
       { mode = "n", keys = "<Leader>f", desc = "+Find" },
       { mode = "n", keys = "<Leader>g", desc = "+Git" },
-      { mode = "n", keys = "<Leader>m", desc = "+Multicursor" },
-      { mode = "x", keys = "<Leader>m", desc = "+Multicursor" },
       { mode = "n", keys = "<Leader>o", desc = "+Overseer" },
+      { mode = "n", keys = "<Leader>p", desc = "+Python" },          -- 【新】
+      { mode = "x", keys = "<Leader>p", desc = "+Python" },          -- 【新】
       { mode = "n", keys = "<Leader>t", desc = "+LaTeX" },
       { mode = "n", keys = "<Leader>u", desc = "+Toggle / UI" },
     },
@@ -389,43 +400,29 @@ use("mini.clue", function(clue)
 end)
 
 ----------------------------------------------------------------------
--- 4. 多光标 (C 保留给内置的 c$)
+-- 4. 多光标：只用 Q / gQ（与 Neovim 0.13 内置多光标同键，升级后手感不变）
+--    不占用 <Leader>、Ctrl、Alt 组合；ga、<C-n>/<C-p>、可视 I/A/s 都保持原生功能。
+--    在 0.13+ 上，这里的 Q / gQ 会覆盖内置同名键，内置的 <C-LeftMouse> 改回普通点击，
+--    内置的 <C-l>（清除光标）已被第 6 节的切窗口覆盖，保证始终只有一套多光标。
+--    代价：Q 不再重放宏（改用 @@），0.12 的 gQ（Ex 模式）也不再可用。
+--    放在 mini.clue 之后：部分 mini.clue 版本会自己映射 Q（用于重放宏），这里要覆盖它。
 ----------------------------------------------------------------------
 use("multicursor-nvim", function(mc)
   mc.setup()
 
-  map({ "n", "x" }, "<C-Down>",   function() mc.lineAddCursor(1)  end, { desc = "Cursor below" })
-  map({ "n", "x" }, "<C-Up>",     function() mc.lineAddCursor(-1) end, { desc = "Cursor above" })
-  map({ "n", "x" }, "<leader>mj", function() mc.lineAddCursor(1)  end, { desc = "Cursor below" })
-  map({ "n", "x" }, "<leader>mk", function() mc.lineAddCursor(-1) end, { desc = "Cursor above" })
-
-  map({ "n", "x" }, "<C-n>", function() mc.matchAddCursor(1)   end, { desc = "Add next match" })
-  map({ "n", "x" }, "<M-n>", function() mc.matchSkipCursor(1)  end, { desc = "Skip next match" })
-  map({ "n", "x" }, "<C-p>", function() mc.matchAddCursor(-1)  end, { desc = "Add prev match" })
-  map({ "n", "x" }, "<M-p>", function() mc.matchSkipCursor(-1) end, { desc = "Skip prev match" })
-  map({ "n", "x" }, "<leader>ma", mc.matchAllAddCursors,            { desc = "Add all matches" })
-  map("n",          "<leader>mv", mc.restoreCursors,                { desc = "Restore cursors" })
-
-  map("x", "s",     mc.matchCursors, { desc = "Select regex in selection" })
-  map("x", "<M-s>", mc.splitCursors, { desc = "Split selection by regex" })   -- 可视 S 留给包围
-  map("x", "I", mc.insertVisual, { desc = "Insert each line" })
-  map("x", "A", mc.appendVisual, { desc = "Append each line" })
-  map({ "n", "x" }, "ga", mc.addCursorOperator, { desc = "Cursors over motion" })
-  map({ "n", "x" }, "<C-q>", mc.toggleCursor,   { desc = "Toggle cursor" })
-
-  map("n", "<C-LeftMouse>",   mc.handleMouse)
-  map("n", "<C-LeftDrag>",    mc.handleMouseDrag)
-  map("n", "<C-LeftRelease>", mc.handleMouseRelease)
+  -- Q：无计数 = 在主光标处放置/删除光标（同时暂停其他光标，移到下一处再按 Q；<Esc> 恢复）
+  --    [count]Q = 在接下来 count 个搜索匹配处加光标（先 /pattern）
+  map("n", "Q", function()
+    local n = vim.v.count
+    if n == 0 then return mc.toggleCursor() end
+    if vim.fn.getreg("/") == "" then return vim.notify("还没有搜索过，先用 /pattern 搜索", L.WARN) end
+    for _ = 1, n do mc.searchAddCursor(1) end
+  end, { desc = "Toggle cursor / [count] add at search" })
+  map("x", "Q", function() mc.toggleCursor() end, { desc = "Toggle cursor" })
+  map("n", "gQ", function() mc.restoreCursors() end, { desc = "Restore cleared cursors" })
 
   -- 仅在存在多光标时生效
   mc.addKeymapLayer(function(set)
-    set({ "n", "x" }, ")", mc.nextCursor)
-    set({ "n", "x" }, "(", mc.prevCursor)
-    set({ "n", "x" }, "<M-,>", mc.deleteCursor)
-    set("n", ",", mc.clearCursors)
-    set("n", "&", mc.alignCursors)
-    set("x", "<M-)>", function() mc.transposeCursors(1)  end)
-    set("x", "<M-(>", function() mc.transposeCursors(-1) end)
     set("n", "<Esc>", function()
       if not mc.cursorsEnabled() then mc.enableCursors() else mc.clearCursors() end
     end)
@@ -448,7 +445,7 @@ end)
 ----------------------------------------------------------------------
 -- 5. Overseer (v2)
 ----------------------------------------------------------------------
--- 自定义组件：任务一启动就通知 (OverseerRun / OverseerShell / 重跑 / LaTeX 都会触发)
+-- 自定义组件：任务一启动就通知 (OverseerRun / OverseerShell / 重跑 / LaTeX / Python 都会触发)
 package.preload["overseer.component.on_start_notify"] = function()
   return {
     desc = "vim.notify when task starts",
@@ -812,10 +809,91 @@ vim.diagnostic.config({
   },
 })
 
+local IS_WIN  = vim.fn.has("win32") == 1
+
+-- conda 安装位置：优先 $CONDA_EXE（conda init 设置，切换环境后仍指向 base），
+-- 没有（如从桌面启动）时查常见安装路径
+local CONDA_BASE = (function()
+  local exe = vim.env.CONDA_EXE
+  if exe and exe ~= "" then return vim.fs.dirname(vim.fs.dirname(vim.fs.normalize(exe))) end
+  for _, d in ipairs({ "~/miniconda3", "~/miniforge3", "~/anaconda3",
+                       "/opt/miniconda3", "/opt/miniforge3", "/opt/anaconda3" }) do
+    d = vim.fs.normalize(d)
+    if vim.uv.fs_stat(vim.fs.joinpath(d, "condabin")) then return d end
+  end
+end)()
+
+-- 外部工具查找：先 PATH，再 USER.extra_path，最后 conda base 的 bin
+local TOOL_DIRS = vim.tbl_map(vim.fs.normalize, vim.deepcopy(USER.extra_path or {}))
+if CONDA_BASE then table.insert(TOOL_DIRS, vim.fs.joinpath(CONDA_BASE, IS_WIN and "Scripts" or "bin")) end
+
+local function find_exe(exe)
+  if has(exe) then return exe end
+  for _, d in ipairs(TOOL_DIRS) do
+    local p = vim.fs.joinpath(d, exe .. (IS_WIN and ".exe" or ""))
+    if has(p) then return p end
+  end
+end
+
+-- Python 解释器探测（basedpyright / 运行 / 测试 / REPL 共用）
+-- 优先级：<Space>pv 手选 > USER.python > $VIRTUAL_ENV > 项目内 .venv/venv/env
+--         > $CONDA_PREFIX（当前激活的 conda 环境）> conda base > PATH
+local PY_ROOT = { { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt",
+                    "pyrightconfig.json", "uv.lock" }, ".git" }
+local py_chosen = {}   -- [项目根] = 解释器路径
+
+local function venv_python(dir)
+  if not dir or dir == "" then return end
+  for _, rel in ipairs(IS_WIN and { "Scripts/python.exe", "python.exe" } or { "bin/python" }) do
+    local p = vim.fs.joinpath(dir, rel)
+    if vim.uv.fs_stat(p) then return p end
+  end
+end
+
+local function py_root(buf)
+  local name = vim.api.nvim_buf_get_name(buf or 0)
+  return vim.fs.root(buf or 0, PY_ROOT) or (name ~= "" and vim.fs.dirname(name)) or vim.fn.getcwd()
+end
+
+local function python_for(root)
+  if root and py_chosen[root] then return py_chosen[root] end
+  if USER.python and USER.python ~= "" then return USER.python end
+  local p = venv_python(vim.env.VIRTUAL_ENV)
+  if p then return p end
+  for _, d in ipairs({ ".venv", "venv", "env" }) do   -- .venv 也可以是指向 conda 环境的软链接
+    p = root and venv_python(vim.fs.joinpath(root, d))
+    if p then return p end
+  end
+  p = venv_python(vim.env.CONDA_PREFIX)          -- conda base 常驻激活，所以放在项目 venv 之后
+  if p then return p end
+  p = venv_python(CONDA_BASE)                    -- 从桌面启动时没有激活环境，用 conda base
+  if p then return p end
+  for _, exe in ipairs({ "python3", "python" }) do
+    if has(exe) then return vim.fn.exepath(exe) end
+  end
+end
+
+local RUFF = find_exe("ruff")
+
 local servers = {
   basedpyright = {
     cmd = { "basedpyright-langserver", "--stdio" }, filetypes = { "python" },
-    root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" },
+    root_markers = PY_ROOT,
+    settings = {
+      basedpyright = {
+        disableOrganizeImports = RUFF ~= nil,     -- 有 ruff 时整理 import 交给它，避免两个同名操作
+        analysis = { typeCheckingMode = USER.py_typecheck },
+      },
+      python = {},
+    },
+    -- 启动前把项目 venv 告诉 pyright，否则第三方包会报 "无法解析导入"
+    before_init = function(_, config)
+      config.settings.python.pythonPath = python_for(config.root_dir)
+    end,
+  },
+  ruff = {   -- lint + 格式化 + 整理 import；行宽等规则读 pyproject.toml / ruff.toml
+    cmd = { "ruff", "server" }, filetypes = { "python" },
+    root_markers = { { "pyproject.toml", "ruff.toml", ".ruff.toml" }, ".git" },
   },
   lua_ls = {
     cmd = { "lua-language-server" }, filetypes = { "lua" },
@@ -835,7 +913,9 @@ local servers = {
   },
 }
 for name, cfg in pairs(servers) do
-  if has(cfg.cmd[1]) then       -- 没装的服务器直接跳过
+  local exe = find_exe(cfg.cmd[1])
+  if exe then                   -- 没装的服务器直接跳过
+    cfg.cmd[1] = exe
     vim.lsp.config(name, cfg)
     vim.lsp.enable(name)
   end
@@ -891,6 +971,21 @@ au("LspAttach", {
 ----------------------------------------------------------------------
 -- 10. LaTeX (优先交给 Overseer：启动/完成都有通知、错误进 quickfix；没有 Overseer 时在底部终端运行)
 ----------------------------------------------------------------------
+-- 通用任务运行（LaTeX / Python 共用）
+-- t = { name, cmd, cwd, efm(可选，默认用 'errorformat'), watch(可选，保存时重跑的目录) }
+local function run_job(t)
+  if overseer then
+    local comps = { { "on_output_quickfix", open_on_exit = "failure", items_only = true,
+                      errorformat = t.efm }, "default" }
+    if t.watch then table.insert(comps, { "restart_on_save", paths = { t.watch } }) end
+    overseer.new_task({ name = t.name, cmd = t.cmd, cwd = t.cwd, components = comps }):start()
+  else
+    if t.watch then vim.notify("保存即重跑需要 overseer.nvim，本次只运行一次", L.WARN) end
+    vim.cmd("botright 12new")
+    vim.fn.jobstart(t.cmd, { term = true, cwd = t.cwd })
+  end
+end
+
 local function latexmk(args, title)
   local file = vim.api.nvim_buf_get_name(0)
   if vim.fn.fnamemodify(file, ":e") ~= "tex" then
@@ -904,17 +999,8 @@ local function latexmk(args, title)
   if vim.fn.filereadable(file) == 0 then
     return vim.notify("当前文件还没保存到磁盘", L.ERROR)
   end
-  local dir = vim.fs.dirname(file)
   local cmd = vim.list_extend(vim.list_extend({ "latexmk" }, args), { vim.fs.basename(file) })
-  if overseer then
-    overseer.new_task({
-      name = title, cmd = cmd, cwd = dir,
-      components = { { "on_output_quickfix", open_on_exit = "failure", items_only = true }, "default" },
-    }):start()
-  else
-    vim.cmd("botright 12new")
-    vim.fn.jobstart(cmd, { term = true, cwd = dir })
-  end
+  run_job({ name = title, cmd = cmd, cwd = vim.fs.dirname(file) })
 end
 
 -- -synctex=1：PDF ↔ 源码跳转；-file-line-error：错误格式为 file:line:，可被 quickfix 解析
@@ -940,7 +1026,278 @@ map("n", "<leader>tv", function()
 end, { desc = "View PDF" })
 
 ----------------------------------------------------------------------
--- 11. Neovide
+-- 11. Python（与 LaTeX 同样：优先交给 Overseer，错误进 quickfix；没有 Overseer 时在底部终端运行）
+--     可选外部工具：ruff（lint/格式化）、项目环境里的 pytest / ipython；缺了只跳过对应功能
+----------------------------------------------------------------------
+-- 续行缩进用 1 个 shiftwidth（PEP 8 风格，内置默认是 2 个）
+vim.g.python_indent = { open_paren = "shiftwidth()", continue = "shiftwidth()",
+                        closed_paren_align_last_line = false }
+
+-- traceback：每个 File 行一条，最后的异常行作为消息；pytest --tb=line 输出 file:line: msg
+local PY_EFM     = [[%A  File "%f"\, line %l%.%#,%C %.%#,%Z%[%^ ]%\@=%m]]
+local PYTEST_EFM = [[%f:%l: %m]]
+
+local function term_run(cmd, cwd)   -- 需要交互（input() / pdb）时用真终端
+  vim.cmd("botright 15new")
+  vim.fn.jobstart(cmd, { term = true, cwd = cwd })
+  vim.cmd.startinsert()
+end
+
+-- 检查 + 保存 + 收集上下文；失败返回 nil
+local function py_ctx()
+  if vim.bo.filetype ~= "python" then return vim.notify("当前不是 Python 文件", L.WARN) end
+  local ok, err = pcall(vim.cmd, "silent update")
+  if not ok then return vim.notify("保存失败: " .. tostring(err), L.ERROR) end
+  local file = vim.api.nvim_buf_get_name(0)
+  if file == "" or vim.fn.filereadable(file) == 0 then
+    return vim.notify("当前文件还没保存到磁盘", L.WARN)
+  end
+  local root = py_root(0)
+  local py = python_for(root)
+  if not py then return vim.notify("找不到 Python 解释器（<Space>pv 手动指定）", L.ERROR) end
+  return { file = file, root = root, py = py }
+end
+
+-- 运行 ---------------------------------------------------------------
+map("n", "<leader>pr", function()
+  local c = py_ctx(); if not c then return end
+  run_job({ name = "Python " .. vim.fs.basename(c.file), cmd = { c.py, "-u", c.file },
+            cwd = c.root, efm = PY_EFM })
+end, { desc = "Run file" })
+
+map("n", "<leader>pa", function()
+  local c = py_ctx(); if not c then return end
+  vim.ui.input({ prompt = "参数: ", default = vim.b.py_args or "" }, function(s)
+    if not s then return end
+    vim.b.py_args = s
+    local cmd = table.concat(vim.tbl_map(vim.fn.shellescape, { c.py, "-u", c.file }), " ") .. " " .. s
+    run_job({ name = "Python " .. vim.fs.basename(c.file) .. " " .. s, cmd = cmd, cwd = c.root, efm = PY_EFM })
+  end)
+end, { desc = "Run with args" })
+
+map("n", "<leader>pw", function()   -- 项目内任意文件保存都会重跑；<Space>oa 停止
+  local c = py_ctx(); if not c then return end
+  run_job({ name = "Python 监视 " .. vim.fs.basename(c.file), cmd = { c.py, "-u", c.file },
+            cwd = c.root, efm = PY_EFM, watch = c.root })
+end, { desc = "Rerun on save" })
+
+map("n", "<leader>pd", function()   -- 配合 <Space>pb 插入的 breakpoint() 进 pdb
+  local c = py_ctx(); if not c then return end
+  term_run({ c.py, c.file }, c.root)
+end, { desc = "Run in terminal (interactive/pdb)" })
+
+map("n", "<leader>pb", function()
+  if vim.bo.filetype ~= "python" or not editable() then return end
+  local row = vim.api.nvim_win_get_cursor(0)[1]
+  local line = vim.api.nvim_get_current_line()
+  if line:match("^%s*breakpoint%(%)%s*$") then
+    vim.api.nvim_buf_set_lines(0, row - 1, row, false, {})
+  else
+    vim.api.nvim_buf_set_lines(0, row - 1, row - 1, false, { line:match("^%s*") .. "breakpoint()" })
+  end
+end, { desc = "Toggle breakpoint()" })
+
+-- 测试 (pytest) ------------------------------------------------------
+-- 光标所在的 test 函数（含外层 class）→ path::Class::test_name
+local function nearest_test(file)
+  local row = vim.api.nvim_win_get_cursor(0)[1]
+  local lines = vim.api.nvim_buf_get_lines(0, 0, row, false)
+  local parts, indent, start = {}, nil, nil
+  for i = row, 1, -1 do
+    local ind, name = lines[i]:match("^(%s*)async%s+def%s+(test[%w_]*)")
+    if not name then ind, name = lines[i]:match("^(%s*)def%s+(test[%w_]*)") end
+    if name then parts, indent, start = { name }, #ind, i; break end
+  end
+  if not start then return end
+  for i = start - 1, 1, -1 do
+    local ind = #lines[i]:match("^%s*")
+    if lines[i]:match("%S") and ind < indent then
+      local cls = lines[i]:match("^%s*class%s+([%w_]+)")
+      if not cls then break end
+      table.insert(parts, 1, cls); indent = ind
+      if ind == 0 then break end
+    end
+  end
+  return file .. "::" .. table.concat(parts, "::")
+end
+
+local function pytest(c, target, title)
+  local cmd = { c.py, "-m", "pytest", "-q", "--tb=line" }
+  if target then table.insert(cmd, target) end
+  run_job({ name = title, cmd = cmd, cwd = c.root, efm = PYTEST_EFM })
+end
+
+map("n", "<leader>pt", function()
+  local c = py_ctx(); if not c then return end
+  local id = nearest_test(c.file)
+  if not id then return vim.notify("光标上方没有 test_ 函数", L.WARN) end
+  pytest(c, id, "pytest " .. id:match("::(.*)$"))
+end, { desc = "Test nearest" })
+map("n", "<leader>pf", function()
+  local c = py_ctx(); if c then pytest(c, c.file, "pytest " .. vim.fs.basename(c.file)) end
+end, { desc = "Test file" })
+map("n", "<leader>pT", function()
+  local c = py_ctx(); if c then pytest(c, nil, "pytest 全部") end
+end, { desc = "Test all" })
+
+-- ruff 代码操作 / 保存时格式化 ----------------------------------------
+local function ruff_action(kind)
+  if #vim.lsp.get_clients({ bufnr = 0, name = "ruff" }) == 0 then
+    return vim.notify("ruff 未运行（需要安装 ruff）", L.WARN)
+  end
+  vim.lsp.buf.code_action({ context = { only = { kind }, diagnostics = {} }, apply = true })
+end
+map("n", "<leader>pi", function() ruff_action("source.organizeImports.ruff") end, { desc = "Organize imports" })
+map("n", "<leader>px", function() ruff_action("source.fixAll.ruff") end,         { desc = "Ruff fix all" })
+
+vim.g.py_format_on_save = USER.py_format_on_save
+map("n", "<leader>uf", function()
+  vim.g.py_format_on_save = not vim.g.py_format_on_save
+  vim.notify("Python 保存时格式化: " .. (vim.g.py_format_on_save and "开" or "关"))
+end, { desc = "Toggle format on save (py)" })
+
+au("LspAttach", {
+  group = group,
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if not client or client.name ~= "ruff" then return end
+    client.server_capabilities.hoverProvider = false      -- K 只用 basedpyright 的文档
+    if vim.b[args.buf].py_fmt_au then return end          -- LSP 重启时别重复注册
+    vim.b[args.buf].py_fmt_au = true
+    au("BufWritePre", {
+      group = group, buffer = args.buf,
+      callback = function(e)
+        if not vim.g.py_format_on_save or vim.b[e.buf].bigfile then return end
+        if #vim.lsp.get_clients({ bufnr = e.buf, name = "ruff" }) == 0 then return end
+        vim.lsp.buf.format({ bufnr = e.buf, name = "ruff", timeout_ms = 2000 })
+      end,
+    })
+  end,
+})
+
+au("FileType", {
+  group = group, pattern = "python",
+  callback = function() vim.opt_local.colorcolumn = tostring(USER.py_line_length + 1) end,
+})
+
+-- 选择解释器 ---------------------------------------------------------
+-- 列出：$VIRTUAL_ENV、项目内各 venv、当前 conda 环境、conda base 及 envs/ 下所有环境、PATH
+map("n", "<leader>pv", function()
+  local root = py_root(0)
+  local items, seen = {}, {}
+  local function add(p, label)
+    if p and not seen[p] then seen[p] = true; table.insert(items, { path = p, label = label }) end
+  end
+  add(venv_python(vim.env.VIRTUAL_ENV), "$VIRTUAL_ENV")
+  for name, t in vim.fs.dir(root) do
+    if t == "directory" or t == "link" then add(venv_python(vim.fs.joinpath(root, name)), name) end
+  end
+  add(venv_python(vim.env.CONDA_PREFIX), "conda 当前")
+  if CONDA_BASE then
+    add(venv_python(CONDA_BASE), "conda base")
+    local envs = vim.fs.joinpath(CONDA_BASE, "envs")
+    if vim.fn.isdirectory(envs) == 1 then
+      for name, t in vim.fs.dir(envs) do
+        if t == "directory" then add(venv_python(vim.fs.joinpath(envs, name)), "conda:" .. name) end
+      end
+    end
+  end
+  for _, exe in ipairs({ "python3", "python" }) do
+    if has(exe) then add(vim.fn.exepath(exe), "PATH") end
+  end
+  table.insert(items, { label = "手动输入路径…" })
+
+  local function apply(p)
+    if vim.fn.executable(p) == 0 then return vim.notify("不可执行: " .. p, L.ERROR) end
+    py_chosen[root] = p
+    for _, cl in ipairs(vim.lsp.get_clients({ bufnr = 0, name = "basedpyright" })) do
+      cl.settings = vim.tbl_deep_extend("force", cl.settings or {}, { python = { pythonPath = p } })
+      cl:notify("workspace/didChangeConfiguration", { settings = cl.settings })
+    end
+    vim.notify("Python 解释器: " .. p .. "\n（已打开的 REPL 需关闭后重开）")
+  end
+
+  vim.ui.select(items, {
+    prompt = "Python 解释器（当前 " .. (python_for(root) or "无") .. "）",
+    format_item = function(it) return it.path and ("%-14s %s"):format(it.label, it.path) or it.label end,
+  }, function(it)
+    if not it then return end
+    if it.path then return apply(it.path) end
+    vim.ui.input({ prompt = "python 路径: ", completion = "file" }, function(s)
+      if s and s ~= "" then apply(vim.fs.normalize(s)) end
+    end)
+  end)
+end, { desc = "Select interpreter" })
+
+-- REPL ---------------------------------------------------------------
+-- 有 ipython 用 ipython（括号粘贴，多行块最稳）；否则普通 python，多行代码经临时文件 exec
+local repl = {}
+
+local function repl_win() return repl.buf and vim.fn.bufwinid(repl.buf) or -1 end
+
+local function repl_open()
+  if repl.chan and repl.buf and vim.api.nvim_buf_is_valid(repl.buf) then
+    if repl_win() == -1 then
+      local cur = vim.api.nvim_get_current_win()
+      vim.cmd("botright 15split")
+      vim.api.nvim_win_set_buf(0, repl.buf)
+      vim.api.nvim_set_current_win(cur)
+    end
+    return true
+  end
+  local root = py_root(0)
+  local py = python_for(root)
+  if not py then return vim.notify("找不到 Python 解释器", L.ERROR) end
+  local ipy = vim.fs.joinpath(vim.fs.dirname(py), IS_WIN and "ipython.exe" or "ipython")
+  repl.ipython = vim.uv.fs_stat(ipy) ~= nil
+  local cmd = repl.ipython and { ipy, "--no-autoindent" } or { py, "-q" }
+  local cur = vim.api.nvim_get_current_win()
+  vim.cmd("botright 15new")
+  repl.buf = vim.api.nvim_get_current_buf()
+  repl.chan = vim.fn.jobstart(cmd, { term = true, cwd = root,
+                                     on_exit = function() repl.chan, repl.buf = nil, nil end })
+  vim.api.nvim_set_current_win(cur)
+  return true
+end
+
+local function dedent(lines)
+  local min
+  for _, l in ipairs(lines) do
+    if l:match("%S") then local n = #l:match("^%s*"); min = math.min(min or n, n) end
+  end
+  return vim.tbl_map(function(l) return l:sub((min or 0) + 1) end, lines)
+end
+
+local function repl_send(lines)
+  lines = dedent(lines)
+  if not repl_open() then return end
+  if #lines == 1 then
+    vim.fn.chansend(repl.chan, lines[1] .. "\r")
+  elseif repl.ipython then
+    vim.fn.chansend(repl.chan, "\27[200~" .. table.concat(lines, "\n") .. "\27[201~\r\r")
+  else
+    local tmp = vim.fn.tempname() .. ".py"
+    vim.fn.writefile(lines, tmp)
+    vim.fn.chansend(repl.chan, ("exec(compile(open(%s, encoding='utf-8').read(), '<selection>', 'exec'))\r")
+      :format(vim.json.encode(tmp)))
+  end
+  local win = repl_win()
+  if win ~= -1 then vim.api.nvim_win_call(win, function() vim.cmd("normal! G") end) end
+end
+
+map("n", "<leader>pp", function()
+  local win = repl_win()
+  if win ~= -1 then vim.api.nvim_win_close(win, false) else repl_open() end
+end, { desc = "Toggle REPL" })
+map("n", "<leader>ps", function() repl_send({ vim.api.nvim_get_current_line() }) end, { desc = "Send line" })
+map("x", "<leader>ps", function()
+  local lines = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."), { type = vim.fn.mode() })
+  vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "nx", false)
+  repl_send(lines)
+end, { desc = "Send selection" })
+
+----------------------------------------------------------------------
+-- 12. Neovide
 ----------------------------------------------------------------------
 o.guifont = ("%s:h%d"):format(USER.font, USER.font_size)
 
@@ -965,7 +1322,7 @@ if vim.g.neovide then
 end
 
 ----------------------------------------------------------------------
--- 12. 缺失插件汇总提示（只提示一次）
+-- 13. 缺失插件汇总提示（只提示一次）
 ----------------------------------------------------------------------
 if #missing > 0 then
   vim.schedule(function()

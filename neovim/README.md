@@ -62,7 +62,7 @@ nvim --headless +qa
 | 插件 | 用途 |
 |---|---|
 | [mini.nvim](https://github.com/nvim-mini/mini.nvim) | 用到的模块：notify、starter、pairs、ai、statusline、bufremove、git、diff、pick、extra、surround、clue |
-| [multicursor.nvim](https://github.com/jake-stewart/multicursor.nvim) | 多光标（`1.0` 分支） |
+| [multicursor.nvim](https://github.com/jake-stewart/multicursor.nvim) | 多光标（`1.0` 分支），只用 `Q` / `gQ` |
 | [overseer.nvim](https://github.com/stevearc/overseer.nvim) | 任务运行器（make / npm / cargo / tasks.json …） |
 
 ## 个人设置 USER
@@ -117,18 +117,41 @@ nvim --headless +qa
 
 ### 多光标
 
+基于 multicursor.nvim，**只用 `Q` / `gQ`**，和 Neovim 0.13 自带多光标的默认键一致，升级后手感不变。不占用任何 `<Space>`、Ctrl 或 Alt 组合。
+
 | 键 | 功能 |
 |---|---|
-| `<C-Down>` / `<C-Up>`，`<Space>mj` / `mk` | 在下方 / 上方加光标（macOS 的 `<C-Up>` 常被系统占用，可用后者） |
-| `<C-n>` / `<C-p>` | 加下一个 / 上一个相同词 |
-| `<M-n>` / `<M-p>` | 跳过这一个 |
-| `<Space>ma` | 选中全部相同词 |
-| `gaip` | 段落里每行一个光标 |
-| 可视 `s` / `<M-s>` | 在选区内按正则选中 / 按正则拆分 |
-| 可视 `I` / `A` | 每行行首插入 / 行尾追加 |
-| `<C-q>` | 在当前位置放置或暂停光标 |
-| `<Space>mv` | 找回刚清除的光标 |
-| **有多光标时才生效：** `(` `)` 切换主光标，`<M-,>` 删除主光标，`&` 对齐，`<M-(>` `<M-)>` 轮换选区内容，`,` 或 `<Esc>` 回到单光标 | |
+| `Q` | 在主光标处放置 / 删除光标，同时暂停其他光标 |
+| `5Q` | 在接下来 5 个搜索匹配处加光标（先 `/pattern` 或 `*`） |
+| 可视模式 `Q` | 放置 / 删除光标 |
+| `gQ` | 找回刚清除的光标 |
+| `<Esc>`（有多光标时） | 光标被暂停时恢复，否则清除所有光标 |
+
+**用 Q 逐个放光标：**
+
+1. 移到第一处，按 `Q`。
+2. 移到第二处，再按 `Q`（这时只有主光标在动，其他光标是暂停的）。
+3. 都放好后按 `<Esc>`，所有光标恢复活动，开始编辑。
+4. 编辑完按 `<Esc>` 清除光标。
+
+**常见用法：**
+
+- 连续几行加光标：`Q` `j` `Q` `j` `Q`……然后 `<Esc>`。
+- 改某个词出现的几处：`*` 或 `/word` 搜索，再按 `3Q` 在后 3 处加光标，然后编辑。
+
+**和原生键的差别：**
+
+- **`Q` 不再重放宏**，改用 `@@`。`@@` 重复的是「上一次执行的」寄存器，录完宏后第一次要用 `@q`。0.13 自带的 `Q` 也同样不再重放宏。
+- **0.12 的 `gQ`（Ex 模式）不再可用**。0.13 里 Ex 模式改用 `:exmode`。
+- `ga`、`<C-n>`、`<C-p>`、可视模式 `I` / `A` / `s` 都保持 Neovim 原本的功能。
+
+**关于 Neovim 0.13：** 0.13 自带多光标，`Q` 添加 / 删除，`[count]Q` 在搜索匹配处加光标，`gQ` 找回，`<C-LeftMouse>` 鼠标切换，`<C-l>` 清除，`q=` 跟随模式。这份配置在 0.13 上：
+
+- 用 multicursor.nvim 的 `Q` / `gQ` 盖掉自带的同名键；
+- 把 `<C-LeftMouse>` 改回普通点击；
+- `<C-l>` 本来就是切换窗口；
+
+所以始终只有一套多光标在工作。以后想改用 0.13 自带的多光标：删掉 `init.lua` 里 PLUGINS 中的 multicursor.nvim 和第 4 节，运行 `:PackClean`。键还是 `Q` / `gQ`，不用重新适应。
 
 ### 任务 / LaTeX
 
@@ -170,7 +193,8 @@ nvim --headless +qa
 | `<M-j>` / `<M-k>` | 上下移动行 |
 | `<C-h/j/k/l>` | 切换窗口 |
 | `\` | 替换光标下的单词（逐个确认） |
-| `<Esc>` | 清除搜索高亮 |
+| `<Esc>` | 清除搜索高亮（有多光标时改为恢复 / 清除光标） |
+| `@@` | 重放上一次执行的宏（`Q` 已用于多光标） |
 | `<C-z>` | 进入命令行（占用了挂起功能，需要挂起请用 `:suspend`） |
 | 终端 `<Esc><Esc>` | 回到普通模式 |
 | 插入 `<M-d>` | 插入当前时间 |
@@ -269,7 +293,8 @@ Neovim 自带的解析器只有 c、lua、markdown、vim、vimdoc、query 这几
 | 插件目录里只有 `.git`，内容是空的 | 配置会自动删掉这种目录，重启后重新安装 |
 | 界面 / 消息显示异常 | 把 `USER.ui2` 设为 `false` |
 | 补全菜单同时弹出两个，或输入的字符被吞掉 | 把 `USER.autocomplete` 设为 `false` |
-| `<C-Up>` / `<C-Down>` 没反应 | 被终端或系统占用了，改用 `<Space>mj` / `mk` |
+| `Q` 的行为不对，或 `:verbose nmap Q` 显示不是 multicursor | 有别的插件或配置在之后又映射了 `Q`。`:verbose nmap Q` 会显示最后是在哪里定义的，去掉那一处即可 |
+| `5Q` 提示"还没有搜索过" | 先用 `/pattern` 或 `*` 搜索，再按 `[count]Q` |
 | Big5 文件显示乱码 | `:e ++enc=big5` |
 | LSP 没有启动 | `:checkhealth vim.lsp`；确认服务器命令在 `$PATH` 里 |
 
@@ -279,7 +304,7 @@ Neovim 自带的解析器只有 c、lua、markdown、vim、vimdoc、query 这几
 
 - `[d` / `]d` 不再使用已弃用的 `float` 参数。自己写的映射已删除，改为内置键加 `diagnostic.config({ jump = { on_jump } })`。
 - `switchbuf` 改成 `useopen,uselast`，quickfix 和跳转不会再不停开新标签页。
-- `C` 还给内置命令（`c$`），多光标改用 `<C-Down>` / `<C-Up>` / `<Space>mj` / `mk`。
+- `C` 还给内置命令（`c$`）。
 - 删除所有 `<C-g>` 取消映射，恢复搜索时的 `<C-g>` / `<C-t>`、插入模式的 `<C-g>u` 等内置功能。
 - `<Tab>` 不再盲目调用 omnifunc，只在有 LSP 时触发 LSP 补全。
 - 去行尾空白会遵守 EditorConfig，并可以按缓冲区开关。
@@ -290,7 +315,8 @@ Neovim 自带的解析器只有 c、lua、markdown、vim、vimdoc、query 这几
 **整理**
 
 - 删除：`showmatch` / `matchtime`、`smartindent`、`extends:#`、多余的 netrw 选项、`<Space>rn` / `<Space>ca`（改用内置 `grn` / `gra`）。
-- 简化了 `pick_tool`；多光标的 Leader 键统一放进 `<Space>m`；mini.clue 补全了所有分组。
+- 简化了 `pick_tool`；mini.clue 补全了所有分组。
+- **多光标只用 `Q` / `gQ`**，与 Neovim 0.13 内置多光标同键。删除了 `<Space>m` 分组及其下所有键，以及 `<C-q>`、`<C-Down>` / `<C-Up>`、`<C-n>` / `<C-p>`、`<M-n>` / `<M-p>`、`ga`、可视模式 `s` / `<M-s>` / `I` / `A`、鼠标键和多光标时的 `(` `)` `<M-,>` `,` `&` `<M-(>` `<M-)>`。`ga`、`<C-n>` / `<C-p>`、可视 `I` / `A` / `s` 恢复为原生功能。
 
 **新增**
 
@@ -306,3 +332,4 @@ Neovim 自带的解析器只有 c、lua、markdown、vim、vimdoc、query 这几
 - [ ] `<Space>uu` 能打开撤销树
 - [ ] `<Space>tt` 编译出错时，quickfix 能自动打开（如果 Overseer 报组件参数错误，删掉 `open_on_exit` / `items_only` 这两个参数）
 - [ ] `:checkhealth vim.lsp vim.pack` 没有 deprecated 警告
+- [ ] `:verbose nmap Q` 显示来自 `init.lua` 的 multicursor 映射；按 `Q` 能放置光标，`<Esc>` 能恢复 / 清除
