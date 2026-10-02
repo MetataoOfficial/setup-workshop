@@ -1,4 +1,5 @@
 -- ~/.config/nvim/init.lua — Neovim 0.12+ 单文件配置（0.13+ 自动改用内置多光标）
+-- Windows: %LOCALAPPDATA%\nvim\init.lua
 --
 -- 设计原则：默认键优先
 --   · Neovim 0.11 / 0.12 / 0.13 内置的键（gr* K [d ]d gcc <C-l> an/in Q gQ - …）一律不覆盖
@@ -10,6 +11,7 @@
 -- ║ 首次启动由内置 vim.pack 自动安装（需要 git）；版本记录在 nvim-pack-lock.json
 -- ║ 任一插件缺失时自动跳过相关功能，启动后汇总提示一次
 -- ║ 国内网络: export NVIM_PACK_MIRROR=https://ghfast.top/    预装: nvim --headless +qa
+-- ║   Windows: setx NVIM_PACK_MIRROR https://ghfast.top/  （设置后重开终端）
 -- ║ :PackUpdate [名字…]   :PackSync 按锁文件同步   :PackClean 删除不用的插件   :restart 重启
 -- ╚═════════════════════════════════════════════════════════════════════════
 --
@@ -55,10 +57,10 @@ local USER = {
   mirror       = vim.env.NVIM_PACK_MIRROR,   -- GitHub 镜像，例 "https://ghfast.top/"；nil = 直连
   colorscheme  = "retrobox",                 -- 内置备选: default / habamax / unokai
   background   = "dark",                     -- "dark" / "light"（F10 临时切换）
-  font         = "Hack",                     -- GUI（Neovide）字体
+  font         = "Hack,Consolas",            -- [Win] GUI（Neovide）字体，逗号后为回退字体
   font_size    = 14,
   indent       = 4,                          -- 缩进宽度（空格）
-  width        = 110,                        -- 参考线位置(第 width+1 列) 与 :CommentRule/:FileHeader 宽度
+  width        = 100,                        -- 参考线位置(第 width+1 列) 与 :CommentRule/:FileHeader 宽度
   clipboard    = "unnamedplus",              -- 与系统剪贴板同步；设为 "" 则不同步
   auto_cd      = true,                       -- 打开文件时自动切换到项目根目录
   -- 项目根标记：同一层 { } 内优先级相同（取最近的），monorepo 子包优先于 .git
@@ -70,18 +72,18 @@ local USER = {
   inlay_hints  = false,                      -- LSP 内联类型提示默认开关（<Space>uh 切换）
   native_multicursor = true,                 -- 0.13+ 用内置多光标（同为 Q/gQ）；false = 继续用插件
   latex_engine = "-xelatex",                 -- latexmk 引擎: -xelatex / -lualatex / -pdf
-  pdf_viewers  = { "okular", "evince", "zathura" },  -- 按顺序尝试，都没有就用系统默认程序
+  -- 按顺序尝试，都没有就用系统默认程序；[Win] Windows 上会再自动尝试 SumatraPDF
+  pdf_viewers  = { "okular", "evince", "zathura" },
   bigfile_mb   = 5,                          -- 超过此大小：关高亮 / 折叠 / LSP / diff / undo 文件
-  -- PATH 里找不到 LSP / ruff 时，再到这些目录找（conda base 的 bin 会自动加入）
+  -- PATH 里找不到 LSP / ruff 时，再到这些目录找（uv tool / pipx 在 Windows 上也装到 ~/.local/bin）
+  -- [Win] 另会自动加入：mason、npm、scoop、winget、pip --user、cargo、conda base 的目录（见第 9 节）
   extra_path   = { "~/.local/bin" },
   python            = nil,                   -- 强制指定解释器路径；nil = 自动探测（见第 9 节）
   py_typecheck      = "standard",            -- basedpyright: off / basic / standard / strict / recommended / all
   py_format_on_save = true,                  -- 有 ruff 时保存自动格式化（<Space>uf 切换）
-  py_line_length    = 88,                    -- Python 参考线位置（ruff/black 默认 88）
 }
 
-vim.g.mapleader      = " "
-vim.g.maplocalleader = " "   -- 文件类型专用键用 <LocalLeader>，这里与 <Leader> 相同，按起来一样
+vim.g.mapleader,vim.g.maplocalleader = " "," "   -- 文件类型专用键用 <LocalLeader>，这里与 <Leader> 相同，按起来一样
 
 local map   = vim.keymap.set
 local L     = vim.log.levels
@@ -223,13 +225,14 @@ end
 ----------------------------------------------------------------------
 o.number       = true
 o.cursorline, o.cursorcolumn = true, true
+o.cursorlineopt = "screenline,number"                  -- 只高亮当前屏幕行，并高亮行号
 o.signcolumn   = "yes"
 o.scrolloff    = 4
 o.colorcolumn  = tostring(USER.width + 1)
 o.list         = true
 o.listchars    = "tab:│ ,trail:·,nbsp:."
 o.winborder    = "rounded"
-pcall(function() o.pumborder = "rounded" end)         -- 0.12：补全菜单边框
+pcall(function() o.pumborder = "rounded" end)          -- 0.12：补全菜单边框
 o.smoothscroll = true                                  -- 折行时按屏幕行平滑滚动
 o.splitkeep    = "screen"                              -- 开/关分屏时文本不跳动
 o.inccommand   = "split"                               -- :s 替换实时预览（含屏幕外匹配）
@@ -248,6 +251,7 @@ o.ignorecase, o.smartcase = true, true
 o.undofile      = true
 o.confirm       = true
 o.fileencodings = "ucs-bom,utf-8,gb18030,latin1"   -- Big5 文件请手动 :e ++enc=big5
+o.fileformats   = "unix,dos"                        -- [Win] 新文件统一用 LF；已有 CRLF 文件照原样读写
 o.spelllang     = "en_us,cjk"                       -- 拼写检查时不把中日韩文字标红
 
 -- 默认按缩进折叠；有 treesitter 解析器或 LSP foldingRange 时自动换成更准的（见第 8、9 节）
@@ -282,6 +286,7 @@ o.formatlistpat = [[^\s*\(\d\+\|[-*]\)\+[\]:.)}\t ]\s*]]
 vim.opt.formatoptions:append("n")
 
 -- 剪贴板延后设置：检测剪贴板工具可能较慢（SSH / WSL），不拖慢启动
+-- （Windows 发行版自带 win32yank.exe，unnamedplus 直接可用）
 vim.schedule(function() o.clipboard = USER.clipboard end)
 
 if not HAS_013 then   -- 0.13 起 netrw 默认不加载（改用内置 dir），这些选项只对 0.12 有意义
@@ -789,6 +794,7 @@ au("BufReadPost", {
 
 -- 项目根目录：自动切换 (找不到就用文件所在目录)；Overseer / Pick 都依赖 cwd
 -- :CdHere 手动切到文件目录并暂停自动切换；:CdRoot 回到项目根并恢复
+-- [Win] 路径比较前一律 vim.fs.normalize（统一 / 分隔符与盘符大小写），否则 C:\a 与 C:/a 会被当成不同目录
 vim.g.auto_cd = USER.auto_cd
 local home = vim.fs.normalize(vim.uv.os_homedir() or "")
 
@@ -797,12 +803,15 @@ local function project_root(buf)
   if vim.bo[buf].buftype ~= "" or name == "" or name:find("://", 1, true) then return end  -- 虚拟缓冲区
   if vim.bo[buf].filetype == "directory" or vim.fn.isdirectory(name) == 1 then return end   -- dir / netrw
   local root = vim.fs.root(buf, USER.root_markers)
+  root = root and vim.fs.normalize(root)
   if not root or root == home then root = vim.fs.dirname(name) end  -- 家目录是 dotfiles 仓库时不切到 ~
-  return root
+  return vim.fs.normalize(root)
 end
 
 local function cd(dir)
-  if dir and dir ~= vim.fs.normalize(vim.fn.getcwd()) and vim.fn.isdirectory(dir) == 1 then
+  if not dir then return end
+  dir = vim.fs.normalize(dir)
+  if dir ~= vim.fs.normalize(vim.fn.getcwd()) and vim.fn.isdirectory(dir) == 1 then
     pcall(vim.fn.chdir, dir)
   end
 end
@@ -935,28 +944,60 @@ vim.diagnostic.config({
 local CONDA_BASE = (function()
   local exe = vim.env.CONDA_EXE
   if exe and exe ~= "" then return vim.fs.dirname(vim.fs.dirname(vim.fs.normalize(exe))) end
-  for _, d in ipairs({ "~/miniconda3", "~/miniforge3", "~/anaconda3",
-                       "/opt/miniconda3", "/opt/miniforge3", "/opt/anaconda3" }) do
+  local localapp = vim.env.LOCALAPPDATA or ""
+  local progdata = vim.env.ProgramData or "C:/ProgramData"
+  local cands = IS_WIN and {   -- [Win] 用户级安装在 ~ 或 %LOCALAPPDATA%，"所有用户"安装在 %ProgramData%
+    "~/miniconda3", "~/miniforge3", "~/anaconda3",
+    localapp .. "/miniconda3", localapp .. "/miniforge3", localapp .. "/anaconda3",
+    progdata .. "/miniconda3", progdata .. "/miniforge3", progdata .. "/anaconda3",
+  } or { "~/miniconda3", "~/miniforge3", "~/anaconda3",
+         "/opt/miniconda3", "/opt/miniforge3", "/opt/anaconda3" }
+  for _, d in ipairs(cands) do
     d = vim.fs.normalize(d)
     if vim.uv.fs_stat(vim.fs.joinpath(d, "condabin")) then return d end
   end
 end)()
 
--- 外部工具查找：先 PATH，再 USER.extra_path，最后 conda base 的 bin
-local TOOL_DIRS = vim.tbl_map(vim.fs.normalize, vim.deepcopy(USER.extra_path or {}))
-if CONDA_BASE then table.insert(TOOL_DIRS, vim.fs.joinpath(CONDA_BASE, IS_WIN and "Scripts" or "bin")) end
+-- 外部工具查找：先 PATH，再 USER.extra_path，再各平台常见目录，最后 conda base
+local TOOL_DIRS = {}
+local function add_dir(d) if d and d ~= "" then table.insert(TOOL_DIRS, vim.fs.normalize(d)) end end
+for _, d in ipairs(USER.extra_path or {}) do add_dir(d) end
+add_dir(vim.fn.stdpath("data") .. "/mason/bin")                   -- 若装过 mason
+if IS_WIN then   -- [Win] 从开始菜单 / Neovide 启动时 PATH 常常不完整，补上常见安装位置
+  local appdata, localapp = vim.env.APPDATA, vim.env.LOCALAPPDATA
+  if appdata then
+    add_dir(appdata .. "/npm")                                     -- npm i -g（.cmd 包装）
+    for _, d in ipairs(vim.fn.glob(appdata .. "/Python/Python3*/Scripts", false, true)) do
+      add_dir(d)                                                   -- pip install --user
+    end
+  end
+  add_dir("~/scoop/shims")                                         -- scoop
+  if localapp then add_dir(localapp .. "/Microsoft/WinGet/Links") end   -- winget
+  add_dir("~/.cargo/bin")
+end
+if CONDA_BASE then
+  if IS_WIN then
+    add_dir(vim.fs.joinpath(CONDA_BASE, "Scripts"))
+    add_dir(vim.fs.joinpath(CONDA_BASE, "Library/bin"))             -- conda-forge 的二进制包放在这里
+  else
+    add_dir(vim.fs.joinpath(CONDA_BASE, "bin"))
+  end
+end
 
+-- 返回完整路径（Windows 会按 PATHEXT 自动补 .exe / .cmd / .bat），找不到返回 nil
+-- [Win] 用完整路径启动，避免 executable() 认得 .cmd 但 jobstart / LSP 启动时找不到
 local function find_exe(exe)
-  if has(exe) then return exe end
+  local p = vim.fn.exepath(exe)
+  if p ~= "" then return p end
   for _, d in ipairs(TOOL_DIRS) do
-    local p = vim.fs.joinpath(d, exe .. (IS_WIN and ".exe" or ""))
-    if has(p) then return p end
+    p = vim.fn.exepath(vim.fs.joinpath(d, exe))
+    if p ~= "" then return p end
   end
 end
 
 -- Python 解释器探测（basedpyright / 运行 / 测试 / REPL 共用）
 -- 优先级：<Space>pv 手选 > USER.python > $VIRTUAL_ENV > 项目内 .venv/venv/env
---         > $CONDA_PREFIX（当前激活的 conda 环境）> conda base > PATH
+--         > $CONDA_PREFIX（当前激活的 conda 环境）> conda base > PATH（Windows 另试 py 启动器）
 local PY_ROOT = { { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt",
                     "pyrightconfig.json", "uv.lock" }, ".git" }
 local py_chosen = {}   -- [项目根] = 解释器路径
@@ -969,9 +1010,33 @@ local function venv_python(dir)
   end
 end
 
+-- [Win] WindowsApps\python.exe 是应用商店占位程序（只会打开 Microsoft Store），不是真解释器
+local function real_python(p)
+  if p and p ~= "" and not (IS_WIN and p:find("WindowsApps", 1, true)) then return p end
+end
+
+-- PATH 中的解释器（结果缓存；false = 找过但没有）
+local path_py_cache
+local function path_python()
+  if path_py_cache ~= nil then return path_py_cache or nil end
+  for _, exe in ipairs(IS_WIN and { "python", "python3" } or { "python3", "python" }) do
+    local p = real_python(vim.fn.exepath(exe))
+    if p then path_py_cache = p; return p end
+  end
+  if IS_WIN and has("py") then   -- [Win] python.org 安装器常只提供 py 启动器：问它真实路径
+    local ok, r = pcall(function()
+      return vim.system({ "py", "-3", "-c", "import sys; print(sys.executable)" }, { text = true }):wait(3000)
+    end)
+    local p = ok and r.code == 0 and real_python(vim.trim(r.stdout or "")) or nil
+    if p then path_py_cache = p; return p end
+  end
+  path_py_cache = false
+end
+
 local function py_root(buf)
   local name = vim.api.nvim_buf_get_name(buf or 0)
-  return vim.fs.root(buf or 0, PY_ROOT) or (name ~= "" and vim.fs.dirname(name)) or vim.fn.getcwd()
+  local r = vim.fs.root(buf or 0, PY_ROOT) or (name ~= "" and vim.fs.dirname(name)) or vim.fn.getcwd()
+  return vim.fs.normalize(r)
 end
 
 local function python_for(root)
@@ -987,9 +1052,7 @@ local function python_for(root)
   if p then return p end
   p = venv_python(CONDA_BASE)                    -- 从桌面启动时没有激活环境，用 conda base
   if p then return p end
-  for _, exe in ipairs({ "python3", "python" }) do
-    if has(exe) then return vim.fn.exepath(exe) end
-  end
+  return path_python()
 end
 
 -- 告诉 basedpyright 用哪个解释器（否则第三方包会报"无法解析导入"）
@@ -1012,7 +1075,9 @@ local servers = {
         analysis = { typeCheckingMode = USER.py_typecheck },
       },
     },
-    on_init = function(client) pyright_set_python(client, python_for(client.root_dir)) end,
+    on_init = function(client)
+      pyright_set_python(client, python_for(client.root_dir and vim.fs.normalize(client.root_dir)))
+    end,
   },
   ruff = {   -- lint + 格式化 + 整理 import；行宽等规则读 pyproject.toml / ruff.toml
     cmd = { "ruff", "server" }, filetypes = { "python" },
@@ -1038,7 +1103,7 @@ local servers = {
 for name, cfg in pairs(servers) do
   local exe = find_exe(cfg.cmd[1])
   if exe then                   -- 没装的服务器直接跳过
-    cfg.cmd[1] = exe
+    cfg.cmd[1] = exe            -- 完整路径（Windows 下可能是 .exe / .cmd / .bat）
     vim.lsp.config(name, cfg)
     vim.lsp.enable(name)
   end
@@ -1141,7 +1206,8 @@ local function latexmk(args, title)
   if vim.fn.fnamemodify(file, ":e") ~= "tex" then
     return vim.notify("当前不是 .tex 文件", L.WARN)
   end
-  if not has("latexmk") then
+  local exe = find_exe("latexmk")   -- [Win] 用完整路径（MiKTeX / TeX Live 的 latexmk.exe）
+  if not exe then
     return vim.notify("未找到 latexmk，请先安装 TeX Live / MiKTeX", L.ERROR)
   end
   local ok, err = try_cmd("silent update")
@@ -1149,7 +1215,7 @@ local function latexmk(args, title)
   if vim.fn.filereadable(file) == 0 then
     return vim.notify("当前文件还没保存到磁盘", L.ERROR)
   end
-  local c = vim.list_extend(vim.list_extend({ "latexmk" }, args), { vim.fs.basename(file) })
+  local c = vim.list_extend(vim.list_extend({ exe }, args), { vim.fs.basename(file) })
   run_job({ name = title, cmd = c, cwd = vim.fs.dirname(file) })
 end
 
@@ -1158,9 +1224,16 @@ local function view_pdf()
   if vim.fn.filereadable(pdf) == 0 then
     return vim.notify("找不到 PDF，请先编译 (<Space>tt)", L.WARN)
   end
-  for _, v in ipairs(USER.pdf_viewers) do
-    if has(v) and pcall(vim.system, { v, pdf }, { detach = true }) then
-      return vim.notify("用 " .. v .. " 打开 " .. vim.fs.basename(pdf))
+  local viewers = vim.deepcopy(USER.pdf_viewers)
+  if IS_WIN then   -- [Win] SumatraPDF 不锁文件（Adobe 会锁，latexmk 写不进去）、支持 synctex
+    vim.list_extend(viewers, { "SumatraPDF",
+      (vim.env.LOCALAPPDATA or "") .. "/SumatraPDF/SumatraPDF.exe",
+      "C:/Program Files/SumatraPDF/SumatraPDF.exe" })
+  end
+  for _, v in ipairs(viewers) do
+    local exe = find_exe(v)
+    if exe and pcall(vim.system, { exe, pdf }, { detach = true }) then
+      return vim.notify("用 " .. vim.fs.basename(exe) .. " 打开 " .. vim.fs.basename(pdf))
     end
   end
   local _, err = vim.ui.open(pdf)              -- 系统默认程序，macOS / Windows 也能用
@@ -1188,6 +1261,7 @@ vim.g.python_indent = { open_paren = "shiftwidth()", continue = "shiftwidth()",
                         closed_paren_align_last_line = false }
 
 -- traceback：每个 File 行一条，最后的异常行作为消息；pytest --tb=line 输出 file:line: msg
+-- （Windows 下 %f 会自动匹配 C: 盘符）
 local PY_EFM     = [[%A  File "%f"\, line %l%.%#,%C %.%#,%Z%[%^ ]%\@=%m]]
 local PYTEST_EFM = [[%f:%l: %m]]
 
@@ -1248,7 +1322,8 @@ local function ruff_action(kind)
   vim.lsp.buf.code_action({ context = { only = { kind }, diagnostics = {} }, apply = true })
 end
 
--- 选择解释器：列出 $VIRTUAL_ENV、项目内各 venv、当前 conda 环境、conda base 及 envs/ 下所有环境、PATH
+-- 选择解释器：列出 $VIRTUAL_ENV、项目内各 venv、当前 conda 环境、conda base 及 envs/ 下所有环境、
+-- PATH，以及（Windows）py 启动器登记的所有 Python
 local function select_python()
   local root = py_root(0)
   local items, seen = {}, {}
@@ -1269,8 +1344,13 @@ local function select_python()
       end
     end
   end
-  for _, exe in ipairs({ "python3", "python" }) do
-    if has(exe) then add(vim.fn.exepath(exe), "PATH") end
+  add(path_python(), "PATH")
+  if IS_WIN and has("py") then   -- [Win] py -0p 列出所有已安装的 Python
+    local ok, r = pcall(function() return vim.system({ "py", "-0p" }, { text = true }):wait(3000) end)
+    for line in ((ok and r.stdout) or ""):gmatch("[^\r\n]+") do
+      local p = line:match("(%a:[\\/].-%.exe)%s*$")
+      if p then add(real_python(vim.fs.normalize(p)), "py 启动器") end
+    end
   end
   table.insert(items, { label = "手动输入路径…" })
 
@@ -1278,7 +1358,9 @@ local function select_python()
     if vim.fn.executable(p) == 0 then return vim.notify("不可执行: " .. p, L.ERROR) end
     py_chosen[root] = p
     for _, cl in ipairs(vim.lsp.get_clients({ name = "basedpyright" })) do  -- 同项目的所有客户端
-      if cl.root_dir == root or vim.lsp.buf_is_attached(0, cl.id) then pyright_set_python(cl, p) end
+      if (cl.root_dir and vim.fs.normalize(cl.root_dir) == root) or vim.lsp.buf_is_attached(0, cl.id) then
+        pyright_set_python(cl, p)
+      end
     end
     vim.notify("Python 解释器: " .. p .. "\n（已打开的 REPL 需关闭后重开）")
   end
@@ -1296,6 +1378,7 @@ local function select_python()
 end
 
 -- REPL：有 ipython 用 ipython（括号粘贴，多行块最稳）；否则普通 python，多行代码经临时文件 exec
+-- [Win] ConPTY 下括号粘贴不可靠，Windows 上多行代码一律走临时文件 exec（ipython 也支持）
 local repl = {}
 local repl_toggle
 
@@ -1316,9 +1399,14 @@ local function repl_open()
   local root = py_root(0)
   local py = python_for(root)
   if not py then return vim.notify("找不到 Python 解释器", L.ERROR) end
-  local ipy = vim.fs.joinpath(vim.fs.dirname(py), IS_WIN and "ipython.exe" or "ipython")
-  repl.ipython = vim.uv.fs_stat(ipy) ~= nil
-  local argv = repl.ipython and { ipy, "--no-autoindent" } or { py, "-q" }
+  -- [Win] conda 环境里 python.exe 在根目录，ipython.exe 在 Scripts\ 下，两处都找
+  local ipy
+  for _, d in ipairs({ vim.fs.dirname(py), vim.fs.joinpath(vim.fs.dirname(py), "Scripts") }) do
+    local p = vim.fs.joinpath(d, IS_WIN and "ipython.exe" or "ipython")
+    if vim.uv.fs_stat(p) then ipy = p; break end
+  end
+  repl.ipython = ipy ~= nil
+  local argv = ipy and { ipy, "--no-autoindent" } or { py, "-q" }
   local cur = vim.api.nvim_get_current_win()
   vim.cmd("botright 15new")
   repl.buf = vim.api.nvim_get_current_buf()
@@ -1348,7 +1436,7 @@ local function repl_send(lines)
   if not repl_open() then return end
   if #lines == 1 then
     vim.fn.chansend(repl.chan, lines[1] .. "\r")
-  elseif repl.ipython then
+  elseif repl.ipython and not IS_WIN then
     vim.fn.chansend(repl.chan, "\27[200~" .. table.concat(lines, "\n") .. "\27[201~\r\r")
   else
     local tmp = vim.fn.tempname() .. ".py"
@@ -1482,8 +1570,15 @@ end
 if #missing > 0 then
   vim.schedule(function()
     local hints = { "修复后重启 nvim 会自动安装" }
-    if not has("git") then table.insert(hints, 1, "未找到 git：vim.pack 需要 git 才能安装插件") end
-    if not MIRROR then table.insert(hints, "国内网络可设置镜像: export NVIM_PACK_MIRROR=https://ghfast.top/") end
+    if not has("git") then
+      table.insert(hints, 1, IS_WIN and "未找到 git：vim.pack 需要 git（winget install Git.Git）"
+                                    or  "未找到 git：vim.pack 需要 git 才能安装插件")
+    end
+    if not MIRROR then
+      table.insert(hints, IS_WIN
+        and "国内网络可设置镜像（cmd / PowerShell）: setx NVIM_PACK_MIRROR https://ghfast.top/  然后重开终端"
+        or  "国内网络可设置镜像: export NVIM_PACK_MIRROR=https://ghfast.top/")
+    end
     vim.notify(("以下插件未加载，相关功能已跳过，编辑器可正常使用:\n  %s\n%s")
       :format(table.concat(missing, ", "), table.concat(hints, "\n")), L.WARN)
   end)
