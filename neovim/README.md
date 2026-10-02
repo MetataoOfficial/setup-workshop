@@ -11,7 +11,6 @@
 - 在 0.12 上，多光标用插件模拟 **0.13 的默认键**。升级到 0.13 后键位不用变。
 
 一般只用记两类东西：Neovim 的默认键（见[内置默认键速查](#内置默认键速查)），加上不到 40 个 `<Space>` 开头的键。
-
 除了极少数几个例外：
 - <C-s>: save
 - F10,11,12: dark/light, insert line, insert header
@@ -31,7 +30,6 @@
   - [内置默认键速查](#内置默认键速查)
   - [插件默认键](#插件默认键)
   - [本配置新增的键](#本配置新增的键)
-  - [已删除的旧键与替代方式](#已删除的旧键与替代方式)
   - [多光标](#多光标)
 - [功能说明](#功能说明)
 - [命令](#命令)
@@ -40,8 +38,6 @@
 - [自定义与扩展](#自定义与扩展)
 - [升级到 Neovim 0.13](#升级到-neovim-013)
 - [故障排查](#故障排查)
-- [本版改动](#本版改动)
-- [验证清单](#验证清单)
 
 ---
 
@@ -152,7 +148,7 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 | `author` | `nil` | `:FileHeader` 里的作者。nil 时依次读取 `git config user.name` 和系统用户名 |
 | `mirror` | `$NVIM_PACK_MIRROR` | GitHub 镜像，例如 `https://ghfast.top/`；nil 表示直连 |
 | `colorscheme` | `retrobox` | 内置备选：`default` / `habamax` / `unokai` 等 |
-| `background` | `dark` | `<Space>ub` 可以临时切换 |
+| `background` | `dark` | `F10` 可以临时切换 |
 | `font` / `font_size` | `Hack` / 14 | Neovide 字体 |
 | `indent` | 4 | 缩进宽度（空格） |
 | `width` | 108 | 参考线画在第 `width+1` 列；同时是 `:CommentRule` / `:FileHeader` 的宽度 |
@@ -200,7 +196,7 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 | `grx` | 运行 CodeLens（0.12） |
 | `gO` | 文档符号列表 |
 | `<C-]>` | 跳到定义（LSP 设置了 `tagfunc`），`<C-t>` 跳回 |
-| 插入模式 `<C-s>` | 签名帮助 |
+| 插入模式 `<M-s>` | 签名帮助 |
 | `gq{motion}` | 用 LSP 格式化一段（LSP 设置了 `formatexpr`），例如 `gqip`、`gqq` |
 
 #### 诊断
@@ -370,7 +366,6 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 | `<Space>ud` | 诊断显示方式：行尾文字 ↔ 在当前行下方展开 |
 | `<Space>uw` | 当前缓冲区保存时是否去掉行尾空白 |
 | `<Space>uf` | Python 保存时是否自动格式化 |
-| `<Space>ub` | 深色 / 浅色背景 |
 | `<Space>us` | 拼写检查（已设 `cjk`，中文不会被标红） |
 
 #### 不在 `<Space>` 下的少数几个
@@ -384,35 +379,6 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 | `Q` / `gQ` / `<C-LeftMouse>`（仅 0.12） | 多光标 | 模拟 0.13 的默认键 |
 | help / quickfix 窗口里的 `q` | 关闭窗口 | 和 man、checkhealth 窗口的内置行为一致 |
 | Neovide `<C-=>` `<C-->` `<C-0>` | 放大 / 缩小 / 重置 | Neovide 官方 FAQ 的写法 |
-
-### 已删除的旧键与替代方式
-
-| 旧键 | 现在用 | 说明 |
-|---|---|---|
-| `<C-s>` 保存 | `:w`，或 `ZZ`（保存并退出） | 插入模式 `<C-s>` 恢复为内置的签名帮助 |
-| `<Space>w` / `<Space>q` | `:w` / `:q` / `ZZ` / `ZQ` | |
-| 插入模式 `<M-s>` 签名帮助 | 插入模式 `<C-s>` | 恢复内置键 |
-| `<Esc>` 清除搜索高亮 | `<C-l>` | 内置；0.13 里还会清除多光标 |
-| `<C-h/j/k/l>` 切换窗口 | `<C-w>h/j/k/l` | 0.13 的 `<C-l>` 有新用途，不应再覆盖 |
-| `gd`（LSP 定义） | `grd` 或 `<C-]>` | `gd` 恢复为内置的"跳到局部声明" |
-| `<Tab>` 多功能补全 | `<C-n>` / `<C-p>` / `<C-y>`、`<C-x><C-o>` | `<Tab>` 恢复为内置的片段跳转 + 缩进 |
-| 插入模式 `<Up>` / `<Down>` 选择补全项 | `<C-n>` / `<C-p>` | |
-| `<M-o>` / `<M-i>` 扩大 / 缩小选区 | 可视模式 `an` / `in` | 本来就是内置键的别名 |
-| `<M-j>` / `<M-k>` 移动行 | `<M-j>` / `<M-k>`（mini.move 默认键） | 键没变，改由插件默认提供，还多了 `<M-h>` / `<M-l>` |
-| 可视模式 `p` / `P` 互换 | 可视模式 `P` | 内置 `P` 本来就不覆盖寄存器 |
-| `\` 替换光标下的单词 | `*` 然后 `cgn` 输入新词，`.` 逐个重复；或 LSP `grn` | |
-| `<C-z>` 进入命令行 | `:` | `<C-z>` 恢复为挂起 |
-| F9 深浅色 / F10 拼写 | `<Space>ub` / `<Space>us` | |
-| F11 分隔线 / F12 文件头 | `:CommentRule` / `:FileHeader` | |
-| `<Space>cd` / `<Space>cr` | `:CdHere` / `:CdRoot` | |
-| `<Home>` / `<End>` / `<PageUp>` / `<PageDown>` | 恢复内置行为（`^` / `$` / `{` / `}` 请直接用） | |
-| 插入模式 `<C-BS>` / `<C-Del>` | 插入模式 `<C-w>`（删除前一个词）/ `<C-o>dw` | |
-| 插入模式 `<M-d>` 插入时间 | 插入模式 `<C-r>=strftime('%F %T')<CR>` | |
-| 插入模式 `<M-=>` / `<M-->` | 删除 | |
-| `<C-F4>` | `<C-w>c` | |
-| `<Space>/` | `<Space>fg` | 删除重复键 |
-
-想把某个旧键加回来，见[自定义与扩展](#自定义与扩展)。
 
 ### 多光标
 
@@ -646,12 +612,6 @@ Neovim 自带的解析器只有 c、lua、markdown、vim、vimdoc、query 等几
 
 把下面的代码加在 `init.lua` 末尾即可。
 
-**加回 `<C-s>` 保存**（会占用插入模式的签名帮助）：
-
-```lua
-vim.keymap.set({ "n", "x" }, "<C-s>", "<cmd>update<cr>", { desc = "Save" })
-```
-
 **加回 `<Esc>` 清除搜索高亮**（kickstart.nvim 的写法）：
 
 ```lua
@@ -713,48 +673,3 @@ end, { expr = true })
 | LaTeX 报 Overseer 组件参数错误 | 删掉 `run_job` 里的 `open_on_exit` / `items_only` 两个参数 |
 | Big5 文件显示乱码 | `:e ++enc=big5` |
 | LSP 没有启动 | `:checkhealth vim.lsp`；确认服务器命令在 `$PATH` 或 `USER.extra_path` 里 |
-
----
-
-## 本版改动
-
-**原则：默认键优先**
-
-- 删除所有和内置键重复或冲突的自定义键：`<C-s>`、`<Esc>` 清高亮、`<C-h/j/k/l>`、`<C-z>`、`<Tab>` / `<S-Tab>`、插入模式方向键、`<M-o>` / `<M-i>`、可视 `p` / `P` 互换、`\`、`<Home>` / `<End>` / `<PageUp>` / `<PageDown>`、`<C-BS>` / `<C-Del>`、`<M-d>`、`<M-=>` / `<M-->`、`<C-F4>`、`<M-s>`、`<Space>w` / `<Space>q` / `<Space>/`。
-- 恢复的内置功能：插入模式 `<C-s>` 签名帮助、`<C-l>` 清高亮（0.13 还会清除多光标）、`<Tab>` 片段跳转、`<C-z>` 挂起、可视 `P`、`gd`。
-- LSP 跳到定义从 `gd` 改为 `grd`（与 `gr*` 一族对齐）；局部格式化用内置 `gq`。
-- 移动行改用 mini.move 的默认键 `<M-h/j/k/l>`。
-- F9 / F10 → `<Space>ub` / `<Space>us`；F11 / F12 → `:CommentRule` / `:FileHeader`；`<Space>cd` / `<Space>cr` → `:CdHere` / `:CdRoot`。
-
-**向 0.13 看齐**
-
-- 0.12 上补齐 0.13 的多光标默认键：`<C-l>` 清除、`<C-LeftMouse>` 鼠标放置。
-- `-` 在 0.12 上用 netrw 模拟 0.13 内置 `dir` 的行为；在 0.13 上不做任何映射。netrw 选项只在 0.12 上设置。
-- 修正旧文档里"`<C-l>` 本来就是切换窗口"的错误说法。
-
-**结构与正确性**
-
-- LaTeX / Python 的键改为只在对应文件类型里生效（`<LocalLeader>` + FileType），不再全局占用。
-- `<Space>pp` 在 REPL 窗口里也能收起 REPL。
-- 自动 cd 会跳过目录缓冲区（netrw / 0.13 dir）。
-- `q` 关闭只用于 help / quickfix，man / checkhealth 内置已有，不再重复映射。
-- Neovide 缩放改用官方的 `neovide_scale_factor`。
-- 新增 `HAS_013` / `IS_WIN` 常量，统一版本判断；用户命令统一用 `cmd()` 定义。
-
----
-
-## 验证清单
-
-以下几项用到了 0.12 / 0.13 较新或实验性的接口，都做了保护，失败只会跳过该功能。第一次使用时建议逐项确认：
-
-- [ ] 插入模式打字时有补全弹出；在有 LSP 的文件里，菜单里是 LSP 的补全项；`<C-y>` 能确认
-- [ ] 插入模式 `<C-s>` 弹出签名帮助
-- [ ] 输入 `:e ` 时自动弹出文件补全，`<Up>` 仍能翻历史
-- [ ] 可视模式 `an` / `in` 能扩大 / 缩小选区
-- [ ] `<C-l>` 能清除搜索高亮
-- [ ] `-` 能打开上级目录
-- [ ] `<Space>uu` 能打开撤销树
-- [ ] 在 `.tex` 里 `<Space>tt` 编译出错时，quickfix 能自动打开
-- [ ] 在 `.py` 里 `<Space>pr` 能运行，`<Space>pv` 能列出解释器
-- [ ] `:checkhealth vim.lsp vim.pack` 没有 deprecated 警告
-- [ ] 0.12：`:verbose nmap Q` 显示来自 `init.lua` 的映射；`Q` 能放置光标，`<Esc>` 能恢复 / 清除，`<C-l>` 能清除

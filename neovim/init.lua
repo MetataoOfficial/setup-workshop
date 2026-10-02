@@ -4,7 +4,6 @@
 --   · Neovim 0.11 / 0.12 / 0.13 内置的键（gr* K [d ]d gcc <C-l> an/in Q gQ - …）一律不覆盖
 --   · 自定义键只放在 <Leader>（空格）下，按功能分组：b c e f g o p t u
 --   · 只在某种文件里有用的键（LaTeX / Python）只在该文件类型的缓冲区里生效
---   · 不常用的功能做成 :命令，不占键
 --
 -- ╔══════════════════════════════ PLUGINS ══════════════════════════════════
 -- ║ mini.nvim / overseer.nvim（0.12 另加 multicursor.nvim；0.13+ 用内置多光标）
@@ -55,11 +54,11 @@ local USER = {
   author       = nil,                        -- :FileHeader 作者；nil = 自动读取 git config user.name
   mirror       = vim.env.NVIM_PACK_MIRROR,   -- GitHub 镜像，例 "https://ghfast.top/"；nil = 直连
   colorscheme  = "retrobox",                 -- 内置备选: default / habamax / unokai
-  background   = "dark",                     -- "dark" / "light"（<Space>ub 临时切换）
+  background   = "dark",                     -- "dark" / "light"（F10 临时切换）
   font         = "Hack",                     -- GUI（Neovide）字体
   font_size    = 14,
   indent       = 4,                          -- 缩进宽度（空格）
-  width        = 108,                        -- 参考线位置(第 width+1 列) 与 :CommentRule/:FileHeader 宽度
+  width        = 110,                        -- 参考线位置(第 width+1 列) 与 :CommentRule/:FileHeader 宽度
   clipboard    = "unnamedplus",              -- 与系统剪贴板同步；设为 "" 则不同步
   auto_cd      = true,                       -- 打开文件时自动切换到项目根目录
   -- 项目根标记：同一层 { } 内优先级相同（取最近的），monorepo 子包优先于 .git
@@ -563,8 +562,6 @@ end)
 ----------------------------------------------------------------------
 -- 6. 通用快捷键（刻意保持很少；能用内置键的都不再自定义）
 ----------------------------------------------------------------------
-local function opts(desc) return { buffer = b, desc = desc } end
-
 -- 保存：无名缓冲区 / 只读等错误给出提示，而不是一串报错
 local function save(vimcmd)
   if vim.bo.buftype ~= "" then
@@ -582,7 +579,7 @@ local function save(vimcmd)
   end
 end
 map({ "n", "x", "i" }, "<C-s>", function() save("update") end, { desc = "Save" })
-map("i", "<M-s>", vim.lsp.buf.signature_help, opts("Signature help"))  -- 插入模式签名改到 <M-s>
+map("i", "<M-s>", vim.lsp.buf.signature_help, { desc = "Signature help" })
 
 -- 终端模式回到普通模式（:h terminal-input 推荐的做法；单个 <Esc> 仍发给终端里的程序）
 map("t", "<Esc><Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode" })
@@ -653,11 +650,6 @@ map("n", "<leader>ud", function()
   vim.diagnostic.config({ virtual_lines = on and { current_line = true } or false, virtual_text = not on })
   vim.notify("诊断显示: " .. (on and "当前行展开" or "行尾"))
 end, { desc = "Toggle diagnostic lines" })
-
-map("n", "<leader>ub", function()
-  o.background = o.background == "dark" and "light" or "dark"
-  vim.notify("背景: " .. o.background)
-end, { desc = "Toggle dark/light" })
 
 map("n", "<leader>us", function()
   vim.wo.spell = not vim.wo.spell
@@ -1496,5 +1488,3 @@ if #missing > 0 then
       :format(table.concat(missing, ", "), table.concat(hints, "\n")), L.WARN)
   end)
 end
---
--- Happy Hacking
