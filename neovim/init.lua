@@ -102,8 +102,10 @@ local HAS_013   = vim.fn.has("nvim-0.13") == 1
 local NATIVE_MC = HAS_013 and USER.native_multicursor
 local IS_WIN    = vim.fn.has("win32") == 1
 
--- ui2 尽早启用，让后面的启动消息也走新界面
-if USER.ui2 then pcall(function() require("vim._core.ui2").enable({}) end) end
+-- ui2 是实验性 API；保留为可选项，但失败时不影响正常启动。
+if USER.ui2 and vim.fn.has("nvim-0.12") == 1 then
+  pcall(function() require("vim._core.ui2").enable({}) end)
+end
 
 ----------------------------------------------------------------------
 -- 0. 插件 (vim.pack)
@@ -243,7 +245,7 @@ o.virtualedit  = "block"                               -- 可视块可越过行�
 o.updatetime   = 300
 
 o.wrap, o.linebreak, o.breakindent = true, true, true
-o.whichwrap    = "b,s,<,>,[,],h,l"
+o.whichwrap    = "b,s,<,>,[,]"
 
 o.expandtab = true
 o.shiftwidth, o.tabstop, o.softtabstop = USER.indent, USER.indent, USER.indent
@@ -261,7 +263,12 @@ o.spelllang     = "en_us,cjk"                       -- 拼写检查时不把中�
 o.foldmethod, o.foldlevel = "indent", 99
 o.foldtext = ""                                     -- 折叠行保留原文的语法高亮
 
-o.timeoutlen   = 400
+-- Ordinary multi-key mappings (gg, gr*, gq*, etc.) use Nvim's normal timeout.
+-- mini.clue no longer intercepts these built-in prefixes.
+o.timeout      = true
+o.timeoutlen   = 1000
+o.ttimeout     = true
+o.ttimeoutlen  = 100
 o.switchbuf    = "useopen,uselast"
 o.splitright, o.splitbelow = true, true
 
@@ -291,10 +298,6 @@ vim.opt.formatoptions:append("n")
 -- 剪贴板延后设置：检测剪贴板工具可能较慢（SSH / WSL），不拖慢启动
 -- （Windows 发行版自带 win32yank.exe，unnamedplus 直接可用）
 vim.schedule(function() o.clipboard = USER.clipboard end)
-
-if not HAS_013 then   -- 0.13 起 netrw 默认不加载（改用内置 dir），这些选项只对 0.12 有意义
-  vim.g.netrw_banner, vim.g.netrw_liststyle = 0, 3
-end
 
 ----------------------------------------------------------------------
 -- 2. 主题
@@ -468,36 +471,28 @@ use("mini.surround", function(m)
 end)
 
 -- 按键提示
-use("mini.clue", function(clue)
-  local gen = clue.gen_clues
+local clue_mod = use("mini.clue", function(clue)
   local clues = {
-    gen.builtin_completion(), gen.g(), gen.marks(), gen.registers(), gen.windows(), gen.z(),
-    { mode = "n", keys = "<Leader>b", desc = "+Buffer" },
-    { mode = "n", keys = "<Leader>c", desc = "+Code" },
-    { mode = "n", keys = "<Leader>f", desc = "+Find" },
-    { mode = "n", keys = "<Leader>g", desc = "+Git / Go" },
-    { mode = "n", keys = "<Leader>o", desc = "+Overseer" },
-    { mode = "n", keys = "<Leader>p", desc = "+Python" },
-    { mode = "x", keys = "<Leader>p", desc = "+Python" },
-    { mode = "n", keys = "<Leader>t", desc = "+LaTeX" },
-    { mode = "n", keys = "<Leader>u", desc = "+Toggle / UI" },
+    -- 只把工作流前缀交给 clue；g / z / [ / ] / <C-w> / 寄存器等仍由
+    -- Neovim 原生按键解析，避免普通命令被 clue 的 buffer-local trigger 接管。
+    { mode = { "n", "x" }, keys = "<Leader>b", desc = "+Buffer" },
+    { mode = { "n", "x" }, keys = "<Leader>c", desc = "+Code" },
+    { mode = { "n", "x" }, keys = "<Leader>e", desc = "+Explorer" },
+    { mode = { "n", "x" }, keys = "<Leader>f", desc = "+Find / Files" },
+    { mode = { "n", "x" }, keys = "<Leader>g", desc = "+Git / Go" },
+    { mode = { "n", "x" }, keys = "<Leader>o", desc = "+Overseer" },
+    { mode = { "n", "x" }, keys = "<Leader>p", desc = "+Python" },
+    { mode = { "n", "x" }, keys = "<Leader>t", desc = "+LaTeX" },
+    { mode = { "n", "x" }, keys = "<Leader>u", desc = "+Toggle / UI" },
   }
-  if gen.square_brackets then table.insert(clues, gen.square_brackets()) end
+
   clue.setup({
     triggers = {
-      { mode = "n", keys = "<Leader>" }, { mode = "x", keys = "<Leader>" },
-      { mode = "n", keys = "g" },        { mode = "x", keys = "g" },
-      { mode = "n", keys = "z" },        { mode = "x", keys = "z" },
-      { mode = "n", keys = "[" },        { mode = "n", keys = "]" },
-      { mode = "n", keys = "<C-w>" },
-      { mode = "n", keys = "'" },        { mode = "n", keys = "`" },   -- 标记
-      { mode = "x", keys = "'" },        { mode = "x", keys = "`" },
-      { mode = "n", keys = '"' },        { mode = "x", keys = '"' },   -- 寄存器
-      { mode = "i", keys = "<C-r>" },    { mode = "c", keys = "<C-r>" },
-      { mode = "i", keys = "<C-x>" },                                   -- 内置补全
+      { mode = { "n", "x" }, keys = "<Leader>" },
     },
     clues = clues,
-    window = { delay = 300 },
+    -- 查询本身不依赖 'timeoutlen'；这里只控制浮窗何时出现。稍微延后，避免短暂停顿就弹窗打断输入。
+    window = { delay = 600 },
   })
 end)
 
@@ -786,7 +781,14 @@ map({ "n", "i" }, "<F12>", "<Cmd>FileHeader<CR>",  { desc = "Insert file header"
 ----------------------------------------------------------------------
 -- 8. 自动命令
 ----------------------------------------------------------------------
-au("TextYankPost", { group = group, callback = function() vim.hl.on_yank({ timeout = 200 }) end })
+local function highlight_yank()
+  if vim.fn.has("nvim-0.13") == 1 and vim.hl.hl_op then
+    vim.hl.hl_op({ timeout = 200 })
+  elseif vim.hl.on_yank then
+    vim.hl.on_yank({ timeout = 200 })
+  end
+end
+au("TextYankPost", { group = group, callback = highlight_yank })
 
 -- 回到 Neovim / 离开终端时检查文件是否被外部修改
 -- （0.13 的 'autoread' 改为文件系统监视，这条在 0.13 上只是多一层保险）
@@ -858,7 +860,15 @@ end
 
 au("BufEnter", {
   group = group,
-  callback = function(args) if vim.g.auto_cd then cd(project_root(args.buf)) end end,
+  callback = function(args)
+    if vim.g.auto_cd then cd(project_root(args.buf)) end
+    -- 保证单一的 Leader clue trigger 最后创建，避免被后续 buffer-local mapping 遮住。
+    if clue_mod then vim.schedule(function()
+      if vim.api.nvim_buf_is_valid(args.buf) then
+        pcall(clue_mod.ensure_buf_triggers, args.buf)
+      end
+    end) end
+  end,
 })
 
 cmd("CdHere", function()
@@ -992,8 +1002,7 @@ local CONDA_BASE = (function()
     "~/miniconda3", "~/miniforge3", "~/anaconda3",
     localapp .. "/miniconda3", localapp .. "/miniforge3", localapp .. "/anaconda3",
     progdata .. "/miniconda3", progdata .. "/miniforge3", progdata .. "/anaconda3",
-  } or { "~/miniconda3", "~/miniforge3", "~/anaconda3",
-         "/opt/miniconda3", "/opt/miniforge3", "/opt/anaconda3" }
+  } or { "~/miniconda3", "~/miniforge3", "~/anaconda3", "/opt/miniconda3", "/opt/miniforge3", "/opt/anaconda3" }
   for _, d in ipairs(cands) do
     d = vim.fs.normalize(d)
     if vim.uv.fs_stat(vim.fs.joinpath(d, "condabin")) then return d end
@@ -1170,20 +1179,9 @@ for name, cfg in pairs(servers) do
   end
 end
 
--- LSP 自动补全默认只在服务器声明的触发字符（如 "."）上弹出；
--- 补上字母和 _，让输入标识符时也弹（:h lsp-attach 官方示例的做法），每个客户端只改一次
-local extended = {}
-local function trigger_on_type(client)
-  local cp = client.server_capabilities.completionProvider
-  if not cp or extended[client.id] then return end
-  extended[client.id] = true
-  local chars, seen = cp.triggerCharacters or {}, {}
-  for _, c in ipairs(chars) do seen[c] = true end
-  for c in ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"):gmatch(".") do
-    if not seen[c] then table.insert(chars, c) end
-  end
-  cp.triggerCharacters = chars
-end
+-- LSP 自动补全只使用服务器声明的 triggerCharacters。
+-- 不再把 a-z/A-Z/_ 全部加入触发字符：那会让每个字母都触发 LSP 请求，
+-- 官方文档明确提醒这种做法可能较慢。未自动弹出时，<Tab> 仍可手动请求 LSP 补全。
 
 au("LspAttach", {
   group = group,
@@ -1205,7 +1203,6 @@ au("LspAttach", {
     if supports("textDocument/completion") then
       local auto = vim.go.autocomplete
       if auto and not pcall(function() vim.bo[b].autocomplete = false end) then auto = false end
-      if auto then trigger_on_type(client) end
       vim.lsp.completion.enable(true, client.id, b, { autotrigger = auto })
     end
 
@@ -1231,6 +1228,9 @@ au("LspAttach", {
     if supports("textDocument/codeLens") and vim.lsp.codelens.enable then
       pcall(vim.lsp.codelens.enable, true, { bufnr = b })
     end
+
+    -- LSP/ftplugin 会在此处新增 buffer-local mappings；Leader trigger 必须最后创建。
+    if clue_mod then pcall(clue_mod.ensure_buf_triggers, b) end
   end,
 })
 
@@ -1244,6 +1244,7 @@ local function ft_keys(pattern, setup)
     group = group, pattern = pattern,
     callback = function(a)
       setup(function(mode, lhs, rhs, desc) map(mode, lhs, rhs, { buffer = a.buf, desc = desc }) end, a.buf)
+      if clue_mod then pcall(clue_mod.ensure_buf_triggers, a.buf) end
     end,
   })
 end
@@ -1318,8 +1319,7 @@ end)
 --     可选外部工具：ruff（lint/格式化）、项目环境里的 pytest / ipython；缺了只跳过对应功能
 ----------------------------------------------------------------------
 -- 续行缩进用 1 个 shiftwidth（PEP 8 风格，内置默认是 2 个）
-vim.g.python_indent = { open_paren = "shiftwidth()", continue = "shiftwidth()",
-                        closed_paren_align_last_line = false }
+vim.g.python_indent = { open_paren = "shiftwidth()", continue = "shiftwidth()", closed_paren_align_last_line = false }
 
 -- traceback：每个 File 行一条，最后的异常行作为消息；pytest --tb=line 输出 file:line: msg
 -- （Windows 下 %f 会自动匹配 C: 盘符）
