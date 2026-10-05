@@ -2,15 +2,16 @@
 
 整份配置只有一个 `init.lua`，只用 2～3 个插件。其余功能全部来自 Neovim 0.12 / 0.13 的内置功能。
 
-**设计原则：能用内置键就不自定义。**
+**设计原则：能用内置键就不自定义；少量例外必须有明确理由。**
 
-- Neovim 0.11 / 0.12 / 0.13 自带的默认键一律不覆盖，例如 `gr*`、`K`、`[d` `]d`、`gcc`、`<C-l>`、`an`/`in`、`Q`、`gQ`、`-`。
-- 自定义键全部放在 `<Space>`（Leader）下，按功能分组：`b c e f g o p t u`。
-- LaTeX / Python 专用键只在对应文件类型的缓冲区里存在。
+- Neovim 自带的导航 / LSP / 编辑键优先保留，例如 `gr*`、`K`、`[d` `]d`、`gcc`、`<C-l>`、`an`/`in`。
+- `Q` / `gQ` / `-` 等兼容键只用于在 0.12 上模拟 0.13 行为；保存、折行等少数人体工学键另有说明。
+- 工作流键主要放在 `<Space>`（Leader）下，按功能分组：`b c e f g o p t u`。
+- LaTeX / Python / Go 专用键只在对应文件类型的缓冲区里存在。
 - 不常用的功能做成 `:命令`，不占键。
 - 在 0.12 上，多光标用插件模拟 **0.13 的默认键**。升级到 0.13 后键位不用变。
 
-一般只用记两类东西：Neovim 的默认键（见[内置默认键速查](#内置默认键速查)），加上不到 40 个 `<Space>` 开头的键。
+一般只用记两类东西：Neovim 的默认键（见[内置默认键速查](#内置默认键速查)），加上几个按功能分组的 `<Space>` 键。
 除了极少数几个例外：
 - <C-s>: save
 - F10,11,12: dark/light, insert line, insert header
@@ -32,6 +33,8 @@
   - [本配置新增的键](#本配置新增的键)
   - [多光标](#多光标)
 - [功能说明](#功能说明)
+  - [mini.nvim 上下文记忆](#mininvim-上下文记忆)
+  - [Go](#go)
 - [命令](#命令)
 - [LSP 服务器安装](#lsp-服务器安装)
 - [Treesitter 解析器](#treesitter-解析器)
@@ -60,6 +63,8 @@
 | 多光标 | 0.13 内置；0.12 用 multicursor.nvim 模拟同一套键 |
 | 目录浏览 `-` | 0.13 内置 `dir`；0.12 用 netrw 模拟同一个键 |
 
+`mini.nvim` 还负责通知、文件查找、文件管理器、会话和访问记录等编辑器体验；详见[插件](#插件)和[mini.nvim 上下文记忆](#mininvim-上下文记忆)。
+
 任何一个插件缺失，相关功能都会自动跳过，编辑器照常可用。启动后会汇总提示一次。
 
 ---
@@ -73,6 +78,7 @@
 | 推荐 | `ripgrep`（全文搜索，支持实时搜索）、`fd`（查找文件更快） |
 | LaTeX | `latexmk` + TeX Live / MiKTeX；PDF 阅读器（okular / evince / zathura，或系统默认程序） |
 | Python | `basedpyright`、`ruff`；项目环境里装 `pytest` / `ipython`（可选） |
+| Go | `go`；`gopls` 提供 LSP、诊断和格式化；项目测试使用 `go test` |
 | 字体 | 不需要 Nerd Font（状态栏已关闭图标）；GUI 推荐 Neovide |
 
 ---
@@ -122,6 +128,8 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 | `~/.local/share/nvim/site/pack/core/opt/` | vim.pack 的插件安装目录 |
 | `~/.local/share/nvim/site/parser/` | 手动安装的 treesitter 解析器 |
 | `~/.local/state/nvim/undo/` | 持久撤销文件 |
+| `~/.local/state/nvim/sessions/` | mini.sessions 的全局会话目录；项目会话默认写入项目内的 `Session.vim` |
+| `~/.local/share/nvim/mini-visits-index` | mini.visits 的访问记录 |
 
 如果旧配置用过 `~/.local/share/nvim/site/pack/plugins`，启动时会提示你删除它，否则插件会被重复加载。
 
@@ -131,8 +139,8 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 
 | 插件 | 用途 |
 |---|---|
-| [mini.nvim](https://github.com/nvim-mini/mini.nvim) | 用到的模块：notify、starter、pairs、statusline、move、ai、extra、bufremove、git、diff、files、pick、surround、clue |
-| [overseer.nvim](https://github.com/stevearc/overseer.nvim) | 任务运行器（make / npm / cargo / tasks.json / LaTeX / Python …） |
+| [mini.nvim](https://github.com/nvim-mini/mini.nvim) | 用到的模块：notify、starter、pairs、statusline、tabline、move、indentscope、cursorword、ai、extra、bufremove、sessions、visits、git、diff、files、pick、surround、clue |
+| [overseer.nvim](https://github.com/stevearc/overseer.nvim) | 任务运行器（make / npm / cargo / tasks.json / LaTeX / Python / Go …） |
 | [multicursor.nvim](https://github.com/jake-stewart/multicursor.nvim) | **只在 0.12 上安装**（`1.0` 分支），用来模拟 0.13 的内置多光标键 |
 
 在 0.13 上，multicursor.nvim 不在插件列表里。之前装过的话，运行 `:PackClean` 删除即可。
@@ -151,10 +159,10 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 | `background` | `dark` | `F10` 可以临时切换 |
 | `font` / `font_size` | `Hack` / 14 | Neovide 字体 |
 | `indent` | 4 | 缩进宽度（空格） |
-| `width` | 108 | 参考线画在第 `width+1` 列；同时是 `:CommentRule` / `:FileHeader` 的宽度 |
+| `width` | 90 | 参考线画在第 `width+1` 列；同时是 `:CommentRule` / `:FileHeader` 的宽度 |
 | `clipboard` | `unnamedplus` | 设为 `""` 则不与系统剪贴板同步（会在启动后延迟设置，不拖慢启动） |
 | `auto_cd` | true | 打开文件时自动切换到项目根目录 |
-| `root_markers` | 见文件 | 判断项目根目录的标记。同一个 `{}` 里的标记优先级相同，取离文件最近的 |
+| `root_markers` | 见文件 | 判断项目根目录的标记；包含 `go.work` / `go.mod`。同一个 `{}` 里的标记优先级相同，取离文件最近的 |
 | `trim_on_save` | true | 保存时去掉行尾空白 |
 | `ui2` | true | 0.12 实验性的新消息 / 命令行界面 |
 | `autocomplete` | true | 边输入边弹出补全 |
@@ -167,7 +175,8 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 | `python` | `nil` | 强制指定 Python 解释器；nil 表示自动探测 |
 | `py_typecheck` | `standard` | basedpyright 检查级别：off / basic / standard / strict / recommended / all |
 | `py_format_on_save` | true | 有 ruff 时保存自动格式化 |
-| `py_line_length` | 88 | Python 文件的参考线位置 |
+| `py_line_length` | 90 | Python 文件的参考线位置 |
+| `go_format_on_save` | true | gopls 可用时 Go 保存自动格式化 |
 
 ---
 
@@ -279,6 +288,8 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 | | （mini.extra） | `B` 全文、`I` 缩进块、`L` 行、`N` 数字、`D` 诊断；如 `yaB`、`dii` |
 | | `al` / `il` | 上一个对象（`an` / `in` 已让给 0.12 内置的语法选区） |
 | mini.move | `<M-h/j/k/l>` | 普通模式移动当前行，可视模式移动选区 |
+| mini.indentscope | `[i` / `]i` | 跳到当前缩进范围的上 / 下边界；`ii` / `ai` 文本对象已关闭，避免和 mini.ai 冲突 |
+| mini.cursorword | 自动 | 高亮光标下单词的其他出现位置 |
 | mini.diff | `]h` `[h` / `]H` `[H` | 下 / 上一个修改块 / 最后 / 第一个 |
 | | `gh{motion}` / `ghgh` | 暂存修改（可视模式下用 `gh`） |
 | | `gH{motion}` / `gHgh` | 撤销修改 |
@@ -310,6 +321,8 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 | `<Space>fl` / `fd` / `fs` | 当前文件的行 / 诊断 / LSP 符号 |
 | `<Space>fk` | 快捷键列表 |
 | `<Space>fr` | 恢复上次查找 |
+| `<Space>fv` / `<Space>fV` | mini.visits：当前项目 / 全局访问记录（按常用度和最近使用排序） |
+| `<Space>fS` / `<Space>fR` / `<Space>fW` / `<Space>fD` | mini.sessions：选择 / 恢复默认 / 保存 / 删除项目会话 |
 
 没有 mini.pick 时，`ff` / `fg` / `fb` / `fh` / `fo` / `fd` 会降级成内置的 `:find`、`:vimgrep`、`:b`、`:help`、`:browse oldfiles` 和诊断列表。
 
@@ -357,6 +370,18 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 | `<Space>pp` | 打开 / 收起 REPL（在 REPL 窗口里也能用） |
 | `<Space>ps` | 把当前行（可视模式下是选区）发送到 REPL |
 
+#### Go（只在 `.go` 文件里有效）
+
+| 键 | 功能 |
+|---|---|
+| `<Space>gr` | 运行当前 Go 包 |
+| `<Space>gt` | 运行光标所在的 `Test` / `Benchmark` / `Example` 函数 |
+| `<Space>gf` | 测试当前 Go 包 |
+| `<Space>gT` | 测试全部包（`go test ./...`） |
+| `<Space>gb` | 构建全部包（`go build ./...`） |
+| `<Space>gF` | 用 gopls 格式化当前文件；没有 gopls 时用 `go fmt` 格式化当前包 |
+| `<Space>gi` | 用 gopls 整理 import |
+
 #### 开关（`<Space>u`）
 
 | 键 | 功能 |
@@ -366,6 +391,7 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 | `<Space>ud` | 诊断显示方式：行尾文字 ↔ 在当前行下方展开 |
 | `<Space>uw` | 当前缓冲区保存时是否去掉行尾空白 |
 | `<Space>uf` | Python 保存时是否自动格式化 |
+| `<Space>uG` | Go 保存时是否自动格式化（需要 gopls） |
 | `<Space>us` | 拼写检查（已设 `cjk`，中文不会被标红） |
 
 #### 不在 `<Space>` 下的少数几个
@@ -423,6 +449,16 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 
 ## 功能说明
 
+### mini.nvim 上下文记忆
+
+这部分用 `mini.nvim` 补上 Neovim 默认不会主动保存的工作上下文：
+
+- `mini.sessions` 把项目的 buffer、窗口和 tab 布局保存为会话。启动 Neovim 时不带文件参数，如果当前目录有 `Session.vim`，会自动恢复；`<Space>fW` 可以手动保存。
+- `mini.visits` 按项目记录访问过的文件，并用“访问次数 + 最近访问”排序。它和 `oldfiles` 不同，项目之间的记录不会混在一起；`<Space>fv` 打开当前项目的记录，`<Space>fV` 查看全部记录。
+- `mini.tabline` 显示当前 tab 中的 buffer，`mini.indentscope` 显示当前代码块范围，`mini.cursorword` 高亮同名文本。
+
+会话文件放在当前项目的 `Session.vim`；访问记录放在 Neovim 的 data 目录中。二者都可以手动编辑或删除。大文件会自动关闭 `mini.diff`、`mini.indentscope` 和 `mini.cursorword` 等额外扫描功能。
+
 ### 补全
 
 **插入模式：**
@@ -465,7 +501,7 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 
 打开文件时自动 `cd` 到项目根目录，Overseer 和查找都以它为准。
 
-- `Makefile` / `justfile` / `package.json` / `pyproject.toml` / `Cargo.toml` / `pubspec.yaml` 优先于 `.git`。所以在 monorepo 的子包里，会停在子包目录。
+- `Makefile` / `justfile` / `package.json` / `pyproject.toml` / `Cargo.toml` / `pubspec.yaml` / `go.work` / `go.mod` 优先于 `.git`。所以在 monorepo 的子包里，会停在子包目录。
 - 家目录本身是 dotfiles 仓库时，不会切到 `~`，而是停在文件所在目录。
 - 终端、帮助、目录缓冲区（netrw / 0.13 dir）等特殊缓冲区不会触发切换。
 - `:CdHere`：切到当前文件所在目录，并暂停自动切换；`:CdRoot`：回到项目根目录，并恢复自动切换。
@@ -484,7 +520,7 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 
 ### 大文件（> `bigfile_mb`）
 
-以下功能会关掉：treesitter 和 syntax 高亮、折叠（改为手动）、十字光标线、LSP、mini.diff、undo 文件、swap 文件、保存时去行尾空白、Python 保存时格式化。
+以下功能会关掉：treesitter 和 syntax 高亮、折叠（改为手动）、十字光标线、LSP、mini.diff、mini.indentscope、mini.cursorword、undo 文件、swap 文件、保存时去行尾空白、Python / Go 保存时格式化。
 
 ### 折叠
 
@@ -535,6 +571,22 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 - **REPL：** 解释器所在目录里有 ipython 就用 ipython（括号粘贴，多行代码块最稳），否则用普通 python。多行代码会经临时文件执行。发送前会自动去掉公共缩进。
 - **缩进：** 续行缩进为 1 个 `shiftwidth`（PEP 8 风格）。参考线在第 `py_line_length + 1` 列。
 
+### Go
+
+- **项目根目录：** 以最近的 `go.work` 或 `go.mod` 为根目录；`go` 命令和 Overseer 任务都从该目录运行。
+- **LSP：** `gopls` 负责补全、诊断、跳转、重命名、代码操作和格式化。配置启用了 `gofumpt`、`staticcheck`、未使用参数 / 写入检查和 nilness 分析。
+- **格式化：** `USER.go_format_on_save = true` 时，gopls 在保存前格式化；`<Space>uG` 可以切换。没有 gopls 时，`<Space>gF` 会降级为 `go fmt` 当前包。
+- **运行与测试：** `<Space>gr` 运行当前包，`<Space>gt` 运行光标所在的测试函数，`<Space>gf` 测试当前包，`<Space>gT` 测试全部包，`<Space>gb` 构建全部包。输出和错误交给 Overseer，错误会进入 quickfix。
+- **整理 import：** `<Space>gi` 使用 gopls 的 `source.organizeImports` 代码操作。
+
+安装 Go 语言服务器：
+
+```sh
+go install golang.org/x/tools/gopls@latest
+```
+
+配置会自动搜索 PATH、`USER.extra_path`、以及默认的 `~/go/bin`。
+
 ### Overseer
 
 - 所有任务在启动和结束时都会弹出通知。Neovim 窗口不在前台时，结束通知还会以桌面通知发出。
@@ -582,6 +634,7 @@ Windows 的配置目录是 `%LOCALAPPDATA%\nvim\`，数据目录是 `%LOCALAPPDA
 |---|---|---|
 | basedpyright | Python | `pipx install basedpyright`，或 `uv tool install basedpyright` |
 | ruff | Python | `pipx install ruff`，或 `uv tool install ruff` |
+| gopls | Go | `go install golang.org/x/tools/gopls@latest` |
 | lua_ls | Lua | 用包管理器安装 `lua-language-server` |
 | bashls | Bash | `npm i -g bash-language-server` |
 | dartls | Dart | 随 Dart / Flutter SDK 附带 |
@@ -667,9 +720,11 @@ end, { expr = true })
 | `5Q` 提示"还没有搜索过" | 先用 `/pattern` 或 `*` 搜索，再按 `[count]Q` |
 | `<C-l>` 没有清除多光标 | 有别的配置或插件映射了 `<C-l>`，用 `:verbose nmap <C-l>` 查找 |
 | `-` 没反应 | 0.12 需要 netrw（默认启用）；检查是否设置了 `g:loaded_netrwPlugin` |
-| `<Space>t…` / `<Space>p…` 不存在 | 这些键只在 `.tex` / `.py` 缓冲区里有效 |
+| `<Space>t…` / `<Space>p…` / `<Space>g[r/t/f/T/b/F/i]` 不存在 | 这些键只在 `.tex` / `.py` / `.go` 缓冲区里有效 |
 | Python 报"无法解析导入" | `<Space>pv` 选择正确的解释器；或在项目里建 `.venv` |
-| 保存时没有格式化 | 确认 ruff 已安装且已挂载（`:lsp`）；`<Space>uf` 是否被关闭 |
+| 保存时没有格式化 | Python 确认 ruff 已安装且已挂载（`:lsp`）；Go 确认 gopls 已安装且已挂载；检查 `<Space>uf` / `<Space>uG` 是否被关闭 |
+| Go 没有补全或诊断 | 安装 `gopls`（`go install golang.org/x/tools/gopls@latest`），重启后用 `:checkhealth vim.lsp` 或 `:lsp` 检查 |
+| 会话没有自动恢复 | 只有不带文件参数启动且当前项目存在 `Session.vim` 时才会自动恢复；可用 `<Space>fW` 保存、`<Space>fS` 选择 |
 | LaTeX 报 Overseer 组件参数错误 | 删掉 `run_job` 里的 `open_on_exit` / `items_only` 两个参数 |
 | Big5 文件显示乱码 | `:e ++enc=big5` |
 | LSP 没有启动 | `:checkhealth vim.lsp`；确认服务器命令在 `$PATH` 或 `USER.extra_path` 里 |

@@ -1,10 +1,10 @@
--- ~/.config/nvim/init.lua — Neovim 0.12+ 单文件配置（0.13+ 自动改用内置多光标）
--- Windows: %LOCALAPPDATA%\nvim\init.lua
+-- Neovim 0.12+ 单文件配置 ~/.config/nvim/init.lua — Windows: %LOCALAPPDATA%\nvim\init.lua
 --
--- 设计原则：默认键优先
---   · Neovim 0.11 / 0.12 / 0.13 内置的键（gr* K [d ]d gcc <C-l> an/in Q gQ - …）一律不覆盖
---   · 自定义键只放在 <Leader>（空格）下，按功能分组：b c e f g o p t u
---   · 只在某种文件里有用的键（LaTeX / Python）只在该文件类型的缓冲区里生效
+-- 设计原则：默认键优先，少量例外有明确理由
+--   · Neovim 内置的导航 / LSP / 编辑键（gr* K [d ]d gcc <C-l> an/in …）不覆盖
+--   · Q/gQ、- 等兼容键只为 0.12 模拟 0.13 行为；保存、折行等少数人体工学键另行说明
+--   · 工作流键主要放在 <Leader>（空格）下，按功能分组：b c e f g o p t u
+--   · 只在某种文件里有用的键（LaTeX / Python / Go）只在该文件类型的缓冲区里生效
 --
 -- ╔══════════════════════════════ PLUGINS ══════════════════════════════════
 -- ║ mini.nvim / overseer.nvim（0.12 另加 multicursor.nvim；0.13+ 用内置多光标）
@@ -32,18 +32,19 @@
 -- ╟─ <Leader> 自定义键 ─────────────────────────────────────────────────────
 -- ║   <Space>e 文件管理器  bd 关缓冲区  cf 格式化
 -- ║   <Space>f  f 文件 g 全文 w 光标词 b 缓冲区 o 最近 h 帮助 l 本文件行 d 诊断 s 符号 k 快捷键 r 恢复
+-- ║             v 项目访问记录 V 全局访问记录 S/R/W/D 会话选择/恢复/保存/删除
 -- ║   <Space>g  o 差异叠加  s 光标处提交
 -- ║   <Space>o  r 运行任务 o 面板 l 重跑 a 操作 s shell 命令
--- ║   <Space>u  u 撤销树 h 内联提示 d 诊断展开 w 去行尾空白 f 保存时格式化 b 深浅色 s 拼写
+-- ║   <Space>u  u 撤销树 h 内联提示 d 诊断展开 w 去行尾空白 f Python格式化 G Go格式化 s 拼写
 -- ║   .tex 内  <Space>t  t 编译 w 持续 e 重建 c 清理 v 看 PDF
 -- ║   .py  内  <Space>p  r 运行 a 带参数 w 保存即重跑 d 终端/pdb b breakpoint() t/f/T 测试
--- ║                       i 整理 import x ruff 修复 v 选解释器 p REPL s 发送行/选区
+-- ║                      i 整理 import x ruff 修复 v 选解释器 p REPL s 发送行/选区
+-- ║   .go  内  <Space>g  r 运行 t/f/T 测试 b 构建 F 格式化 i 整理 import
 -- ╟─ 命令 ──────────────────────────────────────────────────────────────────
 -- ║   :CommentRule 分隔线  :FileHeader 文件头  :CdHere 切到文件目录  :CdRoot 回项目根
 -- ║   :Undotree  :DiffTool a b  :lsp  :checkhealth vim.lsp vim.pack
 -- ╚════════════════════════════════════════════════════════════════════════
 
--- 0.12是推动开箱即用OOTB的里程碑版本
 if vim.fn.has("nvim-0.12") == 0 then
   vim.api.nvim_echo({ { "此配置需要 Neovim 0.12+，已停止加载", "ErrorMsg" } }, true, {})
   return
@@ -60,12 +61,12 @@ local USER = {
   font         = "Hack,Consolas",            -- [Win] GUI（Neovide）字体，逗号后为回退字体
   font_size    = 14,
   indent       = 4,                          -- 缩进宽度（空格）
-  width        = 100,                        -- 参考线位置(第 width+1 列) 与 :CommentRule/:FileHeader 宽度
+  width        = 90,                         -- 参考线位置(第 width+1 列) 与 :CommentRule/:FileHeader 宽度
   clipboard    = "unnamedplus",              -- 与系统剪贴板同步；设为 "" 则不同步
   auto_cd      = true,                       -- 打开文件时自动切换到项目根目录
   -- 项目根标记：同一层 { } 内优先级相同（取最近的），monorepo 子包优先于 .git
   root_markers = { { "Makefile", "justfile", "package.json", "pyproject.toml",
-                     "Cargo.toml", "pubspec.yaml" }, ".git", ".vscode" },
+                     "Cargo.toml", "pubspec.yaml", "go.work", "go.mod" }, ".git", ".vscode" },
   trim_on_save = true,                       -- 保存时去行尾空白（<Space>uw 按缓冲区切换）
   ui2          = true,                       -- 0.12 实验性新消息/命令行界面（无 Press ENTER）
   autocomplete = true,                       -- 边输入边弹补全（无 LSP 用原生，有 LSP 用 LSP）
@@ -81,6 +82,8 @@ local USER = {
   python            = nil,                   -- 强制指定解释器路径；nil = 自动探测（见第 9 节）
   py_typecheck      = "standard",            -- basedpyright: off / basic / standard / strict / recommended / all
   py_format_on_save = true,                  -- 有 ruff 时保存自动格式化（<Space>uf 切换）
+  py_line_length = 90,                       -- black是88
+  go_format_on_save = true,                  -- gopls 保存时格式化（<Space>uG 切换）
 }
 
 vim.g.mapleader,vim.g.maplocalleader = " "," "   -- 文件类型专用键用 <LocalLeader>，这里与 <Leader> 相同，按起来一样
@@ -227,7 +230,7 @@ o.number       = true
 o.cursorline, o.cursorcolumn = true, true
 o.cursorlineopt = "screenline,number"                  -- 只高亮当前屏幕行，并高亮行号
 o.signcolumn   = "yes"
-o.scrolloff    = 4
+o.scrolloff    = 2
 o.colorcolumn  = tostring(USER.width + 1)
 o.list         = true
 o.listchars    = "tab:│ ,trail:·,nbsp:."
@@ -317,7 +320,20 @@ end)
 use("mini.starter",    function(m) m.setup() end)
 use("mini.pairs",      function(m) m.setup() end)
 use("mini.statusline", function(m) m.setup({ use_icons = false }) end)
+use("mini.tabline",    function(m) m.setup({ show_icons = false }) end)
 use("mini.move",       function(m) m.setup() end)   -- 默认键 <M-h/j/k/l>：普通模式移动行，可视模式移动选区
+
+-- 当前代码块的缩进范围；只保留 [i / ]i 跳到范围边界，避免和 mini.ai 的 ai/ii 文本对象相撞
+use("mini.indentscope", function(m)
+  m.setup({
+    symbol = "╎",
+    draw = { delay = 100 },
+    mappings = { object_scope = "", object_scope_with_border = "", goto_top = "[i", goto_bottom = "]i" },
+  })
+end)
+
+-- 光标下单词的其他出现位置轻量高亮；大文件中关闭，避免额外扫描
+use("mini.cursorword", function(m) m.setup() end)
 
 -- 文本对象。额外: B=全文 I=缩进块 L=行 N=数字 D=诊断（来自 mini.extra，如 yaB 复制全文、dii 删缩进块）
 -- 0.12 在可视/操作符模式内置了 an / in（按语法节点扩大/缩小选区）；
@@ -340,6 +356,26 @@ end)
 use("mini.bufremove", function(m)
   m.setup()
   map("n", "<leader>bd", function() m.delete() end, { desc = "Delete buffer (keep window)" })
+end)
+
+-- 会话：自动恢复“无文件参数启动”时的本地 Session.vim，并在退出/切换前保存。
+-- 选择/保存/删除使用大写键，避开已有的查找与 picker 快捷键。
+use("mini.sessions", function(m)
+  local session_dir = vim.fs.joinpath(vim.fn.stdpath("state"), "sessions")
+  vim.fn.mkdir(session_dir, "p")
+  m.setup({ autoread = true, autowrite = true, directory = session_dir, file = "Session.vim" })
+  map("n", "<leader>fS", function() m.select("read") end,   { desc = "Select session" })
+  map("n", "<leader>fR", function() m.read() end,             { desc = "Read default session" })
+  map("n", "<leader>fW", function() m.write("Session.vim", { force = true }) end, { desc = "Write session" })
+  map("n", "<leader>fD", function() m.select("delete") end, { desc = "Delete session" })
+end)
+
+-- 访问记录：按项目保存 frecency（常用 + 最近使用）的文件历史，比 oldfiles 更有上下文。
+use("mini.visits", function(m)
+  m.setup()
+  -- 没有 mini.pick 时仍可用 vim.ui.select；有 mini.pick 时下面 mini.extra 会接管这两个键。
+  map("n", "<leader>fv", function() m.select_path() end,  { desc = "Visited files (project)" })
+  map("n", "<leader>fV", function() m.select_path("") end, { desc = "Visited files (all)" })
 end)
 
 use("mini.git", function(m)
@@ -394,6 +430,10 @@ use("mini.extra", function(m)
   map("n", "<leader>fk", function() m.pickers.keymaps() end,    { desc = "Keymaps" })
   map("n", "<leader>fs", function() m.pickers.lsp({ scope = "document_symbol" }) end, { desc = "Symbols (LSP)" })
   map("n", "<leader>fl", function() m.pickers.buf_lines({ scope = "current" }) end,   { desc = "Buffer lines" })
+  if pcall(require, "mini.visits") then
+    map("n", "<leader>fv", function() m.pickers.visit_paths() end,       { desc = "Visited files (project)" })
+    map("n", "<leader>fV", function() m.pickers.visit_paths({ cwd = "" }) end, { desc = "Visited files (all)" })
+  end
 end)
 
 if not pick then   -- 降级：内置命令（'path' 已含 **）
@@ -435,7 +475,7 @@ use("mini.clue", function(clue)
     { mode = "n", keys = "<Leader>b", desc = "+Buffer" },
     { mode = "n", keys = "<Leader>c", desc = "+Code" },
     { mode = "n", keys = "<Leader>f", desc = "+Find" },
-    { mode = "n", keys = "<Leader>g", desc = "+Git" },
+    { mode = "n", keys = "<Leader>g", desc = "+Git / Go" },
     { mode = "n", keys = "<Leader>o", desc = "+Overseer" },
     { mode = "n", keys = "<Leader>p", desc = "+Python" },
     { mode = "x", keys = "<Leader>p", desc = "+Python" },
@@ -872,6 +912,8 @@ au("BufReadPre", {
     if st and st.size > USER.bigfile_mb * 1024 * 1024 then
       vim.b[args.buf].bigfile = true
       vim.b[args.buf].minidiff_disable = true
+      vim.b[args.buf].miniindentscope_disable = true
+      vim.b[args.buf].minicursorword_disable = true
       vim.bo[args.buf].undofile = false
       vim.bo[args.buf].swapfile = false
       vim.notify(("大文件 (>%dMB)：已关闭高亮 / 折叠 / LSP / diff / undo 文件"):format(USER.bigfile_mb))
@@ -963,6 +1005,7 @@ local TOOL_DIRS = {}
 local function add_dir(d) if d and d ~= "" then table.insert(TOOL_DIRS, vim.fs.normalize(d)) end end
 for _, d in ipairs(USER.extra_path or {}) do add_dir(d) end
 add_dir(vim.fn.stdpath("data") .. "/mason/bin")                   -- 若装过 mason
+add_dir("~/go/bin")                                                -- go install 安装的 gopls / gofumpt 等工具
 if IS_WIN then   -- [Win] 从开始菜单 / Neovide 启动时 PATH 常常不完整，补上常见安装位置
   local appdata, localapp = vim.env.APPDATA, vim.env.LOCALAPPDATA
   if appdata then
@@ -1098,6 +1141,24 @@ local servers = {
   dartls = {
     cmd = { "dart", "language-server", "--protocol=lsp" }, filetypes = { "dart" },
     root_markers = { "pubspec.yaml", ".git" },
+  },
+  gopls = {
+    cmd = { "gopls" },
+    filetypes = { "go", "gomod", "gowork", "gotmpl" },
+    root_markers = { "go.work", "go.mod", ".git" },
+    settings = {
+      gopls = {
+        gofumpt = true,
+        staticcheck = true,
+        analyses = {
+          unusedparams = true,
+          unusedwrite = true,
+          nilness = true,
+        },
+        usePlaceholders = true,
+        completeUnimported = true,
+      },
+    },
   },
 }
 for name, cfg in pairs(servers) do
@@ -1540,7 +1601,111 @@ au("LspAttach", {
 })
 
 ----------------------------------------------------------------------
--- 12. Neovide（缩放键沿用 Neovide 官方 FAQ 的写法）
+-- 12. Go（与 Python 共用项目根、Overseer、quickfix 和文件类型局部键）
+--     需要外部工具：go；语义补全/诊断/格式化需要 gopls（go install golang.org/x/tools/gopls@latest）
+----------------------------------------------------------------------
+local GO_EFM = [[%f:%l:%c: %m,%f:%l: %m]]
+
+local function go_ctx()
+  if vim.bo.filetype ~= "go" then return vim.notify("当前不是 Go 文件", L.WARN) end
+  local ok, err = try_cmd("silent update")
+  if not ok then return vim.notify("保存失败: " .. tostring(err), L.ERROR) end
+  local file = vim.api.nvim_buf_get_name(0)
+  if file == "" or vim.fn.filereadable(file) == 0 then
+    return vim.notify("当前文件还没保存到磁盘", L.WARN)
+  end
+  local root = vim.fs.root(0, { "go.work", "go.mod", ".git" }) or vim.fs.dirname(file)
+  local go = find_exe("go")
+  if not go then return vim.notify("找不到 Go 工具链（go）", L.ERROR) end
+  return { file = file, root = vim.fs.normalize(root), go = go }
+end
+
+-- 把当前文件所在目录转成 go test / go run 可接受的相对包路径。
+local function go_package(c)
+  local rel = vim.fs.relpath(c.root, vim.fs.dirname(c.file)) or "."
+  rel = rel:gsub("\\\\", "/")
+  if rel == "." or rel == "" then return "." end
+  return "./" .. rel
+end
+
+local function nearest_go_test()
+  local row = vim.api.nvim_win_get_cursor(0)[1]
+  local lines = vim.api.nvim_buf_get_lines(0, 0, row, false)
+  for i = row, 1, -1 do
+    local line = lines[i]
+    local name = line:match("^%s*func%s+([A-Z][%w_]*)%s*%(")
+      or line:match("^%s*func%s*%([^)]*%)%s*([A-Z][%w_]*)%s*%(")
+    if name and (name:match("^Test") or name:match("^Benchmark") or name:match("^Example")) then
+      return name
+    end
+  end
+end
+
+local function go_run(c, args, title)
+  run_job({ name = title, cmd = vim.list_extend({ c.go }, args), cwd = c.root, efm = GO_EFM })
+end
+
+vim.g.go_format_on_save = USER.go_format_on_save
+map("n", "<leader>uG", function()
+  vim.g.go_format_on_save = not vim.g.go_format_on_save
+  vim.notify("Go 保存时格式化: " .. (vim.g.go_format_on_save and "开" or "关"))
+end, { desc = "Toggle format on save (go)" })
+
+ft_keys("go", function(k)
+  k("n", "<LocalLeader>gr", function()
+    local c = go_ctx(); if c then go_run(c, { "run", go_package(c) }, "Go run " .. vim.fs.basename(c.file)) end
+  end, "Run package")
+  k("n", "<LocalLeader>gt", function()
+    local c = go_ctx(); if not c then return end
+    local name = nearest_go_test()
+    if not name then return vim.notify("光标上方没有 Test/Benchmark/Example 函数", L.WARN) end
+    go_run(c, { "test", "-count=1", "-run", "^" .. name .. "$", go_package(c) }, "Go test " .. name)
+  end, "Test nearest")
+  k("n", "<LocalLeader>gf", function()
+    local c = go_ctx(); if c then go_run(c, { "test", "-count=1", go_package(c) }, "Go test " .. vim.fs.basename(c.file)) end
+  end, "Test package")
+  k("n", "<LocalLeader>gT", function()
+    local c = go_ctx(); if c then go_run(c, { "test", "-count=1", "./..." }, "Go test all") end
+  end, "Test all")
+  k("n", "<LocalLeader>gb", function()
+    local c = go_ctx(); if c then go_run(c, { "build", "./..." }, "Go build") end
+  end, "Build all")
+  k("n", "<LocalLeader>gF", function()
+    local c = go_ctx(); if not c then return end
+    if #vim.lsp.get_clients({ bufnr = 0, name = "gopls" }) > 0 then
+      vim.lsp.buf.format({ bufnr = 0, name = "gopls", timeout_ms = 2000 })
+    else
+      go_run(c, { "fmt", go_package(c) }, "Go format")
+    end
+  end, "Format package")
+  k("n", "<LocalLeader>gi", function()
+    if #vim.lsp.get_clients({ bufnr = 0, name = "gopls" }) == 0 then
+      return vim.notify("gopls 未运行，无法自动整理 import", L.WARN)
+    end
+    vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" }, diagnostics = {} }, apply = true })
+  end, "Organize imports")
+end)
+
+-- gopls 的格式化策略和 Python/ruff 一样：每个 buffer 只注册一次保存钩子。
+au("LspAttach", {
+  group = group,
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if not client or client.name ~= "gopls" or vim.b[args.buf].go_fmt_au then return end
+    vim.b[args.buf].go_fmt_au = true
+    au("BufWritePre", {
+      group = group, buffer = args.buf,
+      callback = function(e)
+        if not vim.g.go_format_on_save or vim.b[e.buf].bigfile then return end
+        if #vim.lsp.get_clients({ bufnr = e.buf, name = "gopls" }) == 0 then return end
+        vim.lsp.buf.format({ bufnr = e.buf, name = "gopls", timeout_ms = 2000 })
+      end,
+    })
+  end,
+})
+
+----------------------------------------------------------------------
+-- 13. Neovide（缩放键沿用 Neovide 官方 FAQ 的写法）
 ----------------------------------------------------------------------
 o.guifont = ("%s:h%d"):format(USER.font, USER.font_size)
 
@@ -1565,7 +1730,7 @@ if vim.g.neovide then
 end
 
 ----------------------------------------------------------------------
--- 13. 缺失插件汇总提示（只提示一次）
+-- 14. 缺失插件汇总提示（只提示一次）
 ----------------------------------------------------------------------
 if #missing > 0 then
   vim.schedule(function()
