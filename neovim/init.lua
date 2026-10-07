@@ -1,9 +1,8 @@
--- Neovim 0.12+ 单文件配置 ~/.config/nvim/init.lua — Windows: %LOCALAPPDATA%\nvim\init.lua
+-- Neov m 0.12+ 单文件配置 ~/.config/nvim/init.lua — Windows: %LOCALAPPDATA%\nvim\init.lua
 --
 -- 设计原则：默认键优先，少量例外有明确理由
---   · Neovim 内置的导航 / LSP / 编辑键（gr* K [d ]d gcc <C-l> an/in …）不覆盖
 --   · Q/gQ、- 等兼容键只为 0.12 模拟 0.13 行为；保存、折行等少数人体工学键另行说明
---   · 工作流键主要放在 <Leader>（空格）下，按功能分组：b c e f g o p t u
+--   · 工作流键主要放在 <Leader>（空格）下，按功能分组：b c d e f g o p q r s t
 --   · 只在某种文件里有用的键（LaTeX / Python / Go）只在该文件类型的缓冲区里生效
 --
 -- ╔══════════════════════════════ PLUGINS ══════════════════════════════════
@@ -30,16 +29,18 @@
 -- ║   mini.surround(vim-surround 风格) ysiw" yss) 可视 S( ds( cs"'    mini.move <M-h/j/k/l>
 -- ║   mini.diff ]h [h 修改块  gh{motion}/ghgh 暂存  gH{motion}/gHgh 撤销    mini.ai f a t q b B I L N D
 -- ╟─ <Leader> 自定义键 ─────────────────────────────────────────────────────
--- ║   <Space>e 文件管理器  bd 关缓冲区  cf 格式化
--- ║   <Space>f  f 文件 g 全文 w 光标词 b 缓冲区 o 最近 h 帮助 l 本文件行 d 诊断 s 符号 k 快捷键 r 恢复
--- ║             v 项目访问记录 V 全局访问记录 S/R/W/D 会话选择/恢复/保存/删除
--- ║   <Space>g  o 差异叠加  s 光标处提交
+-- ║   <Space>b  b 缓冲区列表 d 关闭缓冲区 h 帮助 o 最近
+-- ║   <Space>c  f 格式化 d 诊断 k 快捷键 s 符号 l 本文件行
+-- ║   <Space>d  o 差异叠加  s 光标处提交 u 撤销树
+-- ║   <Space>e  文件管理器
+-- ║   <Space>f  v/V 项目/全局访问记录 S/R/W/D 会话选择/恢复/保存/删除
+-- ║   <Space>g  .go 内 r 运行 t/f/T 测试 b 构建 F 格式化 i 整理 import
 -- ║   <Space>o  r 运行任务 o 面板 l 重跑 a 操作 s shell 命令
--- ║   <Space>u  u 撤销树 h 内联提示 d 诊断展开 w 去行尾空白 f Python格式化 G Go格式化 s 拼写
+-- ║   <Space>p  .py 内 r 运行 a 参数 w 监视 d 调试 b 断点 t/f/T 测试 i/x Ruff v 解释器 p REPL s 发送
+-- ║   <Space>q  h 内联提示 d 诊断展开 s 拼写 w 去行尾空白
+-- ║   <Space>r  f Python格式化 G Go格式化
+-- ║   <Space>s  f 文件 g 全文 w 光标词 r 恢复
 -- ║   .tex 内  <Space>t  t 编译 w 持续 e 重建 c 清理 v 看 PDF
--- ║   .py  内  <Space>p  r 运行 a 带参数 w 保存即重跑 d 终端/pdb b breakpoint() t/f/T 测试
--- ║                      i 整理 import x ruff 修复 v 选解释器 p REPL s 发送行/选区
--- ║   .go  内  <Space>g  r 运行 t/f/T 测试 b 构建 F 格式化 i 整理 import
 -- ╟─ 命令 ──────────────────────────────────────────────────────────────────
 -- ║   :CommentRule 分隔线  :FileHeader 文件头  :CdHere 切到文件目录  :CdRoot 回项目根
 -- ║   :Undotree  :DiffTool a b  :lsp  :checkhealth vim.lsp vim.pack
@@ -67,10 +68,10 @@ local USER = {
   -- 项目根标记：同一层 { } 内优先级相同（取最近的），monorepo 子包优先于 .git
   root_markers = { { "Makefile", "justfile", "package.json", "pyproject.toml",
                      "Cargo.toml", "pubspec.yaml", "go.work", "go.mod" }, ".git", ".vscode" },
-  trim_on_save = true,                       -- 保存时去行尾空白（<Space>uw 按缓冲区切换）
+  trim_on_save = true,                       -- 保存时去行尾空白（<Space>qw 按缓冲区切换）
   ui2          = true,                       -- 0.12 实验性新消息/命令行界面（无 Press ENTER）
   autocomplete = true,                       -- 边输入边弹补全（无 LSP 用原生，有 LSP 用 LSP）
-  inlay_hints  = false,                      -- LSP 内联类型提示默认开关（<Space>uh 切换）
+  inlay_hints  = false,                      -- LSP 内联类型提示默认开关（<Space>qh 切换）
   native_multicursor = true,                 -- 0.13+ 用内置多光标（同为 Q/gQ）；false = 继续用插件
   latex_engine = "-xelatex",                 -- latexmk 引擎: -xelatex / -lualatex / -pdf
   -- 按顺序尝试，都没有就用系统默认程序；[Win] Windows 上会再自动尝试 SumatraPDF
@@ -81,9 +82,9 @@ local USER = {
   extra_path   = { "~/.local/bin" },
   python            = nil,                   -- 强制指定解释器路径；nil = 自动探测（见第 9 节）
   py_typecheck      = "standard",            -- basedpyright: off / basic / standard / strict / recommended / all
-  py_format_on_save = true,                  -- 有 ruff 时保存自动格式化（<Space>uf 切换）
+  py_format_on_save = true,                  -- 有 ruff 时保存自动格式化（<Space>rf 切换）
   py_line_length = 90,                       -- black是88
-  go_format_on_save = true,                  -- gopls 保存时格式化（<Space>uG 切换）
+  go_format_on_save = true,                  -- gopls 保存时格式化（<Space>rG 切换）
 }
 
 vim.g.mapleader,vim.g.maplocalleader = " "," "   -- 文件类型专用键用 <LocalLeader>，这里与 <Leader> 相同，按起来一样
@@ -368,28 +369,28 @@ use("mini.sessions", function(m)
   vim.fn.mkdir(session_dir, "p")
   m.setup({ autoread = true, autowrite = true, directory = session_dir, file = "Session.vim" })
   map("n", "<leader>fS", function() m.select("read") end,   { desc = "Select session" })
-  map("n", "<leader>fR", function() m.read() end,             { desc = "Read default session" })
-  map("n", "<leader>fW", function() m.write("Session.vim", { force = true }) end, { desc = "Write session" })
+  map("n", "<leader>fR", function() m.read() end,           { desc = "Read default session" })
+  map("n", "<leader>fW", function() m.write("Session.vim",  { force = true }) end, { desc = "Write session" })
   map("n", "<leader>fD", function() m.select("delete") end, { desc = "Delete session" })
 end)
 
 -- 访问记录：按项目保存 frecency（常用 + 最近使用）的文件历史，比 oldfiles 更有上下文。
 use("mini.visits", function(m)
   m.setup()
-  -- 没有 mini.pick 时仍可用 vim.ui.select；有 mini.pick 时下面 mini.extra 会接管这两个键。
-  map("n", "<leader>fv", function() m.select_path() end,  { desc = "Visited files (project)" })
+  -- 没有 mini.pick 时仍可用 vim.ui.select；有 mini.pick 时仍保留这两个文件历史键。
+  map("n", "<leader>fv", function() m.select_path() end,   { desc = "Visited files (project)" })
   map("n", "<leader>fV", function() m.select_path("") end, { desc = "Visited files (all)" })
 end)
 
 use("mini.git", function(m)
   m.setup()
-  map({ "n", "x" }, "<leader>gs", function() m.show_at_cursor() end, { desc = "Git at cursor" })
+  map({ "n", "x" }, "<leader>ds", function() m.show_at_cursor() end, { desc = "Git at cursor" })
 end)
 
 -- 默认键：[h ]h [H ]H 跳修改块；gh / gH 是"暂存 / 撤销"操作符，ghgh / gHgh 作用于光标处的块
 use("mini.diff", function(m)
   m.setup({ view = { style = "sign" } })
-  map("n", "<leader>go", function() m.toggle_overlay() end, { desc = "Diff overlay" })
+  map("n", "<leader>do", function() m.toggle_overlay() end, { desc = "Diff overlay" })
 end)
 
 -- 文件管理器（类 oil：在缓冲区里编辑文件名即可 改名/新建/删除，按 = 应用，g? 帮助）
@@ -412,40 +413,36 @@ local pick = use("mini.pick", function(m)
   m.setup()
   vim.ui.select = m.ui_select
   local b = m.builtin
-  map("n", "<leader>ff", function() b.files({ tool = pick_tool(has("rg") or has("fd")) }) end, { desc = "Files" })
-  map("n", "<leader>fg", function()
+  map("n", "<leader>sf", function() b.files({ tool = pick_tool(has("rg") or has("fd")) }) end, { desc = "Files" })
+  map("n", "<leader>sg", function()
     local t = pick_tool(has("rg"))
     if t then b.grep({ tool = t }) else b.grep_live() end   -- 实时搜索需要 rg/git
   end, { desc = "Grep" })
-  map("n", "<leader>fw", function()
+  map("n", "<leader>sw", function()
     b.grep({ pattern = vim.fn.expand("<cword>"), tool = pick_tool(has("rg")) })
   end, { desc = "Grep word" })
-  map("n", "<leader>fb", function() b.buffers() end, { desc = "Buffers" })
-  map("n", "<leader>fh", function() b.help() end,    { desc = "Help" })
-  map("n", "<leader>fr", function() b.resume() end,  { desc = "Resume" })
+  map("n", "<leader>bb", function() b.buffers() end, { desc = "Buffers" })
+  map("n", "<leader>bh", function() b.help() end,    { desc = "Help" })
+  map("n", "<leader>sr", function() b.resume() end,  { desc = "Resume" })
 end)
 
 use("mini.extra", function(m)
   m.setup()
   if not pick then return end
-  map("n", "<leader>fo", function() m.pickers.oldfiles() end,   { desc = "Recent files" })
-  map("n", "<leader>fd", function() m.pickers.diagnostic() end, { desc = "Diagnostics" })
-  map("n", "<leader>fk", function() m.pickers.keymaps() end,    { desc = "Keymaps" })
-  map("n", "<leader>fs", function() m.pickers.lsp({ scope = "document_symbol" }) end, { desc = "Symbols (LSP)" })
-  map("n", "<leader>fl", function() m.pickers.buf_lines({ scope = "current" }) end,   { desc = "Buffer lines" })
-  if pcall(require, "mini.visits") then
-    map("n", "<leader>fv", function() m.pickers.visit_paths() end,       { desc = "Visited files (project)" })
-    map("n", "<leader>fV", function() m.pickers.visit_paths({ cwd = "" }) end, { desc = "Visited files (all)" })
-  end
+  map("n", "<leader>bo", function() m.pickers.oldfiles() end,   { desc = "Recent files" })
+  map("n", "<leader>cd", function() m.pickers.diagnostic() end, { desc = "Diagnostics" })
+  map("n", "<leader>ck", function() m.pickers.keymaps() end,    { desc = "Keymaps" })
+  map("n", "<leader>cs", function() m.pickers.lsp({ scope = "document_symbol" }) end, { desc = "Symbols (LSP)" })
+  map("n", "<leader>cl", function() m.pickers.buf_lines({ scope = "current" }) end,   { desc = "Buffer lines" })
 end)
 
 if not pick then   -- 降级：内置命令（'path' 已含 **）
-  map("n", "<leader>ff", ":find ",                   { desc = "Files (builtin)" })
-  map("n", "<leader>fg", ":vimgrep //gj **" .. ("<Left>"):rep(6), { desc = "Grep (builtin)" })
-  map("n", "<leader>fb", ":ls<cr>:b ",               { desc = "Buffers (builtin)" })
-  map("n", "<leader>fh", ":help ",                   { desc = "Help (builtin)" })
-  map("n", "<leader>fo", "<cmd>browse oldfiles<cr>", { desc = "Recent files (builtin)" })
-  map("n", "<leader>fd", vim.diagnostic.setloclist,  { desc = "Diagnostics (builtin)" })
+  map("n", "<leader>sf", ":find ",                   { desc = "Files (builtin)" })
+  map("n", "<leader>sg", ":vimgrep //gj **" .. ("<Left>"):rep(6), { desc = "Grep (builtin)" })
+  map("n", "<leader>bb", ":ls<cr>:b ",               { desc = "Buffers (builtin)" })
+  map("n", "<leader>bh", ":help ",                   { desc = "Help (builtin)" })
+  map("n", "<leader>bo", "<cmd>browse oldfiles<cr>", { desc = "Recent files (builtin)" })
+  map("n", "<leader>cd", vim.diagnostic.setloclist,  { desc = "Diagnostics (builtin)" })
 end
 
 -- 包围：tpope/vim-surround 的社区通用键 ys / ds / cs / 可视 S（mini.surround 官方文档给出的兼容写法）
@@ -477,13 +474,16 @@ local clue_mod = use("mini.clue", function(clue)
     -- Neovim 原生按键解析，避免普通命令被 clue 的 buffer-local trigger 接管。
     { mode = { "n", "x" }, keys = "<Leader>b", desc = "+Buffer" },
     { mode = { "n", "x" }, keys = "<Leader>c", desc = "+Code" },
+    { mode = { "n", "x" }, keys = "<Leader>d", desc = "+Diffs" },
     { mode = { "n", "x" }, keys = "<Leader>e", desc = "+Explorer" },
-    { mode = { "n", "x" }, keys = "<Leader>f", desc = "+Find / Files" },
-    { mode = { "n", "x" }, keys = "<Leader>g", desc = "+Git / Go" },
+    { mode = { "n", "x" }, keys = "<Leader>f", desc = "+Files" },
+    { mode = { "n", "x" }, keys = "<Leader>g", desc = "+Go" },
     { mode = { "n", "x" }, keys = "<Leader>o", desc = "+Overseer" },
     { mode = { "n", "x" }, keys = "<Leader>p", desc = "+Python" },
+    { mode = { "n", "x" }, keys = "<Leader>q", desc = "+Quench" },
+    { mode = { "n", "x" }, keys = "<Leader>r", desc = "+Reform" },
+    { mode = { "n", "x" }, keys = "<Leader>s", desc = "+Search" },
     { mode = { "n", "x" }, keys = "<Leader>t", desc = "+LaTeX" },
-    { mode = { "n", "x" }, keys = "<Leader>u", desc = "+Toggle / UI" },
   }
 
   clue.setup({
@@ -673,25 +673,25 @@ end
 
 -- 0.12 自带的可选插件：撤销树 / 目录对比 (:DiffTool dir1 dir2)
 if try_cmd("packadd nvim.undotree") and vim.fn.exists(":Undotree") == 2 then
-  map("n", "<leader>uu", "<cmd>Undotree<cr>", { desc = "Undo tree" })
+  map("n", "<leader>du", "<cmd>Undotree<cr>", { desc = "Undo tree" })
 end
 try_cmd("packadd nvim.difftool")
 
--- <Leader>u：开关类（LazyVim 风格分组）
-map("n", "<leader>uh", function()
+-- <Leader>q：编辑器 / UI 开关
+map("n", "<leader>qh", function()
   local on = not vim.lsp.inlay_hint.is_enabled({ bufnr = 0 })
   vim.lsp.inlay_hint.enable(on, { bufnr = 0 })
   vim.notify("内联提示: " .. (on and "开" or "关"))
 end, { desc = "Toggle inlay hints" })
 
 -- 诊断：行尾文字 <-> 当前行下方展开（长消息不再被截断）
-map("n", "<leader>ud", function()
+map("n", "<leader>qd", function()
   local on = not vim.diagnostic.config().virtual_lines
   vim.diagnostic.config({ virtual_lines = on and { current_line = true } or false, virtual_text = not on })
   vim.notify("诊断显示: " .. (on and "当前行展开" or "行尾"))
 end, { desc = "Toggle diagnostic lines" })
 
-map("n", "<leader>us", function()
+map("n", "<leader>qs", function()
   vim.wo.spell = not vim.wo.spell
   vim.notify("拼写检查: " .. (vim.wo.spell and "开" or "关"))
 end, { desc = "Toggle spell" })
@@ -884,7 +884,7 @@ end, { desc = "cd to project root (resume auto cd)" })
 
 -- 保存时去掉行尾空白
 -- 以下情况跳过：markdown / diff、二进制、大文件、EditorConfig 写了 trim_trailing_whitespace = false、
--- 用 <Space>uw 关掉了当前缓冲区、或 USER.trim_on_save = false
+-- 用 <Space>qw 关掉了当前缓冲区、或 USER.trim_on_save = false
 vim.g.trim_on_save = USER.trim_on_save
 local NO_TRIM = { markdown = true, diff = true }
 local function trim_enabled(buf)
@@ -909,7 +909,7 @@ au("BufWritePre", {
   end,
 })
 
-map("n", "<leader>uw", function()
+map("n", "<leader>qw", function()
   vim.b.trim_on_save = not trim_enabled(0)
   vim.notify("保存时去行尾空白（当前缓冲区）: " .. (vim.b.trim_on_save and "开" or "关"))
 end, { desc = "Toggle trim on save" })
@@ -1576,7 +1576,7 @@ end)
 
 -- 保存时用 ruff 格式化（全局开关，任何缓冲区都能切换）
 vim.g.py_format_on_save = USER.py_format_on_save
-map("n", "<leader>uf", function()
+map("n", "<leader>rf", function()
   vim.g.py_format_on_save = not vim.g.py_format_on_save
   vim.notify("Python 保存时格式化: " .. (vim.g.py_format_on_save and "开" or "关"))
 end, { desc = "Toggle format on save (py)" })
@@ -1646,7 +1646,7 @@ local function go_run(c, args, title)
 end
 
 vim.g.go_format_on_save = USER.go_format_on_save
-map("n", "<leader>uG", function()
+map("n", "<leader>rG", function()
   vim.g.go_format_on_save = not vim.g.go_format_on_save
   vim.notify("Go 保存时格式化: " .. (vim.g.go_format_on_save and "开" or "关"))
 end, { desc = "Toggle format on save (go)" })
@@ -1724,9 +1724,11 @@ if vim.g.neovide then
   vim.g.neovide_floating_blur_amount_x, vim.g.neovide_floating_blur_amount_y = 1.0, 1.0
   vim.g.neovide_scale_factor = 1.0
   local function scale(f) vim.g.neovide_scale_factor = f and vim.g.neovide_scale_factor * f or 1.0 end
+  map("n", "<C-0>", function() scale(nil) end,     { desc = "Zoom reset" })
   map("n", "<C-=>", function() scale(1.1) end,     { desc = "Zoom in" })
   map("n", "<C-->", function() scale(1 / 1.1) end, { desc = "Zoom out" })
-  map("n", "<C-0>", function() scale(nil) end,     { desc = "Zoom reset" })
+  map("n", "<C-kPlus>", function() scale(1.1) end,     { desc = "Zoom in by numpad" })
+  map("n", "<C-kMinus>", function() scale(1 / 1.1) end, { desc = "Zoom out by numpad" })
 end
 
 ----------------------------------------------------------------------

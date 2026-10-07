@@ -1,11 +1,10 @@
 # Neovim 配置（Neovim 0.12+，单文件，默认键优先）
 
 整份配置只有一个 `init.lua`，只用 2～3 个插件。其余功能全部来自 Neovim 0.12 / 0.13 的内置功能。
-
 **设计原则：能用内置键就不自定义；少量例外必须有明确理由。**
 
 - `Q` / `gQ` / `-` 等兼容键只用于在 0.12 上模拟 0.13 行为；保存、折行等少数人体工学键另有说明。
-- 工作流键主要放在 `<Space>`（Leader）下，按功能分组：`b c e f g o p t u`。
+- 工作流键主要放在 `<Space>`（Leader）下，按功能分组：`b c d e f g o p q r s t`。
 - LaTeX / Python / Go 专用键只在对应文件类型的缓冲区里存在。
 - 不常用的功能做成 `:命令`，不占键。
 - 在 0.12 上，多光标用插件模拟 **0.13 的默认键**。升级到 0.13 后键位不用变。
@@ -165,20 +164,41 @@ Windows 配置目录为 `%LOCALAPPDATA%\nvim\`，数据目录为 `%LOCALAPPDATA%
 
 ### 本配置新增的 `<Leader>` 键位（`<Space>`）
 
-#### 文件、搜索与上下文（`<Space>f` / `<Space>b` / `<Space>e`）
-- `<Space>e`：打开 `mini.files` 目录树（可在缓冲区内直接修改文件名、回车建立文件、`=` 应用）。
+| 前缀 | mini.clue 分组 | 用途 |
+|---|---|---|
+| `<Space>b` | `+Buffer` | 缓冲区操作 |
+| `<Space>c` | `+Code` | LSP / 代码操作 |
+| `<Space>d` | `+Diffs` | Git 差异与提交信息 |
+| `<Space>e` | `+Explorer` | 文件管理器 |
+| `<Space>f` | `+Files` | 文件与历史记录 |
+| `<Space>g` | `+Go` | Go 文件专用操作 |
+| `<Space>o` | `+Overseer` | 后台任务 |
+| `<Space>p` | `+Python` | Python 文件专用操作 |
+| `<Space>q` | `+Quench` | 编辑器 / UI 开关 |
+| `<Space>r` | `+Reform` | 语言格式化开关 |
+| `<Space>s` | `+Search` | 文件与文本查找 |
+| `<Space>t` | `+TeX` | LaTeX 文件专用操作 |
+
+这些分组前缀在普通模式和可视模式都由 `mini.clue` 提示；具体子键按功能或文件类型注册。
+
+#### Buffer、Code、Git 与 Explorer（`<Space>b` / `<Space>c` / `<Space>d` / `<Space>e`）
+- `<Space>bb`：打开缓冲区列表。
 - `<Space>bd`：关闭当前 buffer，保持窗口切分布局不乱（`mini.bufremove`）。
-- `<Space>ff`：查找项目内文件（自动适配 `fd` / `rg`）。
-- `<Space>fg` / `<Space>fw`：全文实时检索 / 检索光标所在词。
-- `<Space>fb` / `<Space>fo` / `<Space>fh`：缓冲区列表 / 最近打开的文件 / 帮助文档。
-- `<Space>fl` / `<Space>fd` / `<Space>fs`：检索当前文件行 / 诊断列表 / LSP 符号。
+- `<Space>bh` / `<Space>bo`：帮助文档 / 最近打开的文件。
+- `grd`：跳转到符号定义（与内置 `grn` / `gra` 对齐）。
+- `<Space>cf`：调用 LSP 格式化整个当前文件。
+- `<Space>cd` / `<Space>ck` / `<Space>cs` / `<Space>cl`：诊断列表 / 快捷键 / LSP 符号 / 当前文件行。
+- `<Space>do` / `<Space>ds`：切换 Git 差异叠加 / 查看光标处的提交信息。
+- `<Space>du`：打开内置撤销树（`:Undotree`）。
+- `<Space>e`：打开 `mini.files` 目录树（可在缓冲区内直接修改文件名、回车建立文件、`=` 应用）。
+
+#### Files（`<Space>f`）
 - `<Space>fv` / `<Space>fV`：查看当前项目 / 全局的高频访问文件（`mini.visits`）。
 - `<Space>fS` / `<Space>fR` / `<Space>fW` / `<Space>fD`：会话管理：选择 / 载入 / 保存 / 删除 Session。
 
-#### 代码与重构（`<Space>c` / `gr*`）
-- `grd`：跳转到符号定义（与内置 `grn`/`gra` 对齐）。
-- `<Space>cf`：调用 LSP 格式化整个当前文件。
-- `<Space>go` / `<Space>gs`：差异叠加对比 / 查看光标所在行的 Git Commit 详情。
+#### Find（`<Space>s`）
+- `<Space>sf` / `<Space>sg` / `<Space>sw`：查找文件 / 全文检索 / 检索光标所在词。
+- `<Space>sr`：恢复上次查找。
 
 #### 任务系统 Overseer（`<Space>o`）
 - `<Space>or`：选择并运行任务（自动识别 Make / npm / Cargo / pytest 等）。
@@ -209,13 +229,10 @@ Windows 配置目录为 `%LOCALAPPDATA%\nvim\`，数据目录为 `%LOCALAPPDATA%
   - `<Space>te` / `<Space>tc`：全量清理重建 / 清除编译缓存文件。
   - `<Space>tv`：打开 PDF 预览阅读器。
 
-#### 实用开关（`<Space>u`）
-- `<Space>uu`：切换展示内置撤销树（`:Undotree`）。
-- `<Space>uh`：切换 LSP 内联类型提示（Inlay Hints）。
-- `<Space>ud`：切换诊断信息展示方式（行尾文本 ↔ 换行完整展开）。
-- `<Space>uw`：切换当前 buffer 是否在保存时去行尾空白。
-- `<Space>uf` / `<Space>uG`：切换 Python（ruff）/ Go（gopls）保存时自动格式化开关。
-- `<Space>us`：切换拼写检查（中日韩文本自动忽略标红）。
+#### Toggle（`<Space>q` / `<Space>r`）
+- `<Space>qh` / `<Space>qd` / `<Space>qs`：切换 LSP 内联提示 / 诊断展开 / 拼写检查。
+- `<Space>qw`：切换当前 buffer 是否在保存时去行尾空白。
+- `<Space>rf` / `<Space>rG`：切换 Python（ruff）/ Go（gopls）保存时自动格式化开关。
 
 #### 少数非 Leader 扩展键
 - `<C-s>`：智能保存（适配所有模式，过滤非文件类型 buffer 并抑制冗长报错）。
@@ -251,15 +268,3 @@ Windows 配置目录为 `%LOCALAPPDATA%\nvim\`，数据目录为 `%LOCALAPPDATA%
 2. 原生内置的 `dir` 插件将替代 netrw 接管 `-` 路径导航。
 3. `vim.hl.hl_op` 将自动接管 Yank 高亮，与未来弃用机制无缝衔接。
 4. 本配置的所有快捷键行为保持 100% 一致，无需重新适应。
-
----
-
-## 故障排查
-
-| 现象 | 原因分析与处理方案 |
-|---|---|
-| **`1333gg` 偶发跳到首行** | 现已通过移除 `mini.clue` 对 `g` 的拦截、延长 `timeoutlen` 至 1000ms 彻底解决。如在极端网络延迟/掉字环境下，推荐使用键位击键更少的 `1333G`。 |
-| **输入代码偶发卡顿** | 检查命令行正则或 LSP 补全触发。当前已取消对全字母盲目挂载 triggerCharacters，只使用服务器官方字符声明。 |
-| **Python 报“无法解析导入”** | 按 `<Space>pv` 手动选择或绑定正确的环境路径；项目根目录下推荐直接放置 `.venv`。 |
-| **保存文件未格式化** | 检查外部工具是否在系统 PATH 中；按 `<Space>uf` 或 `<Space>uG` 确认当前语言自动格式化未被关闭。 |
-| **国内插件下载失败** | 在命令行配置镜像环境参数：`export NVIM_PACK_MIRROR=https://ghfast.top/` 后重启编辑器。 |
