@@ -1,0 +1,4 @@
+# ~/.config/ghostty/config.ghostty
+
+font-size = 16
+scrollback-limit = 100000
