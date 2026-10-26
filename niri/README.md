@@ -1,157 +1,180 @@
 # Niri WM Keybindings
 
-The keybindings are designed around three spatial layers:
+The keybindings are designed around spatial layers and ergonomic muscle memory:
 
-- H / L : Columns (left / right)
-- J / K : Workspaces (up / down)
-- N / I / O / U : Monitors (left / up / down / right)
+- **H / L (or ← / →)**: Columns (left / right)
+- **J / K (or ↓ / ↑)**: Windows in column / Workspaces (up / down)
+- **N / I / O / U (or Ctrl + 方向键)**: Monitors (left / up / down / right)
 
-History navigation:
+Navigation Anchors:
 
-- S : Previous window
-- A : Previous workspace
+- **A**: Previous workspace
+- **Y**: First workspace (Workspace 1)
+- **G**: Bottom / scratch workspace (Workspace 9)
+- **M**: Center current column
+- **S**: Toggle column tabbed display
 
-Workspace anchors:
+Application Quick Launch:
 
-- Y : First workspace
-- G : Bottom (scratch) workspace
+- **T / Return**: Terminal (`ghostty`)
+- **W / Space**: Web browser (`firefox`)
+- **E / Esc**: Editor (`neovide`)
+- **F / Backspace**: File manager (`nemo`)
+- **D**: Document viewer (`evince`)
+- **X**: Application launcher (`xfce4-appfinder`)
 
-Applications:
-
-- T : Terminal
-- W : Web
-- E : Editor
-- F : File manager
-- D : Document (PDF)
-- X : Launcher
+---
 
 ## 1. Navigation
 
 ### Column Navigation
 
-| Key           | Action                |
-| ------------- | --------------------- |
-| `Mod + H / ←` | Focus left column     |
-| `Mod + L / →` | Focus right column    |
-| `Mod + Home`  | Focus first column    |
-| `Mod + End`   | Focus last column     |
-| `Mod + M`     | Center current column |
+| Key | Action |
+| :--- | :--- |
+| `Mod + H` / `Mod + ←` | Focus left column |
+| `Mod + L` / `Mod + →` | Focus right column |
+| `Mod + Home` | Focus first column |
+| `Mod + End` | Focus last column |
+| `Mod + Shift + Home` | Move column to first |
+| `Mod + Shift + End` | Move column to last |
+| `Mod + M` | Center current column |
 
-### Workspace Navigation
+### Workspace & Window Vertical Navigation
 
-| Key              | Action                                           |
-| ---------------- | ------------------------------------------------ |
-| `Mod + J / ↓`    | Focus next window/workspace                      |
-| `Mod + K / ↑`    | Focus previous window/workspace                  |
-| `Mod + PageDown` | Next workspace                                   |
-| `Mod + PageUp`   | Previous workspace                               |
-| `Mod + Y`        | Jump to workspace 1                              |
-| `Mod + G`        | Jump to workspace 9 (bottom / scratch workspace) |
-| `Mod + A`        | Return to previous workspace                     |
+| Key | Action |
+| :--- | :--- |
+| `Mod + J` / `Mod + ↓` | Focus window down / workspace down |
+| `Mod + K` / `Mod + ↑` | Focus window up / workspace up |
+| `Mod + PageDown` / `Mod + WheelDown` | Focus workspace down |
+| `Mod + PageUp` / `Mod + WheelUp` | Focus workspace up |
+| `Mod + A` | Return to previous workspace |
+| `Mod + Y` | Jump to workspace 1 |
+| `Mod + G` | Jump to workspace 9 (scratch workspace) |
 
-### Window History
+### Recent Windows & Overview
 
-| Key                 | Action                             |
-| ------------------- | ---------------------------------- |
-| `Mod + S`           | Return to previous focused window  |
-| `Mod + Tab`         | Recent windows (current workspace) |
-| `Mod + Shift + Tab` | Recent windows (reverse)           |
-| `Alt + Tab`         | Recent windows (global)            |
-| `Alt + Shift + Tab` | Recent windows (global reverse)    |
-| `Alt + Grave`       | Cycle windows of same application  |
-| `Mod + Grave`       | Overview                           |
-
----
-
-# 2. Workspace Management
-
-| Key                 | Action                            |
-| ------------------- | --------------------------------- |
-| `Mod + 1…5`         | Focus workspace                   |
-| `Mod + Shift + 1…5` | Move column to workspace          |
-| `Mod + Shift + J/K` | Move column to adjacent workspace |
-| `Mod + Shift + Y`   | Move column to workspace 1        |
-| `Mod + Shift + G`   | Move column to workspace 9        |
+| Key | Action |
+| :--- | :--- |
+| `Mod + Grave` / `Mod + Shift + Grave` | Toggle overview |
+| `Mod + Tab` | Next recent window (scope: all) |
+| `Mod + Shift + Tab` | Previous recent window (scope: all) |
+| `Alt + Tab` | Next recent window (scope: workspace) |
+| `Alt + Shift + Tab` | Previous recent window (scope: workspace) |
+| `Alt + Grave` | Previous window of same application (`app-id`) |
+| `Alt + Shift + Grave` | Next window of same application (`app-id`) |
 
 ---
 
-# 3. Window Management
+## 2. Workspace Management
 
-| Key                  | Action                     |
-| -------------------- | -------------------------- |
-| `Mod + Shift + C`    | Close window               |
-| `Mod + Mouse Middle` | Close window               |
-| `Mod + Z`            | Maximize column            |
-| `Mod + V`            | Cycle preset column widths |
-| `Mod + Shift + H/L`  | Consume / Expel window     |
-| `Mod + [` `]`        | Resize column              |
-| `Mod + - / =`        | Resize window height       |
-
----
-
-# 4. Applications
-
-| Key                     | Application  |
-| ----------------------- | ------------ |
-| `Mod + Return` / `T`    | Ghostty      |
-| `Mod + Space` / `W`     | Firefox      |
-| `Mod + Esc` / `E`       | Neovide      |
-| `Mod + Backspace` / `F` | Nemo         |
-| `Mod + D`               | Zathura      |
-| `Mod + X`               | App Launcher |
+| Key | Action |
+| :--- | :--- |
+| `Mod + 1…5` | Focus workspace 1…5 |
+| `Mod + Shift + 1…5` | Move current column to workspace 1…5 |
+| `Mod + Shift + Y` | Move current column to workspace 1 |
+| `Mod + Shift + G` | Move current column to workspace 9 |
+| `Mod + Shift + J` / `Mod + Shift + ↓` | Move column to workspace down |
+| `Mod + Shift + K` / `Mod + Shift + ↑` | Move column to workspace up |
+| `Mod + Shift + PageDown` / `Mod + Shift + WheelDown` | Move window down |
+| `Mod + Shift + PageUp` / `Mod + Shift + WheelUp` | Move window up |
 
 ---
 
-# 5. Multi-monitor
+## 3. Window & Column Management
 
-### Focus monitor
+### Basic Window Control
 
-| Key                 | Action                   |
-| ------------------- | ------------------------ |
-| `Mod + N I O U`     | Left / Up / Down / Right |
-| `Mod + Ctrl + ←↑↓→` | Same actions             |
+| Key | Action |
+| :--- | :--- |
+| `Mod + Shift + C` | Close focused window |
+| `Mod + Mouse Middle` | Close window |
+| `Mod + Z` | Maximize current column |
+| `Mod + V` | Cycle preset column widths forward (`0.35 -> 0.50 -> 0.65`) |
+| `Mod + Shift + V` | Cycle preset column widths backward |
 
-### Move column
+### Tabbed Mode & Stacking
 
-| Key                         | Action      |
-| --------------------------- | ----------- |
-| `Mod + Shift + N I O U`     | Move column |
-| `Mod + Shift + Ctrl + ←↑↓→` | Move column |
+| Key | Action |
+| :--- | :--- |
+| `Mod + S` | Toggle column tabbed display (Tabs vs Vertical tile) |
+| `Mod + Shift + H` / `Mod + Shift + ←` | Consume / expel window to/from left |
+| `Mod + Shift + L` / `Mod + Shift + →` | Consume / expel window to/from right |
+| `Mod + Comma` (`,`) | Consume window into column |
+| `Mod + Period` (`.`) | Expel window from column |
+| `Mod + Ctrl + J` | Move window down within column/tabs |
+| `Mod + Ctrl + K` | Move window up within column/tabs |
+
+### Dimension Fine-tuning
+
+| Key | Action |
+| :--- | :--- |
+| `Mod + [` | Decrease column width (`-15%`) |
+| `Mod + ]` | Increase column width (`+15%`) |
+| `Mod + -` | Decrease window height (`-15%`) |
+| `Mod + =` | Increase window height (`+15%`) |
 
 ---
 
-# 6. System
+## 4. Applications
 
-| Key                      | Action                           |
-| ------------------------ | -------------------------------- |
-| `Print`                  | Screenshot                       |
-| `Ctrl + Print`           | Screenshot current monitor       |
-| `Alt + Print`            | Screenshot current window        |
-| `XF86Audio*`             | Volume                           |
-| `XF86Brightness*`        | Brightness                       |
-| `Mod + P`                | Hotkey overlay                   |
-| `Mod + Ctrl + B`         | Lock screen & power off monitors |
-| `Mod + Ctrl + Shift + B` | Suspend                          |
-| `Mod + Ctrl + R`         | Reload config                    |
-| `Mod + Ctrl + Q`         | Quit Niri                        |
+| Key | Application | Command |
+| :--- | :--- | :--- |
+| `Mod + Return` / `Mod + T` | Terminal | `ghostty` |
+| `Mod + Space` / `Mod + W` | Web Browser | `firefox` |
+| `Mod + Esc` / `Mod + E` | Editor | `neovide` |
+| `Mod + Backspace` / `Mod + F` | File Manager | `nemo` |
+| `Mod + D` | Document Viewer | `evince` |
+| `Mod + X` | App Finder / Launcher | `xfce4-appfinder` |
 
 ---
 
-## Scratch Workspace
+## 5. Multi-monitor
 
-Workspace **9** is reserved as a temporary workspace.
+### Focus Monitor
 
-```
-Mod + G
-```
+| Key | Action |
+| :--- | :--- |
+| `Mod + N` / `Mod + Ctrl + N` / `Mod + Ctrl + ←` | Focus monitor left |
+| `Mod + I` / `Mod + Ctrl + I` / `Mod + Ctrl + ↑` | Focus monitor up |
+| `Mod + O` / `Mod + Ctrl + O` / `Mod + Ctrl + ↓` | Focus monitor down |
+| `Mod + U` / `Mod + Ctrl + U` / `Mod + Ctrl + →` | Focus monitor right |
 
-Jump to the bottom workspace.
+### Move Column to Monitor
 
-```
-Mod + Shift + G
-```
+| Key | Action |
+| :--- | :--- |
+| `Mod + Shift + N` / `Mod + Shift + Ctrl + N` / `Mod + Shift + Ctrl + ←` | Move column to monitor left |
+| `Mod + Shift + I` / `Mod + Shift + Ctrl + I` / `Mod + Shift + Ctrl + ↑` | Move column to monitor up |
+| `Mod + Shift + O` / `Mod + Shift + Ctrl + O` / `Mod + Shift + Ctrl + ↓` | Move column to monitor down |
+| `Mod + Shift + U` / `Mod + Shift + Ctrl + U` / `Mod + Shift + Ctrl + →` | Move column to monitor right |
 
-Move the current column there.
+---
 
-This behaves similarly to a scratchpad while remaining fully compatible with Niri's dynamic workspace model.
+## 6. System & Hardware
+
+| Key | Action | Command / Target |
+| :--- | :--- | :--- |
+| `Print` | Interactive Screenshot | `screenshot` |
+| `Ctrl + Print` | Screenshot current screen | `screenshot-screen` |
+| `Alt + Print` | Screenshot current window | `screenshot-window` |
+| `XF86AudioRaiseVolume` | Volume +3% | `pactl set-sink-volume @DEFAULT_SINK@ +3%` |
+| `XF86AudioLowerVolume` | Volume -3% | `pactl set-sink-volume @DEFAULT_SINK@ -3%` |
+| `XF86AudioMute` | Toggle audio mute | `pactl set-sink-mute @DEFAULT_SINK@ toggle` |
+| `XF86AudioMicMute` | Toggle mic mute | `pactl set-source-mute @DEFAULT_SOURCE@ toggle` |
+| `XF86MonBrightnessUp` | Brightness +3% | `brightnessctl set 3%+` |
+| `XF86MonBrightnessDown` | Brightness -3% | `brightnessctl set 3%-` |
+| `Mod + P` | Hotkey overlay | `show-hotkey-overlay` |
+| `Mod + Ctrl + B` | Lock screen & power off displays | `gtklock` + `power-off-monitors` |
+| `Mod + Ctrl + Shift + B` | Suspend system | `systemctl suspend` |
+| `Mod + Ctrl + R` | Reload config (with transition) | `reload-config` |
+| `Mod + Ctrl + Q` | Quit Niri session | `quit` |
+
+---
+
+## Scratch Workspace Note
+
+Workspace **9** serves as the scratch workspace:
+
+- `Mod + G`: Jump directly to scratch workspace.
+- `Mod + Shift + G`: Send current focused column to scratch workspace.
 

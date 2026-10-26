@@ -1,5 +1,5 @@
 // =============================================================================
-//           NIRI 现代实验室配置 (基于 i3wm 习惯 & Cell 布局)
+//           NIRI 现代实验室配置 (基于 i3wm 习惯 & Cell 布局 & Tab 模式)
 // =============================================================================
 
 // Refs::
@@ -9,25 +9,25 @@
 // =============================================================================
 //                             屏幕/显示器配置 (Outputs)
 // =============================================================================
-// 你可以通过运行 `niri msg outputs` 来查看你当前的屏幕名称和可用分辨率
-
 output "eDP-1" {
-    mode "1920x1200@60"  // 保持你原有的分辨率和刷新率
-    scale 1.5            // 缩放比例，如果是高分屏可以改为 1.25 或 1.5
+    mode "1920x1200@60"  // 保持原有的分辨率和刷新率
+    scale 1.5            // 缩放比例
     position x=0 y=0
 }
 
-// 示例：添加你的第二个外接屏幕（请根据 niri msg outputs 的实际名字修改，比如 "HDMI-A-1"）
+// 示例：外接屏幕（根据 niri msg outputs 的实际名字修改）
 output "HDMI-A-1" {
-    // mode "1920x1080@60" // 自动或指定分辨率
-    // position x=-1920 y=0    // 将第二块屏幕放在主屏左侧
-    position x=0 y=-1080    // 将第二块屏幕放在主屏上侧
+    // mode "1920x1080@60"
+    position x=-1920 y=0    // 将第二块屏幕放在主屏左侧
 }
 
+// =============================================================================
+//                             输入设备配置 (Input)
+// =============================================================================
 input {
-    // move mouse point the center of the target window
-    warp-mouse-to-focus mode="center-xy-always" // 鼠标自动居中
-    // focus-follows-mouse // 💡
+    // 鼠标自动居中
+    warp-mouse-to-focus mode="center-xy-always"
+    // focus-follows-mouse
 
     keyboard {
         xkb {
@@ -38,12 +38,14 @@ input {
     }
 }
 
+// =============================================================================
+//                             布局与外观 (Layout)
+// =============================================================================
 layout {
-    // center-focused-column "on-overflow"      // 保持焦点居中
     center-focused-column "never"
     always-center-single-column
 
-    gaps 10                                  // 参照 i3 配置: gaps inner 1px
+    gaps 10                                  // 参照 i3 配置
 
     preset-column-widths {
         proportion 0.35 // 2/6
@@ -53,7 +55,23 @@ layout {
 
     focus-ring {
         width 5
-        active-color "#644264" // active-gradient from="#9f3e04" to="#9f6717" angle=45
+        active-color "#644264"
+        inactive-color "#2f2a24"
+    }
+
+    // --- Tab 标签指示器外观定义 ---
+    tab-indicator {
+        // 可选位置：top, bottom, left, right（若习惯类似浏览器可设为 top）
+        position "top"
+        place-within-column
+        hide-when-single-tab
+
+        width 4
+        gap 4
+        gaps-between-tabs 3
+        corner-radius 3
+
+        active-color "#644264"
         inactive-color "#2f2a24"
     }
 }
@@ -62,11 +80,14 @@ animations {
     slowdown 1.1
 }
 
+// =============================================================================
+//                             窗口规则 (Window Rules)
+// =============================================================================
 // 全局窗口规则
 window-rule {
     geometry-corner-radius 6
     clip-to-geometry true
-    default-column-width { proportion 0.5; }
+    default-column-width { proportion 0.35; }
 }
 
 // xfce4-appfinder 专属弹出规则
@@ -77,8 +98,10 @@ window-rule {
     default-window-height { fixed 800; }
 }
 
+// =============================================================================
+//                             最近窗口切换 (Recent Windows)
+// =============================================================================
 recent-windows {
-    // off
     debounce-ms 450
     open-delay-ms 150
 
@@ -90,7 +113,7 @@ recent-windows {
     }
 
     previews {
-        max-height 240 //480
+        max-height 240
         max-scale 0.5
     }
 
@@ -105,11 +128,11 @@ recent-windows {
     }
 }
 
+// =============================================================================
+//                             按键绑定 (Key Binds)
+// =============================================================================
 binds {
     // --- 1. 核心导航 (保持物理位置习惯) ---
-    // show the Overview: a zoomed-out view of workspaces and windows.
-    // You can also move the mouse into the top-left hot corner,
-    // or do a four-finger swipe up on a touchpad.
     Mod+grave { toggle-overview; }
     Mod+Shift+grave { toggle-overview; }
 
@@ -118,7 +141,7 @@ binds {
     Mod+Left  { focus-column-left; }
     Mod+Right { focus-column-right; }
 
-    // 使用 Mod + J/K 实现工作区的前后切换
+    // 在列内各个 Tab 间切换焦点；若到了首尾则在工作区切换
     Mod+J { focus-window-or-workspace-down; }
     Mod+K { focus-window-or-workspace-up; }
     Mod+Down { focus-window-or-workspace-down; }
@@ -134,7 +157,7 @@ binds {
     Mod+Shift+Page_Down { move-window-down; }
     Mod+Shift+Page_Up   { move-window-up; }
 
-    // --- 2. 应用程序启动 (参照 i3wm 映射) ---
+    // --- 2. 应用程序启动 ---
     Mod+Return cooldown-ms=300 { spawn "ghostty"; }
     Mod+T cooldown-ms=300 { spawn "ghostty"; }
 
@@ -148,12 +171,11 @@ binds {
     Mod+F cooldown-ms=300 { spawn "nemo"; }
 
     Mod+D cooldown-ms=300 { spawn "evince"; }
-    // Mod+D cooldown-ms=300 { spawn "zathura"; }
 
     // 应用启动器
     Mod+X repeat=false { spawn "xfce4-appfinder"; }
 
-    // --- 3. 工作区管理 (移植 i3 的 n/i/o/u 逻辑) ---
+    // --- 3. 工作区管理 ---
     Mod+1 { focus-workspace 1; }
     Mod+2 { focus-workspace 2; }
     Mod+3 { focus-workspace 3; }
@@ -174,16 +196,28 @@ binds {
     Mod+Shift+Y { move-column-to-workspace 1; }
     Mod+Shift+G { move-column-to-workspace 9; }
 
-    // --- 4. 窗口管理 ---
+    // --- 4. 窗口管理 & Tab 标签组操作 ---
     Mod+Shift+C cooldown-ms=300 { close-window; }
     Mod+Z { maximize-column; }
     Mod+V cooldown-ms=300 { switch-preset-column-width; }
     Mod+Shift+V cooldown-ms=300 { switch-preset-column-width-back; }
 
+    // 【Tab 模式切换】在垂直平铺与 Tab 标签页之间来回切换
+    Mod+S { toggle-column-tabbed-display; }
+
+    // 【窗口合并与移出】吞并相邻窗口进入当前列或推出
     Mod+Shift+H { consume-or-expel-window-left; }
     Mod+Shift+L { consume-or-expel-window-right; }
     Mod+Shift+Left  { consume-or-expel-window-left; }
     Mod+Shift+Right { consume-or-expel-window-right; }
+
+    // 精确的向右吞并/推出快捷键
+    Mod+Comma  { consume-window-into-column; }
+    Mod+Period { expel-window-from-column; }
+
+    // 【Tab 内顺序调整】在当前列/Tab 组内调整窗口前后顺序
+    Mod+Ctrl+J { move-window-down; }
+    Mod+Ctrl+K { move-window-up; }
 
     Mod+Shift+J { move-column-to-workspace-down; }
     Mod+Shift+K { move-column-to-workspace-up; }
@@ -195,7 +229,7 @@ binds {
     Mod+Shift+WheelScrollDown { move-window-down; }
     Mod+Shift+WheelScrollUp   { move-window-up; }
 
-    // Finer height adjustments when in column with other windows.
+    // 尺寸微调
     Mod+Minus { set-window-height "-15%"; }
     Mod+Equal { set-window-height "+15%"; }
     Mod+BracketLeft { set-column-width "-15%"; }
@@ -210,52 +244,52 @@ binds {
     XF86MonBrightnessDown { spawn "brightnessctl" "set" "3%-"; }
 
     Print { screenshot; }
-    Ctrl+Print { screenshot-screen; } // ~/Pictures/Screenshots/
+    Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }
 
     // 锁屏与休眠
-    // Mod+Ctrl+A { spawn "gtklock"; } // { spawn "bash" "-c" "power-off-monitors && gtklock"; } // swaylock" "-c" "000000"; }
-    Mod+Ctrl+B { spawn "sh" "-c" "gtklock & sleep 0.1 && niri msg action power-off-monitors"; } // Backslash
+    Mod+Ctrl+B { spawn "sh" "-c" "gtklock & sleep 0.1 && niri msg action power-off-monitors"; }
     Mod+Ctrl+Shift+B { spawn "systemctl" "suspend"; }
 
-    // 重载配置
+    // 重载配置与退出
     Mod+Ctrl+R { spawn "niri" "msg" "action" "do-screen-transition" "---" "reload-config"; }
     Mod+Ctrl+Q { quit; }
 
-    // preview the list of important hotkeys.
     Mod+P { show-hotkey-overlay; }
 
-    Mod+S repeat=false { focus-window-previous; }
     Mod+A repeat=false { focus-workspace-previous; }
     Mod+M repeat=false { center-column; }
 
-    // fast close by mouse
+    // 鼠标中键快速关闭窗口
     Mod+MouseMiddle repeat=false { close-window; }
 
     // --- 6. 多屏幕/多显示器控制 (Outputs) ---
-    // 聚焦到其他的显示器
-     Mod+N     { focus-monitor-left; }
-     Mod+I     { focus-monitor-up; }
-     Mod+O     { focus-monitor-down; }
-     Mod+U     { focus-monitor-right; }
-     Mod+Ctrl+Left  { focus-monitor-left; }
-     Mod+Ctrl+Up    { focus-monitor-up; }
-     Mod+Ctrl+Down  { focus-monitor-down; }
-     Mod+Ctrl+Right { focus-monitor-right; }
+    Mod+N     { focus-monitor-left; }
+    Mod+I     { focus-monitor-up; }
+    Mod+O     { focus-monitor-down; }
+    Mod+U     { focus-monitor-right; }
+    Mod+Ctrl+N     { focus-monitor-left; }
+    Mod+Ctrl+I     { focus-monitor-up; }
+    Mod+Ctrl+O     { focus-monitor-down; }
+    Mod+Ctrl+U     { focus-monitor-right; }
+    Mod+Ctrl+Left  { focus-monitor-left; }
+    Mod+Ctrl+Up    { focus-monitor-up; }
+    Mod+Ctrl+Down  { focus-monitor-down; }
+    Mod+Ctrl+Right { focus-monitor-right; }
 
-     // 将当前选中的窗口/列 移动到其他的显示器
-     Mod+Shift+N     { move-column-to-monitor-left; }
-     Mod+Shift+I     { move-column-to-monitor-up; }
-     Mod+Shift+O     { move-column-to-monitor-down; }
-     Mod+Shift+U     { move-column-to-monitor-right; }
-     Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
-     Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
-     Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
-     Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
-
-    // 快捷将整个工作区移动到另一个屏幕（可选）
-    // Mod+Ctrl+Page_Down { move-workspace-to-monitor-down; }
-    // Mod+Ctrl+Page_Up   { move-workspace-to-monitor-up; }
+    // 移动当前选中的列到其他显示器
+    Mod+Shift+N     { move-column-to-monitor-left; }
+    Mod+Shift+I     { move-column-to-monitor-up; }
+    Mod+Shift+O     { move-column-to-monitor-down; }
+    Mod+Shift+U     { move-column-to-monitor-right; }
+    Mod+Shift+Ctrl+N     { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+I     { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+O     { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+U     { move-column-to-monitor-right; }
+    Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
 }
 
 screenshot-path "~/Pictures/Screenshots/Screenshot_%Y-%m-%d_%H-%M-%S.png"
@@ -263,10 +297,6 @@ screenshot-path "~/Pictures/Screenshots/Screenshot_%Y-%m-%d_%H-%M-%S.png"
 // =============================================================================
 //                               启动项 (Autostart)
 // =============================================================================
-
-// 1. 初始化核心环境
-// Emacs is a GTK3/PGTK client and needs these variables before its first
-// frame is created; setting them only inside init.el is too late.
 environment {
     LANG "zh_CN.UTF-8"
     LC_ALL "zh_CN.UTF-8"
@@ -278,24 +308,13 @@ environment {
     LC_CTYPE "zh_CN.UTF-8"
 }
 
-// 2. Synchronize the same environment for D-Bus-activated applications.
 spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP" "DISPLAY" "LANG" "LC_ALL" "XMODIFIERS" "GTK_IM_MODULE" "QT_IM_MODULE" "INPUT_METHOD" "SDL_IM_MODULE" "LC_CTYPE"
 spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
-
-// 3. UI 组件
 spawn-at-startup "waybar"
-spawn-at-startup "mako" // Notification Daemon
-// spawn-at-startup "xfsettingsd" // 如果没有特定 GTK 主题同步问题，建议注释掉以减少冲突
-
-// 4. 核心应用托盘 (Fcitx5 建议在后台运行)
+spawn-at-startup "mako"
 spawn-at-startup "fcitx5" "-d" "--replace"
 spawn-at-startup "~/bin/fcitx5-x11"
 spawn-at-startup "nm-applet" "--indicator"
 spawn-at-startup "blueman-applet"
 spawn-at-startup "pamac-tray"
-
-// 5. 电量管理 (使用 --no-daemon 模式并置于 dbus 启动后)
 spawn-at-startup "xfce4-power-manager" "--no-daemon"
-
-// // 5. 设置屏幕分辨率
-// spawn-at-startup "xrandr" "--output" "eDP-1" "--mode" "1920x1200" "--rate" "60"
