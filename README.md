@@ -2,6 +2,8 @@
 
 To setup my personal workshop/environment for coding and writing.
 
-- cosmic
+- manjaro
+- niriWM
 - ghostty
 - neovim
+- firefox
