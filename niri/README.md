@@ -1,180 +1,99 @@
-# Niri WM Keybindings
+# Niri 快捷键速查
 
-The keybindings are designed around spatial layers and ergonomic muscle memory:
+`Mod` 通常是 `Super` / `Win` 键。
 
-- **H / L (or ← / →)**: Columns (left / right)
-- **J / K (or ↓ / ↑)**: Windows in column / Workspaces (up / down)
-- **N / I / O / U (or Ctrl + 方向键)**: Monitors (left / up / down / right)
+## 记忆口诀
 
-Navigation Anchors:
+- **H / L**：左右切列
+- **J / K**：上下切窗口
+- **N / I / O / U**：左 / 上 / 下 / 右切显示器
+- **Shift**：通常表示移动窗口或列，而不是只切换焦点
+- **A / Y / G / M / S**：上一个工作区 / 工作区 1 / 工作区 9 / 居中 / Tab 模式
 
-- **A**: Previous workspace
-- **Y**: First workspace (Workspace 1)
-- **G**: Bottom / scratch workspace (Workspace 9)
-- **M**: Center current column
-- **S**: Toggle column tabbed display
+## 最常用
 
-Application Quick Launch:
+| 快捷键 | 功能 |
+|---|---|
+| `Mod + H / L` 或 `← / →` | 切换左 / 右列 |
+| `Mod + J / K` 或 `↓ / ↑` | 切换列内窗口；到边界时切换工作区 |
+| `Mod + A` | 返回上一个工作区 |
+| `Mod + 1…5` | 切换到工作区 1–5 |
+| `Mod + Y / G` | 切换到工作区 1 / 9 |
+| `Mod + S` | 切换普通平铺 / Tab 标签模式 |
+| `Mod + Grave` | 打开 / 关闭总览 |
+| `Mod + M` | 将当前列居中 |
+| `Mod + Shift + C` 或 `Mod + 鼠标中键` | 关闭窗口 |
+| `Mod + P` | 显示快捷键提示 |
 
-- **T / Return**: Terminal (`ghostty`)
-- **W / Space**: Web browser (`firefox`)
-- **E / Esc**: Editor (`neovide`)
-- **F / Backspace**: File manager (`nemo`)
-- **D**: Document viewer (`evince`)
-- **X**: Application launcher (`xfce4-appfinder`)
+## 启动应用
 
----
+| 快捷键 | 应用 |
+|---|---|
+| `Mod + Return` 或 `Mod + T` | 终端 `ghostty` |
+| `Mod + Space` 或 `Mod + W` | 浏览器 `firefox` |
+| `Mod + Esc` 或 `Mod + E` | 编辑器 `neovide` |
+| `Mod + Backspace` 或 `Mod + F` | 文件管理器 `nemo` |
+| `Mod + D` | 文档阅读器 `evince` |
+| `Mod + X` | 应用启动与窗口切换器 `rofi` |
 
-## 1. Navigation
+## 窗口与列
 
-### Column Navigation
+| 快捷键 | 功能 |
+|---|---|
+| `Mod + Z` | 最大化当前列 |
+| `Mod + V` / `Mod + Shift + V` | 切换预设列宽（正向 / 反向） |
+| `Mod + [` / `Mod + ]` | 缩小 / 加宽当前列 |
+| `Mod + -` / `Mod + =` | 缩短 / 加高当前窗口 |
+| `Mod + Shift + H / L` 或 `← / →` | 将相邻窗口并入当前列，或将窗口推出 |
+| `Mod + ,` | 将窗口并入当前列 |
+| `Mod + .` | 将窗口从当前列推出 |
+| `Mod + Shift + J / K` 或 `↓ / ↑` | 调整窗口在列 / Tab 组中的顺序 |
+| `Mod + Home / End` | 聚焦第一列 / 最后一列 |
+| `Mod + Shift + Home / End` | 将当前列移到最前 / 最后 |
 
-| Key | Action |
-| :--- | :--- |
-| `Mod + H` / `Mod + ←` | Focus left column |
-| `Mod + L` / `Mod + →` | Focus right column |
-| `Mod + Home` | Focus first column |
-| `Mod + End` | Focus last column |
-| `Mod + Shift + Home` | Move column to first |
-| `Mod + Shift + End` | Move column to last |
-| `Mod + M` | Center current column |
+## 工作区
 
-### Workspace & Window Vertical Navigation
+| 快捷键 | 功能 |
+|---|---|
+| `Mod + 1…5` | 切换到工作区 1–5 |
+| `Mod + Shift + 1…5` | 将当前列移到工作区 1–5 |
+| `Mod + Y / G` | 切换到工作区 1 / 9 |
+| `Mod + Shift + Y / G` | 将当前列移到工作区 1 / 9 |
+| `Mod + PageUp / PageDown` 或滚轮 | 切换上 / 下工作区 |
+| `Mod + Shift + PageUp / PageDown` 或 `Mod + Shift + 滚轮` | 将窗口移到上 / 下位置 |
 
-| Key | Action |
-| :--- | :--- |
-| `Mod + J` / `Mod + ↓` | Focus window down / workspace down |
-| `Mod + K` / `Mod + ↑` | Focus window up / workspace up |
-| `Mod + PageDown` / `Mod + WheelDown` | Focus workspace down |
-| `Mod + PageUp` / `Mod + WheelUp` | Focus workspace up |
-| `Mod + A` | Return to previous workspace |
-| `Mod + Y` | Jump to workspace 1 |
-| `Mod + G` | Jump to workspace 9 (scratch workspace) |
+**工作区 9 是临时工作区（scratch workspace）。**
 
-### Recent Windows & Overview
+## 最近窗口切换
 
-| Key | Action |
-| :--- | :--- |
-| `Mod + Grave` / `Mod + Shift + Grave` | Toggle overview |
-| `Mod + Tab` | Next recent window (scope: all) |
-| `Mod + Shift + Tab` | Previous recent window (scope: all) |
-| `Alt + Tab` | Next recent window (scope: workspace) |
-| `Alt + Shift + Tab` | Previous recent window (scope: workspace) |
-| `Alt + Grave` | Previous window of same application (`app-id`) |
-| `Alt + Shift + Grave` | Next window of same application (`app-id`) |
+| 快捷键 | 功能 |
+|---|---|
+| `Mod + Tab` / `Mod + Shift + Tab` | 切换所有工作区中的下一个 / 上一个最近窗口 |
+| `Alt + Tab` / `Alt + Shift + Tab` | 切换当前工作区中的下一个 / 上一个最近窗口 |
+| `Alt + Grave` / `Alt + Shift + Grave` | 切换同一应用的上一个 / 下一个窗口 |
 
----
+## 多显示器
 
-## 2. Workspace Management
+方向约定：`N = 左`、`I = 上`、`O = 下`、`U = 右`。
 
-| Key | Action |
-| :--- | :--- |
-| `Mod + 1…5` | Focus workspace 1…5 |
-| `Mod + Shift + 1…5` | Move current column to workspace 1…5 |
-| `Mod + Shift + Y` | Move current column to workspace 1 |
-| `Mod + Shift + G` | Move current column to workspace 9 |
-| `Mod + Shift + J` / `Mod + Shift + ↓` | Move column to workspace down |
-| `Mod + Shift + K` / `Mod + Shift + ↑` | Move column to workspace up |
-| `Mod + Shift + PageDown` / `Mod + Shift + WheelDown` | Move window down |
-| `Mod + Shift + PageUp` / `Mod + Shift + WheelUp` | Move window up |
+| 快捷键 | 功能 |
+|---|---|
+| `Mod + N / I / O / U` | 聚焦对应方向的显示器 |
+| `Mod + Ctrl + N / I / O / U` 或 `Mod + Ctrl + 方向键` | 同上 |
+| `Mod + Shift + N / I / O / U` | 将当前列移到对应方向的显示器 |
+| `Mod + Shift + Ctrl + N / I / O / U` 或 `Mod + Shift + Ctrl + 方向键` | 同上 |
 
----
+## 系统控制
 
-## 3. Window & Column Management
-
-### Basic Window Control
-
-| Key | Action |
-| :--- | :--- |
-| `Mod + Shift + C` | Close focused window |
-| `Mod + Mouse Middle` | Close window |
-| `Mod + Z` | Maximize current column |
-| `Mod + V` | Cycle preset column widths forward (`0.35 -> 0.50 -> 0.65`) |
-| `Mod + Shift + V` | Cycle preset column widths backward |
-
-### Tabbed Mode & Stacking
-
-| Key | Action |
-| :--- | :--- |
-| `Mod + S` | Toggle column tabbed display (Tabs vs Vertical tile) |
-| `Mod + Shift + H` / `Mod + Shift + ←` | Consume / expel window to/from left |
-| `Mod + Shift + L` / `Mod + Shift + →` | Consume / expel window to/from right |
-| `Mod + Comma` (`,`) | Consume window into column |
-| `Mod + Period` (`.`) | Expel window from column |
-| `Mod + Ctrl + J` | Move window down within column/tabs |
-| `Mod + Ctrl + K` | Move window up within column/tabs |
-
-### Dimension Fine-tuning
-
-| Key | Action |
-| :--- | :--- |
-| `Mod + [` | Decrease column width (`-15%`) |
-| `Mod + ]` | Increase column width (`+15%`) |
-| `Mod + -` | Decrease window height (`-15%`) |
-| `Mod + =` | Increase window height (`+15%`) |
-
----
-
-## 4. Applications
-
-| Key | Application | Command |
-| :--- | :--- | :--- |
-| `Mod + Return` / `Mod + T` | Terminal | `ghostty` |
-| `Mod + Space` / `Mod + W` | Web Browser | `firefox` |
-| `Mod + Esc` / `Mod + E` | Editor | `neovide` |
-| `Mod + Backspace` / `Mod + F` | File Manager | `nemo` |
-| `Mod + D` | Document Viewer | `evince` |
-| `Mod + X` | App Finder / Launcher | `xfce4-appfinder` |
-
----
-
-## 5. Multi-monitor
-
-### Focus Monitor
-
-| Key | Action |
-| :--- | :--- |
-| `Mod + N` / `Mod + Ctrl + N` / `Mod + Ctrl + ←` | Focus monitor left |
-| `Mod + I` / `Mod + Ctrl + I` / `Mod + Ctrl + ↑` | Focus monitor up |
-| `Mod + O` / `Mod + Ctrl + O` / `Mod + Ctrl + ↓` | Focus monitor down |
-| `Mod + U` / `Mod + Ctrl + U` / `Mod + Ctrl + →` | Focus monitor right |
-
-### Move Column to Monitor
-
-| Key | Action |
-| :--- | :--- |
-| `Mod + Shift + N` / `Mod + Shift + Ctrl + N` / `Mod + Shift + Ctrl + ←` | Move column to monitor left |
-| `Mod + Shift + I` / `Mod + Shift + Ctrl + I` / `Mod + Shift + Ctrl + ↑` | Move column to monitor up |
-| `Mod + Shift + O` / `Mod + Shift + Ctrl + O` / `Mod + Shift + Ctrl + ↓` | Move column to monitor down |
-| `Mod + Shift + U` / `Mod + Shift + Ctrl + U` / `Mod + Shift + Ctrl + →` | Move column to monitor right |
-
----
-
-## 6. System & Hardware
-
-| Key | Action | Command / Target |
-| :--- | :--- | :--- |
-| `Print` | Interactive Screenshot | `screenshot` |
-| `Ctrl + Print` | Screenshot current screen | `screenshot-screen` |
-| `Alt + Print` | Screenshot current window | `screenshot-window` |
-| `XF86AudioRaiseVolume` | Volume +3% | `pactl set-sink-volume @DEFAULT_SINK@ +3%` |
-| `XF86AudioLowerVolume` | Volume -3% | `pactl set-sink-volume @DEFAULT_SINK@ -3%` |
-| `XF86AudioMute` | Toggle audio mute | `pactl set-sink-mute @DEFAULT_SINK@ toggle` |
-| `XF86AudioMicMute` | Toggle mic mute | `pactl set-source-mute @DEFAULT_SOURCE@ toggle` |
-| `XF86MonBrightnessUp` | Brightness +3% | `brightnessctl set 3%+` |
-| `XF86MonBrightnessDown` | Brightness -3% | `brightnessctl set 3%-` |
-| `Mod + P` | Hotkey overlay | `show-hotkey-overlay` |
-| `Mod + Ctrl + B` | Lock screen & power off displays | `gtklock` + `power-off-monitors` |
-| `Mod + Ctrl + Shift + B` | Suspend system | `systemctl suspend` |
-| `Mod + Ctrl + R` | Reload config (with transition) | `reload-config` |
-| `Mod + Ctrl + Q` | Quit Niri session | `quit` |
-
----
-
-## Scratch Workspace Note
-
-Workspace **9** serves as the scratch workspace:
-
-- `Mod + G`: Jump directly to scratch workspace.
-- `Mod + Shift + G`: Send current focused column to scratch workspace.
-
+| 快捷键 | 功能 |
+|---|---|
+| `Print` | 区域截图 / 交互式截图 |
+| `Ctrl + Print` | 当前屏幕截图 |
+| `Alt + Print` | 当前窗口截图 |
+| 音量键 | 音量增减或静音；每次调整 3% |
+| 麦克风静音键 | 切换麦克风静音 |
+| 亮度键 | 亮度增减；每次调整 3% |
+| `Mod + Ctrl + B` | 锁屏并关闭显示器 |
+| `Mod + Ctrl + Shift + B` | 挂起系统 |
+| `Mod + Ctrl + R` | 重新加载 Niri 配置 |
+| `Mod + Ctrl + Q` | 退出 Niri |
