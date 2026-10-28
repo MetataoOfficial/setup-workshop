@@ -6,6 +6,71 @@
 // https://github.com/niri-wm/niri/blob/main/resources/default-config.kdl
 // https://github.com/niri-wm/niri/wiki/Configuration:-Key-Bindings
 
+// | 快捷键 | 功能 |
+// |---|---|
+// | `Mod + H / L / J / K` 或 `← / → / ↓ / ↑` | 切换左 / 右 / 下 / 上 窗口 |
+// | `Mod + Y / G` | 切换到第一列 / 最后一列 |
+// | `Mod + S` | 切换普通平铺 / Tab 标签模式 |
+// | `Mod + Grave` 或 `Mod + Shift + Grave` | 打开 / 关闭总览 |
+//
+// | 快捷键 | 功能 |
+// |---|---|
+// | `Mod + Tab` / `Mod + Shift + Tab` | 在所有工作区中切换下一个 / 上一个最近窗口 |
+// | `Alt + Tab` / `Alt + Shift + Tab` | 在当前工作区中切换下一个 / 上一个最近窗口 |
+// | `Alt + Grave` / `Alt + Shift + Grave`| 切换同一应用的下一个 / 上一个窗口 |
+//
+// | 快捷键 | 功能 |
+// |---|---|
+// | `Mod + M` | 将当前列居中 |
+// | `Mod + Shift + C` 或 `Mod + 鼠标中键` | 关闭当前窗口 |
+// | `Mod + P` | 显示 Niri 快捷键提示 |
+// | `Mod + X` | Rofi：窗口切换、应用启动、运行命令 |
+//
+// | 快捷键 | 功能 |
+// |---|---|
+// | `Mod + Z` | 最大化当前列 |
+// | `Mod + V` / `Mod + Shift + V` | 正向 / 反向切换预设列宽 |
+// | `Mod + [` / `Mod + ]` | 缩小 / 加宽当前列 |
+// | `Mod + -` / `Mod + =` | 缩短 / 加高当前窗口 |
+// | `Mod + ,` / `Mod + .` | 将窗口并入当前列 / 将窗口从当前列推出 |
+//
+// | 快捷键 | 功能 |
+// |---|---|
+// | `Mod + A` | 返回上一个工作区 |
+// | `Mod + 1…9` | 切换到工作区 1–9 |
+// | `Mod + HOME / END` | 切换到工作区 1 / 9 |
+// | `Mod + PageUp / PageDown` | 切换上 / 下工作区 |
+//
+// **注意：** 若系统中的工作区数量不足 9，Niri 会按动态工作区规则解析该编号。
+//
+// ## 多显示器
+//
+// 方向约定：`N = 左`、`I = 上`、`O = 下`、`U = 右`。
+//
+// | 快捷键 | 功能 |
+// |---|---|
+// | `Mod + N / I / O / U` | 聚焦对应方向的显示器 |
+// | `Mod + Shift + N / I / O / U` | 将当前窗口移到对应方向的显示器 |
+//
+// ## 系统控制
+//
+// | 快捷键 | 功能 |
+// |---|---|
+// | `Print` | 打开交互式截图 |
+// | `Ctrl + Print` | 截取当前屏幕 |
+// | `Alt + Print` | 截取当前窗口 |
+// | `Mod + Ctrl + B` | 锁屏（`gtklock`；当前绑定不会主动关闭显示器） |
+// | `Mod + Ctrl + Shift + B` | 挂起系统 |
+// | `Mod + Ctrl + Shift + R` | 通过屏幕过渡动作重新加载 Niri 配置 |
+// | `Mod + Ctrl + Shift + Q` | 退出 Niri |
+// | 音量增减键 | 音量增减，每次 3% |
+// | 音量静音键 | 切换系统输出静音 |
+// | 麦克风静音键 | 切换麦克风静音 |
+// | 亮度增减键 | 亮度增减，每次 3% |
+//
+// 截图保存路径：`~/Pictures/Screenshots/Screenshot_%Y-%m-%d_%H-%M-%S.png`
+//
+
 // =============================================================================
 //                             屏幕/显示器配置 (Outputs)
 // =============================================================================
@@ -20,7 +85,7 @@ output "HDMI-A-1" {
     // mode "1920x1080@60"
     // scale 1
     // position x=-1920 y=0    // 将第二块屏幕放在主屏左侧
-    position x=0 y=1200    // 将第二块屏幕放在主屏上侧
+    position x=0 y=-1080    // 将第二块屏幕放在主屏上侧
 }
 
 // =============================================================================
@@ -35,8 +100,8 @@ input {
         xkb {
             layout "cell" // 保持 CELL 布局
         }
-        repeat-delay 250
-        repeat-rate 40
+        repeat-delay 500
+        repeat-rate 50
     }
 }
 
@@ -76,10 +141,6 @@ layout {
         active-color "#999966"
         inactive-color "#366363" // "#3f2f3f"
     }
-}
-
-animations {
-    slowdown 1.1
 }
 
 // =============================================================================
@@ -138,26 +199,47 @@ binds {
     Mod+grave { toggle-overview; }
     Mod+Shift+grave { toggle-overview; }
 
+    // 左右切换焦点和移动窗口
     Mod+H { focus-column-left; }
     Mod+L { focus-column-right; }
     Mod+Left  { focus-column-left; }
     Mod+Right { focus-column-right; }
 
-    // 在列内各个 Tab 间切换焦点；若到了首尾则在工作区切换
-    Mod+J { focus-window-or-workspace-down; }
-    Mod+K { focus-window-or-workspace-up; }
-    Mod+Down { focus-window-or-workspace-down; }
-    Mod+Up   { focus-window-or-workspace-up; }
+    Mod+Shift+H { consume-or-expel-window-left; }
+    Mod+Shift+L { consume-or-expel-window-right; }
+    Mod+Shift+Left  { consume-or-expel-window-left; }
+    Mod+Shift+Right { consume-or-expel-window-right; }
 
-    Mod+Home { focus-column-first; }
-    Mod+End  { focus-column-last; }
-    Mod+Shift+Home { move-column-to-first; }
-    Mod+Shift+End  { move-column-to-last; }
+    // 在列内各个 Tab 间切换焦点；若到了首尾则在工作区切换
+    Mod+J { focus-window-down; } // or-workspace-
+    Mod+K { focus-window-up; }   // or-workspace-
+    Mod+Down { focus-window-down; } // or-workspace-
+    Mod+Up   { focus-window-up; }   // or-workspace-
+
+    // 在当前列/Tab 组内调整窗口前后顺序
+    Mod+Shift+J { move-window-down; }
+    Mod+Shift+K { move-window-up; }
+    Mod+Shift+Down { move-window-down; }
+    Mod+Shift+Up   { move-window-up; }
+
+    // cmobo 聚焦与移动
+    Mod+Y { focus-column-first; }
+    Mod+G { focus-column-last; }
+    Mod+Shift+Y { move-column-to-first; }
+    Mod+Shift+G { move-column-to-last; }
+
+    // 跳到第一个 / 最后一个工作区
+    Mod+HOME { focus-workspace 1; }
+    Mod+END  { focus-workspace 9; }
+
+    // 把当前列移动到第一个 / 最后一个工作区
+    Mod+Shift+HOME { move-column-to-workspace 1; }
+    Mod+Shift+END  { move-column-to-workspace 9; }
 
     Mod+Page_Down { focus-workspace-down; }
     Mod+Page_Up   { focus-workspace-up; }
-    Mod+Shift+Page_Down { move-window-down; }
-    Mod+Shift+Page_Up   { move-window-up; }
+    Mod+Shift+Page_Down { move-column-to-workspace-down; }
+    Mod+Shift+Page_Up   { move-column-to-workspace-up; }
 
     // --- 2. 应用程序启动 ---
     Mod+Return cooldown-ms=300 { spawn "ghostty"; }
@@ -175,7 +257,7 @@ binds {
     Mod+D cooldown-ms=300 { spawn "evince"; }
 
     // 应用启动器 - current windows, desktop app(drun), commands(run)
-    Mod+X { spawn "rofi" "-show" "combi" "-modes" "combi" "-combi-modes" "window,drun,run"; }
+    Mod+X { spawn "rofi" "-theme" "gruvbox-dark" "-show" "combi" "-modes" "combi" "-combi-modes" "window,drun,run"; }
 
     // --- 3. 工作区管理 ---
     Mod+1 { focus-workspace 1; }
@@ -183,20 +265,20 @@ binds {
     Mod+3 { focus-workspace 3; }
     Mod+4 { focus-workspace 4; }
     Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 8; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
 
-    Mod+Shift+1 { move-column-to-workspace 1; }
-    Mod+Shift+2 { move-column-to-workspace 2; }
-    Mod+Shift+3 { move-column-to-workspace 3; }
-    Mod+Shift+4 { move-column-to-workspace 4; }
-    Mod+Shift+5 { move-column-to-workspace 5; }
-
-    // 跳到第一个 / 最后一个工作区
-    Mod+Y { focus-workspace 1; }
-    Mod+G { focus-workspace 9; }
-
-    // 把当前列移动到第一个 / 最后一个工作区
-    Mod+Shift+Y { move-column-to-workspace 1; }
-    Mod+Shift+G { move-column-to-workspace 9; }
+    Mod+Shift+1 { move-window-to-workspace 1; }
+    Mod+Shift+2 { move-window-to-workspace 2; }
+    Mod+Shift+3 { move-window-to-workspace 3; }
+    Mod+Shift+4 { move-window-to-workspace 4; }
+    Mod+Shift+5 { move-window-to-workspace 5; }
+    Mod+Shift+6 { move-window-to-workspace 6; }
+    Mod+Shift+7 { move-window-to-workspace 8; }
+    Mod+Shift+8 { move-window-to-workspace 8; }
+    Mod+Shift+9 { move-window-to-workspace 9; }
 
     // --- 4. 窗口管理 & Tab 标签组操作 ---
     Mod+Shift+C cooldown-ms=300 { close-window; }
@@ -207,21 +289,9 @@ binds {
     // 【Tab 模式切换】在垂直平铺与 Tab 标签页之间来回切换
     Mod+S { toggle-column-tabbed-display; }
 
-    // 【窗口合并与移出】吞并相邻窗口进入当前列或推出
-    Mod+Shift+H { consume-or-expel-window-left; }
-    Mod+Shift+L { consume-or-expel-window-right; }
-    Mod+Shift+Left  { consume-or-expel-window-left; }
-    Mod+Shift+Right { consume-or-expel-window-right; }
-
     // 精确的向右吞并/推出快捷键
     Mod+Comma  { consume-window-into-column; }
     Mod+Period { expel-window-from-column; }
-
-    // 【Tab 内顺序调整】在当前列/Tab 组内调整窗口前后顺序
-    Mod+Shift+J { move-window-down; }
-    Mod+Shift+K { move-window-up; }
-    Mod+Shift+Down { move-window-down; }
-    Mod+Shift+Up   { move-window-up; }
 
     Mod+WheelScrollDown { focus-workspace-down; }
     Mod+WheelScrollUp   { focus-workspace-up; }
@@ -247,15 +317,14 @@ binds {
     Alt+Print { screenshot-window; }
 
     // 锁屏与休眠
-    Mod+Ctrl+B { spawn "sh" "-c" "gtklock & sleep 0.1 && niri msg action power-off-monitors"; }
+    Mod+Ctrl+B { spawn "gtklock"; } //"sh" "-c" "gtklock & sleep 1 && niri msg action power-off-monitors"; }
     Mod+Ctrl+Shift+B { spawn "systemctl" "suspend"; }
 
     // 重载配置与退出
-    Mod+Ctrl+R { spawn "niri" "msg" "action" "do-screen-transition" "---" "reload-config"; }
-    Mod+Ctrl+Q { quit; }
+    Mod+Ctrl+Shift+R { spawn "niri" "msg" "action" "do-screen-transition" "---" "reload-config"; }
+    Mod+Ctrl+Shift+Q { quit; }
 
     Mod+P { show-hotkey-overlay; }
-
     Mod+A repeat=false { focus-workspace-previous; }
     Mod+M repeat=false { center-column; }
 
@@ -267,28 +336,12 @@ binds {
     Mod+I     { focus-monitor-up; }
     Mod+O     { focus-monitor-down; }
     Mod+U     { focus-monitor-right; }
-    Mod+Ctrl+N     { focus-monitor-left; }
-    Mod+Ctrl+I     { focus-monitor-up; }
-    Mod+Ctrl+O     { focus-monitor-down; }
-    Mod+Ctrl+U     { focus-monitor-right; }
-    Mod+Ctrl+Left  { focus-monitor-left; }
-    Mod+Ctrl+Up    { focus-monitor-up; }
-    Mod+Ctrl+Down  { focus-monitor-down; }
-    Mod+Ctrl+Right { focus-monitor-right; }
 
     // 移动当前选中的列到其他显示器
-    Mod+Shift+N     { move-column-to-monitor-left; }
-    Mod+Shift+I     { move-column-to-monitor-up; }
-    Mod+Shift+O     { move-column-to-monitor-down; }
-    Mod+Shift+U     { move-column-to-monitor-right; }
-    Mod+Shift+Ctrl+N     { move-column-to-monitor-left; }
-    Mod+Shift+Ctrl+I     { move-column-to-monitor-up; }
-    Mod+Shift+Ctrl+O     { move-column-to-monitor-down; }
-    Mod+Shift+Ctrl+U     { move-column-to-monitor-right; }
-    Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
-    Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
-    Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
-    Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
+    Mod+Shift+N     { move-window-to-monitor-left; }
+    Mod+Shift+I     { move-window-to-monitor-up; }
+    Mod+Shift+O     { move-window-to-monitor-down; }
+    Mod+Shift+U     { move-window-to-monitor-right; }
 }
 
 screenshot-path "~/Pictures/Screenshots/Screenshot_%Y-%m-%d_%H-%M-%S.png"
@@ -297,24 +350,16 @@ screenshot-path "~/Pictures/Screenshots/Screenshot_%Y-%m-%d_%H-%M-%S.png"
 //                               启动项 (Autostart)
 // =============================================================================
 environment {
-    LANG "zh_CN.UTF-8"
-    LC_ALL "zh_CN.UTF-8"
-    GTK_IM_MODULE "fcitx"
-    QT_IM_MODULE "fcitx"
     XMODIFIERS "@im=fcitx"
-    INPUT_METHOD "fcitx"
-    SDL_IM_MODULE "fcitx"
-    LC_CTYPE "zh_CN.UTF-8"
+    QT_IM_MODULE "fcitx"
 }
 
 spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP" "DISPLAY" "LANG" "LC_ALL" "XMODIFIERS" "GTK_IM_MODULE" "QT_IM_MODULE" "INPUT_METHOD" "SDL_IM_MODULE" "LC_CTYPE"
-spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
+spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1" // pacman -S polkit-gnome
 spawn-at-startup "waybar"
 spawn-at-startup "mako"
 spawn-at-startup "fcitx5" "-d" "--replace"
-// spawn-at-startup "~/bin/fcitx5-x11"
 spawn-at-startup "nm-applet" "--indicator"
-spawn-at-startup "blueman-applet"
 spawn-at-startup "pamac-tray"
 spawn-at-startup "xfce4-power-manager" "--no-daemon"
 
