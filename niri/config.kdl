@@ -129,7 +129,7 @@ layout {
     // --- Tab 标签指示器外观定义 ---
     tab-indicator {
         // 可选位置：top, bottom, left, right（若习惯类似浏览器可设为 top）
-        position "top"
+        position "right"
         place-within-column
         hide-when-single-tab
 
@@ -325,7 +325,7 @@ binds {
     Mod+Ctrl+Shift+Q { quit; }
 
     Mod+P { show-hotkey-overlay; }
-    Mod+A repeat=false { focus-workspace-previous; }
+    Mod+A repeat=false { toggle-window-floating; }
     Mod+M repeat=false { center-column; }
 
     // 鼠标中键快速关闭窗口
