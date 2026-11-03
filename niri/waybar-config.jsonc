@@ -1,4 +1,5 @@
 /**
+ * ~/.config/waybar/config.jsonc
  * Waybar 配置 - 琥珀色悬浮圆角版
  * 适配 niri 滚动窗口管理器
  */
@@ -11,6 +12,10 @@
     "margin-top": 15,
     "margin-bottom": 15,
     "margin-right": 10,
+
+    "start_hidden": false,
+    "on-sigusr1": "toggle",
+    // or "show", "hide" with 2 signals
 
     // 模块排列
     "modules-left": [
@@ -112,7 +117,7 @@
 
     // 模块：系统托盘
     "tray": {
-        "icon-size": 18,
+        "icon-size": 24,
         "spacing": 10
     },
 
