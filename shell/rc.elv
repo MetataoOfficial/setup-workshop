@@ -10,7 +10,7 @@
 # Python py ipy pipi
 #
 # ── 安装（Manjaro）────────────────────────────────────────────
-#   sudo pacman -S --needed starship zoxide fzf trash-cli tree
+#   sudo pacman -S --needed starship zoxide fzf trash-cli tree bsdtar
 #
 # ── 一次性设置（写进各工具自己的配置，不用放在 rc 里）────────
 #   go env -w GOPROXY=https://goproxy.cn,direct
@@ -54,7 +54,7 @@ if (has-external zoxide) {
 }
 
 # 5. 编辑器行为
-set edit:insert:binding[Alt-Backspace] = { edit:kill-word-left }
+set edit:insert:binding[Alt-Backspace] = { edit:kill-small-word-left }
 set edit:insert:binding[Ctrl-L]        = { edit:clear }
 set edit:insert:binding[Alt-l]         = { edit:location:start }
 
@@ -80,7 +80,7 @@ fn ll {|@a| e:ls -lh  --color=auto --group-directories-first $@a }
 fn la {|@a| e:ls -lAh --color=auto --group-directories-first $@a }
 fn lt {|@a| e:tree -L 2 $@a }
 
-fn mcd {|dir| e:mkdir -p $dir; cd $dir }
+fn md {|@dirs| e:mkdir -p -- $@dirs }
 fn !   { cd .. }
 fn !!  { cd ../.. }
 fn !!! { cd ../../.. }
