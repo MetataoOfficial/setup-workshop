@@ -82,8 +82,6 @@ output "eDP-1" {
 
 // 示例：外接屏幕（根据 niri msg outputs 的实际名字修改）
 output "HDMI-A-1" {
-    // mode "1920x1080@60"
-    // scale 1
     // position x=-1920 y=0    // 将第二块屏幕放在主屏左侧
     position x=0 y=-1080    // 将第二块屏幕放在主屏上侧
 }
@@ -109,7 +107,7 @@ input {
 //                             布局与外观 (Layout)
 // =============================================================================
 layout {
-    center-focused-column "never"
+    center-focused-column "always" // never
     always-center-single-column
 
     gaps 10                                  // 参照 i3 配置
@@ -195,6 +193,9 @@ recent-windows {
 //                             按键绑定 (Key Binds)
 // =============================================================================
 binds {
+    // toggle the hide/show of waybar
+    Mod+0 repeat=false { spawn "pkill" "-USR1" "-x" "waybar"; } // press release thing...
+
     // --- 1. 核心导航 (保持物理位置习惯) ---
     Mod+grave { toggle-overview; }
     Mod+Shift+grave { toggle-overview; }
@@ -251,8 +252,8 @@ binds {
     Mod+Escape cooldown-ms=300 { spawn "neovide"; }
     Mod+E cooldown-ms=300 { spawn "neovide"; }
 
-    Mod+BackSpace cooldown-ms=300 { spawn "nemo"; }
-    Mod+F cooldown-ms=300 { spawn "nemo"; }
+    Mod+BackSpace cooldown-ms=300 { spawn "dolphin"; }
+    Mod+F cooldown-ms=300 { spawn "dolphin"; }
 
     Mod+D cooldown-ms=300 { spawn "evince"; }
 
@@ -333,14 +334,14 @@ binds {
 
     // --- 6. 多屏幕/多显示器控制 (Outputs) ---
     Mod+N     { focus-monitor-left; }
-    Mod+I     { focus-monitor-up; }
-    Mod+O     { focus-monitor-down; }
+    Mod+I     { focus-monitor-down; }
+    Mod+O     { focus-monitor-up; }
     Mod+U     { focus-monitor-right; }
 
     // 移动当前选中的列到其他显示器
     Mod+Shift+N     { move-window-to-monitor-left; }
-    Mod+Shift+I     { move-window-to-monitor-up; }
-    Mod+Shift+O     { move-window-to-monitor-down; }
+    Mod+Shift+I     { move-window-to-monitor-down; }
+    Mod+Shift+O     { move-window-to-monitor-up; }
     Mod+Shift+U     { move-window-to-monitor-right; }
 }
 
@@ -362,4 +363,3 @@ spawn-at-startup "fcitx5" "-d" "--replace"
 spawn-at-startup "nm-applet" "--indicator"
 spawn-at-startup "pamac-tray"
 spawn-at-startup "xfce4-power-manager" "--no-daemon"
-
