@@ -117,7 +117,7 @@
 
     // 模块：系统托盘
     "tray": {
-        "icon-size": 24,
+        "icon-size": 27,
         "spacing": 10
     },
 
