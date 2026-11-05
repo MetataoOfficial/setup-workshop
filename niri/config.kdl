@@ -3,8 +3,8 @@
 // =============================================================================
 
 // Refs::
-// https://github.com/niri-wm/niri/blob/main/resources/default-config.kdl
-// https://github.com/niri-wm/niri/wiki/Configuration:-Key-Bindings
+// - https://github.com/niri-wm/niri/blob/main/resources/default-config.kdl
+// - https://github.com/niri-wm/niri/wiki/Configuration:-Key-Bindings
 
 // ## 1. 核心导航与移动
 //
@@ -38,7 +38,7 @@
 // | `Mod + [` / `Mod + ]` | 缩小 / 加宽当前列 (-15% / +15%) |
 // | `Mod + -` / `Mod + =` | 缩短 / 加高当前窗口 (-15% / +15%) |
 // | `Mod + ,` / `Mod + .` | 将右侧窗口并入当前列 / 将当前窗口从列中推出 |
-// | `Mod + Shift + C` 或 `Mod + 鼠标中键` | 关闭当前窗口 |
+// | `Mod + Shift + C`| 关闭当前窗口 |
 //
 // ## 4. 工作区管理
 //
@@ -66,6 +66,7 @@
 // | `Mod + D` | 启动文档阅读器 (Evince) |
 // | `Mod + R` | 隐藏 / 显示顶部状态栏 (Waybar) |
 // | `Mod + P` | 显示 Niri 快捷键提示面板 |
+// | `Mod + 0` 或 `Mod + Shift + 0` | 清除 / 恢复通知 (mako) |
 //
 // ## 6. 多显示器
 //
@@ -145,7 +146,6 @@ layout {
 
     // --- Tab 标签指示器外观定义 ---
     tab-indicator {
-        // 可选位置：top, bottom, left, right（若习惯类似浏览器可设为 top）
         position "right"
         place-within-column
         hide-when-single-tab
@@ -161,21 +161,12 @@ layout {
 }
 
 // =============================================================================
-//                             窗口规则 (Window Rules)
+//                         全局窗口规则 (Window Rules)
 // =============================================================================
-// 全局窗口规则
 window-rule {
     geometry-corner-radius 6
     clip-to-geometry true
-    default-column-width { proportion 0.35; }
-}
-
-// xfce4-appfinder 专属弹出规则
-window-rule {
-    match app-id="^xfce4-appfinder$"
-    open-floating true
-    default-column-width { fixed 600; }
-    default-window-height { fixed 800; }
+    default-column-width { proportion 0.5; }
 }
 
 // =============================================================================
@@ -212,7 +203,7 @@ recent-windows {
 //                             按键绑定 (Key Binds)
 // =============================================================================
 binds {
-    // toggle the hide/show of waybar
+    // Toggle the waybar
     Mod+R repeat=false { spawn "pkill" "-USR1" "-x" "waybar"; }
 
     // --- 1. 核心导航 (保持物理位置习惯) ---
@@ -225,6 +216,7 @@ binds {
     Mod+Left  { focus-column-left; }
     Mod+Right { focus-column-right; }
 
+    // 进入 / 推出 Tab
     Mod+Shift+H { consume-or-expel-window-left; }
     Mod+Shift+L { consume-or-expel-window-right; }
     Mod+Shift+Left  { consume-or-expel-window-left; }
@@ -256,6 +248,7 @@ binds {
     Mod+Shift+HOME { move-column-to-workspace 1; }
     Mod+Shift+END  { move-column-to-workspace 9; }
 
+    // 把当前列移动到 上 / 下 一个工作区
     Mod+Page_Down { focus-workspace-down; }
     Mod+Page_Up   { focus-workspace-up; }
     Mod+Shift+Page_Down { move-column-to-workspace-down; }
@@ -283,6 +276,7 @@ binds {
     // 分号：返回上一个工作区 (Back-and-forth)
     Mod+semicolon { focus-workspace-previous; }
 
+    // 移动到#i工作区
     Mod+1 { focus-workspace 1; }
     Mod+2 { focus-workspace 2; }
     Mod+3 { focus-workspace 3; }
@@ -293,6 +287,7 @@ binds {
     Mod+8 { focus-workspace 8; }
     Mod+9 { focus-workspace 9; }
 
+    // 传送到#i工作区
     Mod+Shift+1 { move-column-to-workspace 1; }
     Mod+Shift+2 { move-column-to-workspace 2; }
     Mod+Shift+3 { move-column-to-workspace 3; }
@@ -304,10 +299,16 @@ binds {
     Mod+Shift+9 { move-column-to-workspace 9; }
 
     // --- 4. 窗口管理 & Tab 标签组 & 斜线/引号扩展操作 ---
-    Mod+Shift+C cooldown-ms=300 { close-window; }
+    // 关闭当前窗口
+    Mod+Shift+C cooldown-ms=600 { close-window; }
+
+    // 最大化
     Mod+Z { maximize-column; }
+
     // 扩展当前列填充屏幕剩下的空间
     Mod+V repeat=false { expand-column-to-available-width; }
+
+    // 切换预设列宽
     Mod+slash cooldown-ms=300 { switch-preset-column-width; }
     Mod+Shift+slash cooldown-ms=300 { switch-preset-column-width-back; }
 
@@ -317,6 +318,7 @@ binds {
     // 伪全屏
     Mod+A repeat=false { toggle-windowed-fullscreen; }
 
+    // 居中
     Mod+M repeat=false { center-column; }
 
     // 精确的向右吞并/推出快捷键
@@ -329,7 +331,8 @@ binds {
     Mod+BracketLeft { set-column-width "-15%"; }
     Mod+BracketRight { set-column-width "+15%"; }
 
-    // --- 5. 系统控制 --- 音量与亮度控制
+    // --- 5. 系统控制 ---
+    // 音量与亮度控制
     XF86AudioRaiseVolume  allow-when-locked=true { spawn "pactl" "set-sink-volume" "@DEFAULT_SINK@" "+3%"; }
     XF86AudioLowerVolume  allow-when-locked=true { spawn "pactl" "set-sink-volume" "@DEFAULT_SINK@" "-3%"; }
     XF86AudioMute         allow-when-locked=true { spawn "pactl" "set-sink-mute"   "@DEFAULT_SINK@" "toggle"; }
@@ -337,6 +340,7 @@ binds {
     XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "set" "3%+"; }
     XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "3%-"; }
 
+    // 截屏
     Print { screenshot; }
     Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }
@@ -348,23 +352,24 @@ binds {
     // 退出
     Mod+Ctrl+Shift+Q { quit; }
 
-    // 提示
+    // 快捷键提示
     Mod+P { show-hotkey-overlay; }
 
-    // 鼠标中键快速关闭窗口
-    Mod+MouseMiddle repeat=false { close-window; }
+    // 清除通知
+    Mod+0 cooldown-ms=300 { spawn "makoctl" "dismiss" "-a"; } // makoctl invoke
+    Mod+Shift+0 cooldown-ms=300 { spawn "makoctl" "restore"; }
 
     // --- 6. 多屏幕/多显示器控制 (Outputs) ---
-    Mod+N     { focus-monitor-left; }
-    Mod+I     { focus-monitor-down; }
-    Mod+O     { focus-monitor-up; }
-    Mod+U     { focus-monitor-right; }
+    Mod+N { focus-monitor-left; }
+    Mod+I { focus-monitor-down; }
+    Mod+O { focus-monitor-up; }
+    Mod+U { focus-monitor-right; }
 
     // 移动当前选中的列到其他显示器
-    Mod+Shift+N     { move-column-to-monitor-left; }
-    Mod+Shift+I     { move-column-to-monitor-down; }
-    Mod+Shift+O     { move-column-to-monitor-up; }
-    Mod+Shift+U     { move-column-to-monitor-right; }
+    Mod+Shift+N { move-column-to-monitor-left; }
+    Mod+Shift+I { move-column-to-monitor-down; }
+    Mod+Shift+O { move-column-to-monitor-up; }
+    Mod+Shift+U { move-column-to-monitor-right; }
 }
 
 // =============================================================================
