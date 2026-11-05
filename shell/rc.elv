@@ -10,7 +10,7 @@
 # Python py ipy pipi
 #
 # ── 安装（Manjaro）────────────────────────────────────────────
-#   sudo pacman -S --needed starship zoxide fzf trash-cli tree bsdtar
+# sudo pacman -S starship zoxide fzf trash-cli tree bsdtar yazi
 #
 # ── 一次性设置（写进各工具自己的配置，不用放在 rc 里）────────
 #   go env -w GOPROXY=https://goproxy.cn,direct
@@ -80,14 +80,38 @@ fn ll {|@a| e:ls -lh  --color=auto --group-directories-first $@a }
 fn la {|@a| e:ls -lAh --color=auto --group-directories-first $@a }
 fn lt {|@a| e:tree -L 2 $@a }
 
+fn cltex {
+    try {
+        rm -f *.{aux,toc,fls,log,out,xdv,fdb_latexmk,synctex.gz}
+    } catch _ {
+        echo "Found no LaTeX aux files"
+    }
+}
+
+# 文件管理
 fn md {|@dirs| e:mkdir -p -- $@dirs }
+fn yz {|@args|
+    var tmp = (mktemp -t yazi-cwd.XXXXXX)
+    try {
+        e:yazi $@args --cwd-file=$tmp
+        if (path:is-regular $tmp) {
+            var cwd = (cat $tmp)
+            if ($cwd != $pwd and (path:is-dir $cwd)) {
+                cd $cwd
+            }
+        }
+    } finally {
+        rm -f $tmp
+    }
+}
+
 fn !   { cd .. }
 fn !!  { cd ../.. }
 fn !!! { cd ../../.. }
 
 fn del {|@a| e:trash-put $@a }    # 恢复：trash-list / trash-restore
 fn fe  {|@a| try { e:nvim (e:fzf $@a) } catch { } }   # Esc 取消
-# fn ex  {|f| e:bsdtar -xf $f }     # 支持 tar.gz/xz/bz2/zst、zip、7z 等
+fn ex  {|f| e:bsdtar -xf $f }     # 支持 tar.gz/xz/bz2/zst、zip、7z 等
 
 fn py   {|@a| e:python  $@a }
 fn ipy  {|@a| e:ipython $@a }
