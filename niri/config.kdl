@@ -2,11 +2,14 @@
 //           NIRI 现代实验室配置 (基于 i3wm 习惯 & Cell 布局 & Tab 模式)
 // =============================================================================
 
+// pacman -S dms-shell ghostty neovide rofi pactl nemo nemo-fileroller
+// spawn-at-startup "gsettings" "set" "org.nemo.desktop" "show-desktop-icons" "false"
+// spawn-at-startup "gsettings" "set" "org.gnome.desktop.interface" "gtk-theme" "Adwaita-dark"
+// spawn-at-startup "gsettings" "set" "org.gnome.desktop.interface" "color-scheme" "prefer-dark"
+
 // Refs::
 // - https://github.com/niri-wm/niri/blob/main/resources/default-config.kdl
 // - https://github.com/niri-wm/niri/wiki/Configuration:-Key-Bindings
-// // pacman -S dms-shell ghostty neovide rofi pactl lxqt-policykit cosmic
-// // systemctl enable cosmic-greeter --force
 
 // ## 1. 核心导航与移动
 //
@@ -25,7 +28,7 @@
 // |---|---|
 // | `Mod + Tab` / `Mod + Shift + Tab` | 在所有工作区中切换下一个 / 上一个最近窗口 |
 // | `Alt + Tab` / `Alt + Shift + Tab` | 在当前工作区中切换下一个 / 上一个最近窗口 |
-// | `Alt + Grave` / `Alt + Shift + Grave`| 切换同一应用的下一个 / 上一个窗口 |
+// | `Alt + Grave` / `Alt + Shift + Grave` | 切换同一应用的下一个 / 上一个窗口 |
 //
 // ## 3. 窗口、列尺寸与浮动 / Tab 管理
 //
@@ -64,7 +67,7 @@
 // | `Mod + Return` 或 `Mod + T` | 启动终端 (Ghostty) |
 // | `Mod + Space` 或 `Mod + W` | 启动浏览器 (Firefox) |
 // | `Mod + Escape` 或 `Mod + E` | 启动编辑器 (Neovide) |
-// | `Mod + BackSpace` 或 `Mod + F` | 启动文件管理器 (cosmic-files) |
+// | `Mod + BackSpace` 或 `Mod + F` | 启动文件管理器 (Nemo) |
 // | `Mod + D` | 启动文档阅读器 (Evince) |
 // | `Mod + P` | 显示 Niri 快捷键提示面板 |
 // | `Mod + R` 或 `Mod + Shift + R` | 清除 / 恢复通知 |
@@ -261,8 +264,8 @@ binds {
     Mod+Escape cooldown-ms=300 { spawn "neovide"; }
     Mod+E cooldown-ms=300 { spawn "neovide"; }
 
-    Mod+BackSpace cooldown-ms=300 { spawn "env" "RUST_LOG=none" "cosmic-files"; }
-    Mod+F cooldown-ms=300 { spawn "env" "RUST_LOG=none" "cosmic-files"; }
+    Mod+BackSpace cooldown-ms=300 { spawn "nemo"; }
+    Mod+F cooldown-ms=300 { spawn "nemo"; }
 
     Mod+D cooldown-ms=300 { spawn "evince"; }
 
@@ -375,13 +378,15 @@ binds {
 environment {
     XMODIFIERS "@im=fcitx"
     QT_IM_MODULE "fcitx"
+    QT_QPA_PLATFORM "wayland"
+    QT_QPA_PLATFORMTHEME "gnome"
 }
 
 // D-Bus environment
 spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP" "DISPLAY" "LANG" "LC_ALL" "XMODIFIERS" "QT_IM_MODULE" "INPUT_METHOD" "SDL_IM_MODULE" "LC_CTYPE" // "GTK_IM_MODULE"
 
 // Polkit authentication agent
-spawn-at-startup "env" "RUST_LOG=none" "cosmic-osd"
+spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 
 // DMS
 spawn-at-startup "dms" "run"
