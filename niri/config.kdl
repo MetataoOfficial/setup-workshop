@@ -106,7 +106,7 @@ output "eDP-1" {
     position x=0 y=0
 }
 
-// 示例：外接屏幕（根据 niri msg outputs 的实际名字修改）
+// 外接屏幕（根据 niri msg outputs 的实际名字修改）
 output "HDMI-A-1" {
     // position x=-1920 y=0    // 将第二块屏幕放在主屏左侧
     position x=0 y=-1080    // 将第二块屏幕放在主屏上侧
@@ -116,7 +116,6 @@ output "HDMI-A-1" {
 //                             输入设备配置 (Input)
 // =============================================================================
 input {
-    // 鼠标自动居中
     warp-mouse-to-focus mode="center-xy-always"
 
     keyboard {
@@ -132,14 +131,14 @@ input {
 //                             布局与外观 (Layout)
 // =============================================================================
 layout {
-    center-focused-column "on-overflow" // never  always
+    center-focused-column "on-overflow" // never always
     always-center-single-column
     gaps 10                                  // 参照 i3 配置
 
     preset-column-widths {
-        proportion 0.35 // 2/6
-        proportion 0.50 // 3/6
-        proportion 0.65 // 4/6
+        proportion 0.40 // 0.35 // 2/6
+        // proportion 0.50 // 3/6
+        proportion 0.60 // 0.65 // 4/6
     }
 
     focus-ring {
@@ -165,12 +164,18 @@ layout {
 }
 
 // =============================================================================
-//                         全局窗口规则 (Window Rules)
+//                         全局规则 (Global Rules)
 // =============================================================================
 window-rule {
     geometry-corner-radius 6
     clip-to-geometry true
     default-column-width { proportion 0.5; }
+}
+
+switch-events {
+    lid-close {
+        spawn "dms" "ipc" "call" "lock" "lock";
+    }
 }
 
 // =============================================================================
@@ -326,10 +331,10 @@ binds {
     Mod+Period { expel-window-from-column; }
 
     // 尺寸微调
-    Mod+Minus { set-window-height "-15%"; }
-    Mod+Equal { set-window-height "+15%"; }
-    Mod+BracketLeft { set-column-width "-15%"; }
-    Mod+BracketRight { set-column-width "+15%"; }
+    Mod+Minus { set-window-height "-10%"; }
+    Mod+Equal { set-window-height "+10%"; }
+    Mod+BracketLeft  { set-column-width "-10%"; }
+    Mod+BracketRight { set-column-width "+10%"; }
 
     // --- 5. 系统控制 ---
     // 音量与亮度控制
