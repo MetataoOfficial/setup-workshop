@@ -27,6 +27,8 @@
 
     ( modifiers: [ Super, ], key: "m",): ToggleTiling,
     ( modifiers: [ Super, ], key: "b",): ToggleOrientation,
+    ( modifiers: [ Super, ], key: "comma",): ToggleWindowFloating,
+    ( modifiers: [ Super, ], key: "period",): ToggleStacking,
 
     ( modifiers: [ Alt, ], key: "F4",): Disable,
     ( modifiers: [ Super, ], key: "F11",): Disable,
