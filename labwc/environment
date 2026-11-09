@@ -1,0 +1,18 @@
+# =============================================================================
+#                              labwc 环境变量配置
+#                          (~/.config/labwc/environment)
+# =============================================================================
+
+XKB_DEFAULT_LAYOUT=cell
+
+# --- 光标与主题 (Cursor & Theme) ---
+XCURSOR_SIZE="36"
+XCURSOR_THEME="breeze-cursors-snow"
+
+# --- 输入法配置 (Fcitx5 Input Method) ---
+XMODIFIERS="@im=fcitx"
+QT_IM_MODULE="fcitx"
+
+# --- Toolkit & Wayland 渲染后端 ---
+QT_QPA_PLATFORM="wayland"
+QT_QPA_PLATFORMTHEME="gnome"
