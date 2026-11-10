@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <labwc_config>
 
   <!-- ================================================================ -->
@@ -10,6 +9,15 @@
     <font name="Hack" size="12" />
     <cornerRadius>12</cornerRadius>
   </theme>
+
+  <windowSwitcher show="yes" preview="yes" outlines="yes" allWorkspaces="no">
+    <osd style="thumbnail" />
+    <fields>
+        <field content="type" width="35%" />
+        <field content="trimmed_identifier" width="35%" />
+        <field content="title" width="50%" />
+    </fields>
+  </windowSwitcher>
 
   <!-- ================================================================ -->
   <!-- Keyboard -->
@@ -267,6 +275,13 @@
         command="brightnessctl set 3%-" />
     </keybind>
 
+    <keybind key="W-Tab">
+      <action name="NextWindow" />
+    </keybind>
+
+    <keybind key="W-S-Tab">
+      <action name="PreviousWindow" />
+    </keybind>
   </keyboard>
 
   <!-- ================================================================ -->
@@ -282,5 +297,4 @@
         <name>4</name>
     </names>
   </desktops>
-
 </labwc_config>
