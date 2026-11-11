@@ -1,0 +1,196 @@
+# ==============================================================================
+# SWAY CONFIG
+# ==============================================================================
+# === Variables ===
+set $mod Mod4
+set $moS Mod4+Shift
+set $moC Mod4+Control
+
+# DMS IPC
+set $dmsc dms ipc call
+
+# 应用程序配置
+set $browser_launcher   firefox
+set $browser_focuser    "(?i)firefox"
+set $editor_launcher    neovide
+set $editor_focuser     "(?i)neovide"
+set $terminal_launcher  ghostty
+set $terminal_focuser   "(?i)ghostty"
+set $filer_launcher     nemo
+set $filer_focuser      "(?i)nemo"
+
+# === Appearance & General Behavior ===
+font pango:hack 12px
+show_marks yes
+focus_wrapping workspace
+workspace_auto_back_and_forth yes
+
+# 窗口标题与边框：锁定为传统的浮动窗口样式
+for_window [all] title_window_icon yes
+floating_minimum_size 400 x 300
+floating_modifier $mod
+title_align center
+default_border normal
+default_floating_border normal
+
+# 骨子里初始化为 Stacking（堆叠层叠模型），全盘接收 Openbox 灵魂
+workspace_layout stacking
+
+# 窗口间隙
+gaps inner 1px
+
+# === Autostart Applications ===
+# 核心特权与认证代理
+exec_always --no-startup-id /usr/bin/lxqt-policykit-agent
+
+# 启动常用应用组
+exec --no-startup-id dms run
+exec --no-startup-id fcitx5 -d --replace
+
+# 显示器配置：精确到像素与刷新的硬件声明
+output eDP-1 resolution 1920x1200@60Hz
+
+# 键盘与输入法环境注入（完美修正 Xkb）
+input type:keyboard {
+    xkb_layout "cell"
+}
+
+# === Keybindings ===
+# 多媒体控制（联动高效刷新信号）
+bindsym XF86AudioRaiseVolume  exec --no-startup-id "pactl set-sink-volume @DEFAULT_SINK@ +3%"
+bindsym XF86AudioLowerVolume  exec --no-startup-id "pactl set-sink-volume @DEFAULT_SINK@ -3%"
+bindsym XF86AudioMute         exec --no-startup-id "pactl set-sink-mute   @DEFAULT_SINK@ toggle"
+bindsym XF86AudioMicMute      exec --no-startup-id "pactl set-source-mute @DEFAULT_SOURCE@ toggle"
+bindsym XF86MonBrightnessUp   exec --no-startup-id "brightnessctl set 3%+"
+bindsym XF86MonBrightnessDown exec --no-startup-id "brightnessctl set 3%-"
+
+# 任务切换。TODO: 暂时沿用，后面魔改
+bindsym $mod+Tab exec --no-startup-id "rofi -theme gruvbox-dark -show combi -combi-modi window,drun,run -show-icons"
+bindsym $moS+Tab exec --no-startup-id "rofi -theme gruvbox-dark -show combi -combi-modi window,drun,run -show-icons"
+
+bindsym Mod1+Tab       focus next
+bindsym Mod1+Shift+Tab focus prev
+
+# Focus container
+bindsym $moC+Up    focus parent
+bindsym $moC+Down  focus child
+
+# Toggle tiling / floating for a window
+bindsym $mod+a focus mode_toggle
+bindsym $moS+a floating toggle
+
+# Change container layout
+bindsym $mod+s layout toggle stacking splitv
+bindsym $moS+s layout toggle splitv stacking
+
+# exec sth.
+bindsym $mod+e exec --no-startup-id "rofi -dmenu -p 'Exec> ' -font 'Hack 16' | xargs swaymsg"
+bindsym $moS+e exec --no-startup-id "rofi -dmenu -p 'Exec> ' -font 'Hack 16' | xargs swaymsg"
+
+# Mark a window with "TAGGED" and swap with it
+bindsym $mod+t mark TAGGED
+bindsym $moS+t swap container with mark TAGGED
+
+# Toggle fullscreen for the focused container
+bindsym $mod+z fullscreen toggle
+
+# 应用启动器
+bindsym $mod+x exec --no-startup-id "rofi -theme gruvbox-dark -show combi -combi-modi window,drun,run -show-icons"
+
+# 关闭窗口与底层命令透传
+bindsym $moS+c kill
+
+# 暂存区（Scratchpad）
+bindsym $mod+v scratchpad show
+bindsym $moS+v move scratchpad
+
+# 锁屏与休眠 Blank
+bindsym $moC+b exec --no-startup-id $dmsc lock lockAndOutputsOff
+bindsym $moC+Shift+b exec --no-startup-id systemctl suspend
+
+# 清除通知 Message
+bindsym $mod+m exec --no-startup-id $dmsc notifications toggle
+bindsym $mod+Shift+m exec --no-startup-id $dmsc notifications clearAll
+
+# 应用精准聚焦与条件拉起
+bindsym $mod+space     [app_id=$browser_focuser] focus
+bindsym $moS+space     exec --no-startup-id $browser_launcher
+bindsym $mod+Escape    [app_id=$editor_focuser] focus
+bindsym $moS+Escape    exec --no-startup-id $editor_launcher
+bindsym $mod+Return    [app_id=$terminal_focuser] focus
+bindsym $moS+Return    exec --no-startup-id $terminal_launcher
+bindsym $mod+BackSpace [app_id=$filer_focuser] focus
+bindsym $moS+BackSpace exec --no-startup-id $filer_launcher
+
+# 基础物理焦点切换（经典的上下左右）
+bindsym $mod+h     focus left
+bindsym $mod+j     focus down
+bindsym $mod+k     focus up
+bindsym $mod+l     focus right
+bindsym $mod+Left  focus left
+bindsym $mod+Down  focus down
+bindsym $mod+Up    focus up
+bindsym $mod+Right focus right
+
+# 基础物理几何挪动
+bindsym $moS+h     move left
+bindsym $moS+j     move down
+bindsym $moS+k     move up
+bindsym $moS+l     move right
+bindsym $moS+Left  move left
+bindsym $moS+Down  move down
+bindsym $moS+Up    move up
+bindsym $moS+Right move right
+
+# 工作区管理（1-4 极简映射）
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+
+bindsym $mod+n workspace number $ws1
+bindsym $mod+i workspace number $ws2
+bindsym $mod+o workspace number $ws3
+bindsym $mod+u workspace number $ws4
+bindsym $mod+1 workspace number $ws1
+bindsym $mod+2 workspace number $ws2
+bindsym $mod+3 workspace number $ws3
+bindsym $mod+4 workspace number $ws4
+
+bindsym $moS+n move container to workspace number $ws1
+bindsym $moS+i move container to workspace number $ws2
+bindsym $moS+o move container to workspace number $ws3
+bindsym $moS+u move container to workspace number $ws4
+bindsym $moS+1 move container to workspace number $ws1
+bindsym $moS+2 move container to workspace number $ws2
+bindsym $moS+3 move container to workspace number $ws3
+bindsym $moS+4 move container to workspace number $ws4
+
+# Gnome2 like workspacing
+bindsym $moC+Left  workspace prev
+bindsym $moC+Right workspace next
+bindsym $moC+Shift+Left  move container to workspace prev
+bindsym $moC+Shift+Right move container to workspace next
+
+# 多显示器容器级独立管理
+bindsym $mod+y focus output left
+bindsym $mod+g focus output down
+bindsym $mod+r focus output up
+bindsym $mod+p focus output right
+
+bindsym $moS+y move container to output left
+bindsym $moS+g move container to output down
+bindsym $moS+r move container to output up
+bindsym $moS+p move container to output right
+
+# === Window Rules (强制全员夺舍) ===
+no_focus [window_role="pop-up"]
+for_window [window_role="About"] floating enable
+
+# 核心安全闭环：全面拦截 X11 传统 class 和 Wayland 现代 app_id，全屏自由浮动
+# for_window [class=".*"] floating enable
+# for_window [app_id=".*"] floating enable
+
+# ==============================================================================
+# THE END
+# ==============================================================================
