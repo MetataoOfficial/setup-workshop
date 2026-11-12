@@ -1,8 +1,8 @@
 # ==============================================================================
-# SWAY CONFIG
+# SWAY CONFIG; dms, rofi, sway-alttab-gui
 # ==============================================================================
-# w定切分方向、s换堆叠模式、a选父子层级、f管悬浮状态、t做标记互换。5
-# q是锁屏睡眠、d显示任务栏、e和x是执行、c是关闭、z和v是最大最小化。7
+# w管桌面通知、d定切分方向、f管悬浮聚焦、a选父子层级、s换堆叠切分。5
+# q是锁屏、t做标记互换、e编布局、x跑命令、c是关闭、z和v最大最小化。7
 # 空格、Esc、回车、退格四键专用于浏览器、编辑器、终端、文件管理器；4
 # 方向键是按方向移动, Page与数字键管工作区、屏幕不单独管理，无他。10
 
@@ -33,7 +33,7 @@ workspace_auto_back_and_forth yes
 # 窗口标题与边框：锁定为传统的浮动窗口样式
 for_window [all] title_window_icon yes
 floating_minimum_size 400 x 300
-floating_modifier $mod
+floating_modifier $mod normal
 title_align center
 default_border normal
 default_floating_border normal
@@ -53,12 +53,12 @@ exec --no-startup-id dms run
 exec --no-startup-id fcitx5 -d --replace
 exec --no-startup-id sway-alttab-gui daemon
 
-# 显示器配置：精确到像素与刷新的硬件声明
+# 显示器配置 swaymsg -t get_outputs
 output eDP-1 resolution 1920x1200@60Hz
 
 # 绑定语法：workspace <ws#i> output <显示器A> <备用显示器B>
-workspace 1 output HDMI-A-1 eDP-1
-workspace 2 output HDMI-A-1 eDP-1
+workspace 1 output DP-3 eDP-1
+workspace 2 output DP-3 eDP-1
 workspace 3 output eDP-1
 workspace 4 output eDP-1
 
@@ -86,15 +86,15 @@ bindsym Mod1+Shift+Tab exec --no-startup-id sway-alttab-gui show
 
 # 锁屏与休眠 Quit
 bindsym $moC+q exec --no-startup-id $dmsc lock lockAndOutputsOff
-bindsym $moC+Shift+q exec --no-startup-id systemctl suspend
+bindsym $moC+Shift+q exec --no-startup-id $dmsc lock lockAndOutputsOff; sleep 0.1; systemctl suspend
 
-# 预设下一次切分为水平方向（下一个窗口并排在右边）splitWide
-bindsym $mod+w splith
-bindsym $moS+w splitv
+# Workshop bar/msg
+bindsym $mod+w exec --no-startup-id $dmsc bar toggle index 0
+bindsym $moS+w exec --no-startup-id $dmsc notifications clearAll
 
-# Drop bar/msg
-bindsym $mod+d exec --no-startup-id $dmsc bar toggle index 0
-bindsym $moS+d exec --no-startup-id $dmsc notifications clearAll
+# 预设下一次切分为水平方向 Direction
+bindsym $mod+d splith
+bindsym $moS+d splitv
 
 # 将当前聚焦的窗口在平铺与悬浮之间切换 Float
 bindsym $mod+f focus mode_toggle
@@ -104,23 +104,28 @@ bindsym $moS+f floating toggle
 bindsym $mod+a focus parent
 bindsym $moS+a focus child
 
-# Change container layout -- Stacking or Split
+# Change container layout -- Stack/split, or toggle direction
 bindsym $mod+s layout toggle stacking splitv
+bindsym $moS+s layout toggle split
 
-# Exec sth.
-bindsym $mod+e exec --no-startup-id "rofi -dmenu -p 'Exec> ' -font 'Hack 16' | xargs swaymsg"
+# Edit layout (by south-east corner)
+bindsym $mod+e mode "edit-normal"
+bindsym $moS+e mode "edit-refine"
 
 # mark a window with "TAG" and swap with it
-bindsym $mod+t mark TAG
+bindsym $mod+t mark --toggle TAG
 bindsym $moS+t swap container with mark TAG
 
 # toggle fullscreen for the focused container Zoom
-bindsym $mod+z fullscreen toggle
+bindsym $mod+z layout toggle stacking tabbed
+bindsym $moS+z fullscreen toggle
 
 # 应用启动器 eXec
 bindsym $mod+x exec --no-startup-id "rofi -theme gruvbox-dark -show combi -combi-modi window,drun,run -show-icons"
+bindsym $moS+x exec --no-startup-id $dmsc spotlight toggle
 
 # 关闭窗口与底层命令透传 Close
+bindsym $mod+c exec --no-startup-id "rofi -dmenu -p 'Exec> ' -font 'Hack 16' | xargs swaymsg"
 bindsym $moS+c kill
 
 # 暂存区 Vanish
@@ -178,3 +183,38 @@ for_window [window_role="About"] floating enable
 # 全屏自由浮动
 # for_window [class=".*"] floating enable
 # for_window [app_id=".*"] floating enable
+
+# 手动编辑模式
+### 普通
+mode "edit-normal" {
+    bindsym Left  move left  250px
+    bindsym Down  move down  200px
+    bindsym Up    move up    200px
+    bindsym Right move right 250px
+
+    bindsym Shift+Left  resize shrink width  250px
+    bindsym Shift+Down  resize grow   height 200px
+    bindsym Shift+Up    resize shrink height 200px
+    bindsym Shift+Right resize grow   width  250px
+
+    bindsym c move position center
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+### 精细
+mode "edit-refine" {
+    bindsym Left  move left  50px
+    bindsym Down  move down  40px
+    bindsym Up    move up    40px
+    bindsym Right move right 50px
+
+    bindsym Shift+Left  resize shrink width  50px
+    bindsym Shift+Down  resize grow   height 40px
+    bindsym Shift+Up    resize shrink height 40px
+    bindsym Shift+Right resize grow   width  50px
+
+    bindsym c move position center
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
