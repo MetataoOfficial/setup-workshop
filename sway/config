@@ -1,6 +1,11 @@
 # ==============================================================================
 # SWAY CONFIG
 # ==============================================================================
+# w定切分方向、s换堆叠模式、a选父子层级、f管悬浮状态、t做标记互换。5
+# q是锁屏睡眠、d显示任务栏、e和x是执行、c是关闭、z和v是最大最小化。7
+# 空格、Esc、回车、退格四键专用于浏览器、编辑器、终端、文件管理器；4
+# 方向键是按方向移动, Page与数字键管工作区、屏幕不单独管理，无他。10
+
 # === Variables ===
 set $mod Mod4
 set $moS Mod4+Shift
@@ -33,7 +38,7 @@ title_align center
 default_border normal
 default_floating_border normal
 
-# 骨子里初始化为 Stacking（堆叠层叠模型），全盘接收 Openbox 灵魂
+# 初始化为 Stacking（堆叠模式）
 workspace_layout stacking
 
 # 窗口间隙
@@ -68,33 +73,48 @@ bindsym XF86AudioRaiseVolume  exec --no-startup-id "pactl set-sink-volume @DEFAU
 bindsym XF86AudioLowerVolume  exec --no-startup-id "pactl set-sink-volume @DEFAULT_SINK@ -3%"
 bindsym XF86AudioMute         exec --no-startup-id "pactl set-sink-mute   @DEFAULT_SINK@ toggle"
 bindsym XF86AudioMicMute      exec --no-startup-id "pactl set-source-mute @DEFAULT_SOURCE@ toggle"
+
 bindsym XF86MonBrightnessUp   exec --no-startup-id "brightnessctl set 3%+"
 bindsym XF86MonBrightnessDown exec --no-startup-id "brightnessctl set 3%-"
 
-# 任务切换。TODO: 暂时沿用，后面魔改 "rofi -theme gruvbox-dark -show combi -combi-modi window,drun,run -show-icons"
+# 任务切换。backup: "rofi -theme gruvbox-dark -show combi -combi-modi window,drun,run -show-icons"
 bindsym $mod+Tab exec --no-startup-id sway-alttab-gui show
 bindsym $moS+Tab exec --no-startup-id sway-alttab-gui show
 
 bindsym Mod1+Tab       exec --no-startup-id sway-alttab-gui show
 bindsym Mod1+Shift+Tab exec --no-startup-id sway-alttab-gui show
 
-# Focus Ancestor
+# 锁屏与休眠 Quit
+bindsym $moC+q exec --no-startup-id $dmsc lock lockAndOutputsOff
+bindsym $moC+Shift+q exec --no-startup-id systemctl suspend
+
+# 预设下一次切分为水平方向（下一个窗口并排在右边）splitWide
+bindsym $mod+w splith
+bindsym $moS+w splitv
+
+# Drop bar/msg
+bindsym $mod+d exec --no-startup-id $dmsc bar toggle index 0
+bindsym $moS+d exec --no-startup-id $dmsc notifications clearAll
+
+# 将当前聚焦的窗口在平铺与悬浮之间切换 Float
+bindsym $mod+f focus mode_toggle
+bindsym $moS+f floating toggle
+
+# focus Ancestor
 bindsym $mod+a focus parent
 bindsym $moS+a focus child
 
 # Change container layout -- Stacking or Split
 bindsym $mod+s layout toggle stacking splitv
-bindsym $moS+s layout toggle splitv stacking
 
 # Exec sth.
 bindsym $mod+e exec --no-startup-id "rofi -dmenu -p 'Exec> ' -font 'Hack 16' | xargs swaymsg"
-bindsym $moS+e exec --no-startup-id "rofi -dmenu -p 'Exec> ' -font 'Hack 16' | xargs swaymsg"
 
 # mark a window with "TAG" and swap with it
 bindsym $mod+t mark TAG
 bindsym $moS+t swap container with mark TAG
 
-# Toggle fullscreen for the focused container Zoom
+# toggle fullscreen for the focused container Zoom
 bindsym $mod+z fullscreen toggle
 
 # 应用启动器 eXec
@@ -106,14 +126,6 @@ bindsym $moS+c kill
 # 暂存区 Vanish
 bindsym $mod+v scratchpad show
 bindsym $moS+v move scratchpad
-
-# 锁屏与休眠 Blank
-bindsym $moC+b exec --no-startup-id $dmsc lock lockAndOutputsOff
-bindsym $moC+Shift+b exec --no-startup-id systemctl suspend
-
-# 清除通知 Message
-bindsym $mod+m exec --no-startup-id $dmsc notifications toggle
-bindsym $mod+Shift+m exec --no-startup-id $dmsc notifications clearAll
 
 # 应用精准聚焦与条件拉起
 bindsym $mod+space     [app_id=$browser_focuser] focus
@@ -163,6 +175,6 @@ bindsym $moS+Page_Down move container to workspace next
 no_focus [window_role="pop-up"]
 for_window [window_role="About"] floating enable
 
-# 核心安全闭环：全面拦截 X11 传统 class 和 Wayland 现代 app_id，全屏自由浮动
+# 全屏自由浮动
 # for_window [class=".*"] floating enable
 # for_window [app_id=".*"] floating enable
