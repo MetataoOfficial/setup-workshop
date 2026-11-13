@@ -31,7 +31,7 @@ set-env VISUAL nvim
 set-env LESS '-R -F -X -i'
 
 # 2. PATH：前置常用目录，去掉不存在的目录和重复项
-set paths = [~/.local/bin ~/go/bin /opt/miniconda3/bin $@paths]
+set paths = [~/.local/bin ~/go/bin /opt/miniconda3/bin /var/lib/snapd/snap/bin $@paths]
 var seen = [&]
 set paths = [(for p $paths {
     if (and (path:is-dir $p) (not (has-key $seen $p))) {
