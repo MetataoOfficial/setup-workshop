@@ -1,9 +1,9 @@
 // =============================================================================
-//        FrameIsland NIRI 配置 (基于 极简配置 & Cell键盘 & Tab模式)
+//        NIRI 极简配置 on Cell 键盘布局 with Tab 模式
 // =============================================================================
 
 // Installation::
-// pacman -S dms-shell ghostty nvim-qt rofi pactl nemo nemo-fileroller lxqt-policykit breeze-cursors5
+// pacman -S rofi dms-shell lxqt-policykit breeze-cursors5 pactl elvish ghostty nvim evince nemo nemo-fileroller
 //
 // gsettings set org.nemo.desktop show-desktop-icons false
 // gsettings set org.gnome.desktop.interface cursor-theme 'breeze-cursors-snow'
@@ -38,9 +38,7 @@ output "HDMI-A-1" {
 // =============================================================================
 input {
     keyboard {
-        xkb {
-            layout "cell" // 保持 CELL 布局
-        }
+        xkb { layout "cell"; }
         repeat-delay 500
         repeat-rate 50
     }
@@ -54,10 +52,7 @@ layout {
     always-center-single-column
     default-column-display "tabbed"
     gaps 10                                  // 参照 i3 配置
-
-    preset-column-widths {
-        proportion 0.75
-    }
+    preset-column-widths { proportion 0.75; }
 
     focus-ring {
         width 10
@@ -103,9 +98,7 @@ window-rule {
 //                         事件处理 (Event Responders)
 // =============================================================================
 switch-events {
-    lid-close {
-        spawn "dms" "ipc" "call" "lock" "lockAndOutputsOff"
-    }
+    lid-close { spawn "dms" "ipc" "call" "lock" "lockAndOutputsOff"; }
 }
 
 // =============================================================================
@@ -160,7 +153,9 @@ binds {
 
     // 锁屏与休眠 Blank
     Mod+Ctrl+B repeat=false { spawn "dms" "ipc" "call" "lock" "lockAndOutputsOff"; }
-    Mod+Ctrl+Shift+B repeat=false { spawn "systemctl" "suspend"; }
+    Mod+Ctrl+Shift+B repeat=false {
+        spawn "elvish" "-c" "dms ipc call lock lockAndOutputsOff; sleep 1; systemctl suspend";
+    }
 
     // 清除通知 Message
     Mod+M repeat=false { spawn "dms" "ipc" "call" "notifications" "toggle"; }
@@ -216,7 +211,7 @@ binds {
     // --- 应用程序启动 ---
     Mod+Return cooldown-ms=300 { spawn "ghostty"; }
     Mod+Space cooldown-ms=300 { spawn "firefox"; }
-    Mod+Escape cooldown-ms=300 { spawn "nvim-qt"; }
+    Mod+Escape cooldown-ms=300 { spawn "evince"; }
     Mod+BackSpace cooldown-ms=300 { spawn "nemo"; }
 
     // 音量与亮度控制
