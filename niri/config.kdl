@@ -1,9 +1,9 @@
 // =============================================================================
-//        FrameIsland NIRI 配置 (基于 i3wm 习惯 & Cell 布局 & Tab 模式)
+//        FrameIsland NIRI 配置 (基于 极简配置 & Cell键盘 & Tab模式)
 // =============================================================================
 
 // Installation::
-// pacman -S dms-shell ghostty neovide rofi pactl nemo nemo-fileroller lxqt-policykit breeze-cursors5
+// pacman -S dms-shell ghostty nvim-qt rofi pactl nemo nemo-fileroller lxqt-policykit breeze-cursors5
 //
 // gsettings set org.nemo.desktop show-desktop-icons false
 // gsettings set org.gnome.desktop.interface cursor-theme 'breeze-cursors-snow'
@@ -14,80 +14,6 @@
 // Refs::
 // - https://github.com/niri-wm/niri/blob/main/resources/default-config.kdl
 // - https://github.com/niri-wm/niri/wiki/Configuration:-Key-Bindings
-
-// ## 1. 核心导航与移动
-//
-// | 快捷键 | 功能 |
-// |---|---|
-// | `Mod + H / L` 或 `← / →` | 切换左 / 右列 |
-// | `Mod + J / K` 或 `↓ / ↑` | 在当前列内切换下 / 上窗口 |
-// | `Mod + Shift + H / L` 或 `← / →` | 将当前窗口向左 / 向右吞并或推出列 |
-// | `Mod + Shift + J / K` 或 `↓ / ↑` | 在当前列 / Tab 组内下移 / 上移窗口顺序 |
-// | `Mod + HOME / END` | 切换到第一列 / 最后一列 |
-// | `Mod + Shift + HOME / END` | 将当前列移动到最前 / 最后 |
-// | `Mod + Y / G / R / P` | 聚焦 左 / 下 / 上 / 右 方向的显示器 |
-// | `Mod + Shift + Y / G / R / P` | 将当前工作区移到 左 / 下 / 上 / 右 方向的显示器 |
-// | `Mod + Grave` | 打开 / 关闭总览 (Overview) |
-//
-// ## 2. 工作区管理
-//
-// | 快捷键 | 功能 |
-// |---|---|
-// | `Mod + Semicolon` | 返回上一个工作区 (Back-and-forth) |
-// | `Mod + 1…0` | 切换到工作区 1–10 |
-// | `Mod + Shift + 1…0` | 将当前列移动到工作区 1–10 |
-// | `Mod + N / I / O / U / '` | 切换到工作区 1–5 |
-// | `Mod + Shift + N / I / O / U / '` | 将当前列移动到工作区 1–5 |
-// | `Mod + PageUp / PageDown` | 切换上 / 下工作区 |
-// | `Mod + Shift + PageUp / PageDown` | 将当前列移动到上 / 下工作区 |
-//
-// ## 3. 最近窗口切换 (Recent Windows)
-//
-// | 快捷键 | 功能 |
-// |---|---|
-// | `Mod + Tab` / `Mod + Shift + Tab` | 在所有工作区中切换下一个 / 上一个最近窗口 |
-// | `Alt + Tab` / `Alt + Shift + Tab` | 在当前工作区中切换下一个 / 上一个最近窗口 |
-// | `Alt + Grave` / `Alt + Shift + Grave` | 切换同一应用的下一个 / 上一个窗口 |
-//
-// ## 4. 窗口、列尺寸与浮动 / Tab 管理
-//
-// | 快捷键 | 功能 |
-// |---|---|
-// | `Mod + S` | 切换当前列：普通垂直平铺 / Tab 标签模式 |
-// | `Mod + A` | 切换当前窗口浮动状态 |
-// | `Mod + Shift + A` | 在浮动层与平铺层之间切换焦点 |
-// | `Mod + D` | 切换伪全屏窗口 |
-// | `Mod + Z` | 最大化当前列 |
-// | `Mod+ Slash` | 居中当前列 |
-// | `Mod + Shift + C`| 关闭当前窗口 |
-// | `Mod + V` / `Mod + Shift + V` | 正向 / 反向切换预设列宽 |
-// | `Mod + Backslash`  | 将当前列撑满屏幕剩余可用宽度 |
-// | `Mod + [` / `Mod + ]` | 缩小 / 加宽当前列 (-10% / +10%) |
-// | `Mod + -` / `Mod + =` | 缩短 / 加高当前窗口 (-10% / +10%) |
-// | `Mod + Comma` / `Mod + Period` | 将右侧窗口并入当前列 / 将当前窗口从列中推出 |
-//
-// ## 5. 应用启动与界面工具
-//
-// | 快捷键 | 功能 |
-// |---|---|
-// | `Mod + X` | 应用启动器 (Rofi) |
-// | `Mod + Return` 或 `Mod + T` | 启动终端 (Ghostty) |
-// | `Mod + Space` 或 `Mod + W` | 启动浏览器 (Firefox) |
-// | `Mod + Escape` 或 `Mod + E` | 启动编辑器 (Neovide) |
-// | `Mod + BackSpace` 或 `Mod + F` | 启动文件管理器 (Nemo) |
-//
-// ## 6. 系统控制
-//
-// | 快捷键 | 功能 |
-// |---|---|
-// | `Print` | 交互式截图 |
-// | `Alt + Print` | 截取当前窗口 |
-// | `Mod + Ctrl + B` | 锁屏并关闭输出 |
-// | `Mod + Ctrl + Shift + B` | 挂起系统 (Suspend) |
-// | `Mod + Ctrl + Shift + Q` | 退出 Niri |
-// | `Mod + M` / `Mod + Shift + M` | 切换通知 / 清除所有通知 |
-// | 音量增减键 / 静音键 / 麦克风键 | 音量 ±3% / 切换输出静音 / 切换麦克风静音 |
-// | 亮度增减键 | 屏幕亮度 ±3% |
 
 // Screenshots Dir
 screenshot-path "~/Pictures/Screenshots/Screenshot_%Y-%m-%d_%H-%M-%S.png"
@@ -130,8 +56,7 @@ layout {
     gaps 10                                  // 参照 i3 配置
 
     preset-column-widths {
-        proportion 0.50 // 3/6
-        proportion 1.00 // 6/6
+        proportion 0.75
     }
 
     focus-ring {
@@ -165,7 +90,7 @@ cursor {
 window-rule {
     geometry-corner-radius 12
     clip-to-geometry true
-    default-column-width { proportion 0.5; }
+    default-column-width { proportion 0.75; }
 }
 
 window-rule {
@@ -216,49 +141,53 @@ recent-windows {
 //                             按键绑定 (Key Binds)
 // =============================================================================
 binds {
-    // --- 1. 核心导航 (保持物理位置习惯) ---
     Mod+grave { toggle-overview; }
     Mod+Shift+grave { toggle-overview; }
 
+    // 最大化 Zoom
+    Mod+Z repeat=false { maximize-column; }
+
+    // 应用启动器 - eXec - current windows, desktop app(drun), commands(run)
+    Mod+X repeat=false {
+        spawn "rofi" "-theme" "gruvbox-dark" "-show" "combi" "-combi-modi" "window,drun,run" "-show-icons";
+    }
+
+    // 关闭当前窗口 Close
+    Mod+Shift+C repeat=false { close-window; }
+
+    // Vertical 垂直平铺与 Tab 标签页之间来回切换
+    Mod+V repeat=false { toggle-column-tabbed-display; }
+
+    // 锁屏与休眠 Blank
+    Mod+Ctrl+B repeat=false { spawn "dms" "ipc" "call" "lock" "lockAndOutputsOff"; }
+    Mod+Ctrl+Shift+B repeat=false { spawn "systemctl" "suspend"; }
+
+    // 清除通知 Message
+    Mod+M repeat=false { spawn "dms" "ipc" "call" "notifications" "toggle"; }
+    Mod+Shift+M repeat=false { spawn "dms" "ipc" "call" "notifications" "clearAll"; }
+
+    // 默认位置与尺寸
+    Mod+0 repeat=false { center-column; }
+    Mod+Shift+0 repeat=false { switch-preset-column-width; }
+
+    // 尺寸微调
+    Mod+Minus { set-window-height "-10%"; }
+    Mod+Equal { set-window-height "+10%"; }
+    Mod+BracketLeft  { set-column-width "-10%"; }
+    Mod+BracketRight { set-column-width "+10%"; }
+
     // 左右切换焦点和移动窗口
-    Mod+H { focus-column-left; }
-    Mod+L { focus-column-right; }
     Mod+Left  { focus-column-left; }
     Mod+Right { focus-column-right; }
-
     // 进入 / 推出 Tab
-    Mod+Shift+H { consume-or-expel-window-left; }
-    Mod+Shift+L { consume-or-expel-window-right; }
     Mod+Shift+Left  { consume-or-expel-window-left; }
     Mod+Shift+Right { consume-or-expel-window-right; }
 
-    // 精确的向右吞并/推出快捷键
-    Mod+Comma  { consume-window-into-column; }
-    Mod+Period { expel-window-from-column; }
-
-    // 在列内各个 Tab 间切换焦点
-    Mod+J { focus-window-down; } // or-workspace-
-    Mod+K { focus-window-up; }   // or-workspace-
+    // 在列内各个 Tab 间切换焦点，或调整窗口前后顺序
     Mod+Down { focus-window-down; } // or-workspace-
     Mod+Up   { focus-window-up; }   // or-workspace-
-
-    // 在当前列/Tab 组内调整窗口前后顺序
-    Mod+Shift+J { move-window-down; }
-    Mod+Shift+K { move-window-up; }
     Mod+Shift+Down { move-window-down; }
     Mod+Shift+Up   { move-window-up; }
-
-    // --- 多屏幕/多显示器控制 (Outputs) ---
-    Mod+Y { focus-monitor-left; }
-    Mod+G { focus-monitor-down; }
-    Mod+R { focus-monitor-up; }
-    Mod+P { focus-monitor-right; }
-
-    // 移动当前工作区到其他显示器
-    Mod+Shift+Y { move-workspace-to-monitor-left; }
-    Mod+Shift+G { move-workspace-to-monitor-down; }
-    Mod+Shift+R { move-workspace-to-monitor-up; }
-    Mod+Shift+P { move-workspace-to-monitor-right; }
 
     // 首尾列快速聚焦或移动
     Mod+HOME { focus-column-first; }
@@ -272,104 +201,24 @@ binds {
     Mod+Shift+Page_Up   { move-column-to-workspace-up; }
     Mod+Shift+Page_Down { move-column-to-workspace-down; }
 
-    // --- 2. 工作区管理 ---
-    // 分号：返回上一个工作区 (Back-and-forth)
-    Mod+semicolon { focus-workspace-previous; }
-
     // 移动到#i工作区
     Mod+1 { focus-workspace 1; }
     Mod+2 { focus-workspace 2; }
     Mod+3 { focus-workspace 3; }
     Mod+4 { focus-workspace 4; }
-    Mod+5 { focus-workspace 5; }
-    Mod+6 { focus-workspace 6; }
-    Mod+7 { focus-workspace 7; }
-    Mod+8 { focus-workspace 8; }
-    Mod+9 { focus-workspace 9; }
-    Mod+0 { focus-workspace 10; }
-
-    Mod+N { focus-workspace 1; }
-    Mod+I { focus-workspace 2; }
-    Mod+O { focus-workspace 3; }
-    Mod+U { focus-workspace 4; }
-    Mod+Apostrophe       { focus-workspace 5; }
 
     // 传送到#i工作区
     Mod+Shift+1 { move-column-to-workspace 1; }
     Mod+Shift+2 { move-column-to-workspace 2; }
     Mod+Shift+3 { move-column-to-workspace 3; }
     Mod+Shift+4 { move-column-to-workspace 4; }
-    Mod+Shift+5 { move-column-to-workspace 5; }
-    Mod+Shift+6 { move-column-to-workspace 6; }
-    Mod+Shift+7 { move-column-to-workspace 7; }
-    Mod+Shift+8 { move-column-to-workspace 8; }
-    Mod+Shift+9 { move-column-to-workspace 9; }
-    Mod+Shift+0 { move-column-to-workspace 10; }
 
-    Mod+Shift+N { move-column-to-workspace 1; }
-    Mod+Shift+I { move-column-to-workspace 2; }
-    Mod+Shift+O { move-column-to-workspace 3; }
-    Mod+Shift+U { move-column-to-workspace 4; }
-    Mod+Shift+Apostrophe { move-column-to-workspace 5; }
-
-    // --- 3. 应用程序启动 ---
+    // --- 应用程序启动 ---
     Mod+Return cooldown-ms=300 { spawn "ghostty"; }
-    Mod+T cooldown-ms=300 { spawn "ghostty"; }
-
     Mod+Space cooldown-ms=300 { spawn "firefox"; }
-    Mod+W cooldown-ms=300 { spawn "firefox"; }
-
-    Mod+Escape cooldown-ms=300 { spawn "neovide"; }
-    Mod+E cooldown-ms=300 { spawn "neovide"; }
-
+    Mod+Escape cooldown-ms=300 { spawn "nvim-qt"; }
     Mod+BackSpace cooldown-ms=300 { spawn "nemo"; }
-    Mod+F cooldown-ms=300 { spawn "nemo"; }
 
-    // 应用启动器 - eXec - current windows, desktop app(drun), commands(run)
-    Mod+X repeat=false {
-        spawn "rofi" "-theme" "gruvbox-dark" "-show" "combi" "-combi-modi" "window,drun,run" "-show-icons";
-    }
-
-    // --- 4. 窗口管理 & Tab 标签组 & 斜线/引号扩展操作 ---
-    // 关闭当前窗口 Close
-    Mod+Shift+C repeat=false { close-window; }
-
-    // 最大化 Zoom
-    Mod+Z repeat=false { maximize-column; }
-
-    // 切换预设列宽 Variant
-    Mod+V repeat=false { switch-preset-column-width; }
-    Mod+Shift+V repeat=false { switch-preset-column-width-back; }
-
-    // 扩展当前列填充屏幕剩下的空间
-    Mod+Backslash repeat=false { expand-column-to-available-width; }
-
-    // 在 Stack 垂直平铺与 Tab 标签页之间来回切换 Stack
-    Mod+S repeat=false { toggle-column-tabbed-display; }
-
-    // 伪全屏 Deskly
-    Mod+D repeat=false { toggle-windowed-fullscreen; }
-
-    // 切换浮动 Above
-    Mod+A repeat=false { toggle-window-floating; }
-    Mod+Shift+A repeat=false { switch-focus-between-floating-and-tiling; }
-
-    // 居中
-    Mod+Slash repeat=false { center-column; }
-
-    // 尺寸微调
-    Mod+Minus { set-window-height "-10%"; }
-    Mod+Equal { set-window-height "+10%"; }
-    Mod+BracketLeft  { set-column-width "-10%"; }
-    Mod+BracketRight { set-column-width "+10%"; }
-
-    // 移动浮动窗口
-    Mod+Shift+Minus        { spawn "niri" "msg" "action" "move-floating-window" "-x" "-10%" "-y" "-10%"; }
-    Mod+Shift+Equal        { spawn "niri" "msg" "action" "move-floating-window" "-x" "+10%" "-y" "-10%"; }
-    Mod+Shift+BracketLeft  { spawn "niri" "msg" "action" "move-floating-window" "-x" "-10%" "-y" "+10%"; }
-    Mod+Shift+BracketRight { spawn "niri" "msg" "action" "move-floating-window" "-x" "+10%" "-y" "+10%"; }
-
-    // --- 5. 系统控制 ---
     // 音量与亮度控制
     XF86AudioRaiseVolume  allow-when-locked=true { spawn "pactl" "set-sink-volume" "@DEFAULT_SINK@" "+3%"; }
     XF86AudioLowerVolume  allow-when-locked=true { spawn "pactl" "set-sink-volume" "@DEFAULT_SINK@" "-3%"; }
@@ -381,23 +230,11 @@ binds {
     // 截屏
     Print { screenshot; }
     Alt+Print { screenshot-window; }
-
-    // 锁屏与休眠 Blank
-    Mod+Ctrl+B repeat=false { spawn "dms" "ipc" "call" "lock" "lockAndOutputsOff"; }
-    Mod+Ctrl+Shift+B repeat=false { spawn "systemctl" "suspend"; }
-
-    // 清除通知 Message
-    Mod+M repeat=false { spawn "dms" "ipc" "call" "notifications" "toggle"; }
-    Mod+Shift+M repeat=false { spawn "dms" "ipc" "call" "notifications" "clearAll"; }
-
-    // 退出 Quit
-    Mod+Ctrl+Shift+Q repeat=false { quit; }
 }
 
 // =============================================================================
 //                               启动项 (Autostart)
 // =============================================================================
-// 环境变量
 environment {
     XCURSOR_SIZE "36"
     XCURSOR_THEME "breeze-cursors-snow"
@@ -407,14 +244,7 @@ environment {
     QT_QPA_PLATFORMTHEME "gnome"
 }
 
-// D-Bus environment
 spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP" "DISPLAY" "LANG" "LC_ALL" "XMODIFIERS" "QT_IM_MODULE" "INPUT_METHOD" "SDL_IM_MODULE" "LC_CTYPE"
-
-// Polkit authentication agent
 spawn-at-startup "/usr/bin/lxqt-policykit-agent"
-
-// DMS
 spawn-at-startup "dms" "run"
-
-// Input method
 spawn-at-startup "fcitx5" "-d" "--replace"
