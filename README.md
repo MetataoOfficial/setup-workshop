@@ -3,7 +3,7 @@
 To setup my personal workshop/environment for coding and writing.
 
 - manjaro
-- swaywm
+- niriWM
 - ghostty
 - elvish
 - neovim
