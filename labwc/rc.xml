@@ -24,13 +24,11 @@
   <!-- ================================================================ -->
   <keyboard>
     <default />
-
     <repeatDelay>500</repeatDelay>
     <repeatRate>50</repeatRate>
 
-    <!-- Session -->
-    <keybind key="W-C-S-q">
-      <action name="Exit" />
+    <keybind key="W-q">
+      <action name="AutoPlace" policy="center" />
     </keybind>
 
     <!-- Whole screen -->
@@ -48,12 +46,12 @@
       <action name="ToggleOmnipresent" />
     </keybind>
 
-    <!-- Maximize -->
+    <!-- Zoom -->
     <keybind key="W-z">
       <action name="ToggleMaximize" />
     </keybind>
 
-    <!-- Minimize -->
+    <!-- Vanish -->
     <keybind key="W-v">
       <action name="Iconify" />
     </keybind>
@@ -63,13 +61,12 @@
       <action name="Close" />
     </keybind>
 
-    <!-- Application launcher -->
+    <!-- eXec -->
     <keybind key="W-x">
       <action name="Execute"
         command="rofi -theme gruvbox-dark -show combi -combi-modi window,drun,run -show-icons" />
     </keybind>
 
-    <!-- DMS -->
     <keybind key="W-C-b">
       <action name="Execute"
         command="dms ipc call lock lockAndOutputsOff" />
@@ -77,7 +74,7 @@
 
     <keybind key="W-C-S-b">
       <action name="Execute"
-        command="systemctl suspend" />
+        command="dms ipc call lock lockAndOutputsOff; systemctl suspend" />
     </keybind>
 
     <keybind key="W-m">
@@ -91,25 +88,21 @@
     </keybind>
 
     <!-- Window Placement: Quarter Corners -->
-    <!-- 左上 -->
     <keybind key="W-d">
       <action name="MoveToEdge" direction="left" snapWindows="no" />
       <action name="MoveToEdge" direction="up" snapWindows="no" />
     </keybind>
 
-    <!-- 左下 -->
     <keybind key="W-e">
       <action name="MoveToEdge" direction="left" snapWindows="no" />
       <action name="MoveToEdge" direction="down" snapWindows="no" />
     </keybind>
 
-    <!-- 右上 -->
     <keybind key="W-f">
       <action name="MoveToEdge" direction="right" snapWindows="no" />
       <action name="MoveToEdge" direction="up" snapWindows="no" />
     </keybind>
 
-    <!-- 右下 -->
     <keybind key="W-t">
       <action name="MoveToEdge" direction="right" snapWindows="no" />
       <action name="MoveToEdge" direction="down" snapWindows="no" />
@@ -133,86 +126,77 @@
 
     <!-- Window Movement: Relative Position -->
     <keybind key="W-n">
-      <action name="MoveRelative" x="-50" y="0" />
+      <action name="MoveRelative" x="-150" y="0" />
     </keybind>
 
     <keybind key="W-i">
-      <action name="MoveRelative" x="0" y="50" />
+      <action name="MoveRelative" x="0" y="90" />
     </keybind>
 
     <keybind key="W-o">
-      <action name="MoveRelative" x="0" y="-50" />
+      <action name="MoveRelative" x="0" y="-90" />
     </keybind>
 
     <keybind key="W-u">
-      <action name="MoveRelative" x="50" y="0" />
+      <action name="MoveRelative" x="150" y="0" />
     </keybind>
 
     <!-- Window Resizing: Grow -->
     <keybind key="W-y">
-      <action name="ResizeRelative" left="50" />
+      <action name="ResizeRelative" left="150" />
     </keybind>
 
     <keybind key="W-g">
-      <action name="ResizeRelative" bottom="50" />
+      <action name="ResizeRelative" bottom="90" />
     </keybind>
 
     <keybind key="W-r">
-      <action name="ResizeRelative" top="50" />
+      <action name="ResizeRelative" top="90" />
     </keybind>
 
     <keybind key="W-p">
-      <action name="ResizeRelative" right="50" />
+      <action name="ResizeRelative" right="150" />
     </keybind>
 
     <!-- Window Resizing: Shrink -->
-    <keybind key="W-S-y">
-      <action name="ResizeRelative" left="-50" />
-    </keybind>
-
-    <keybind key="W-S-g">
-      <action name="ResizeRelative" bottom="-50" />
-    </keybind>
-
-    <keybind key="W-S-r">
-      <action name="ResizeRelative" top="-50" />
-    </keybind>
-
-    <keybind key="W-S-p">
-      <action name="ResizeRelative" right="-50" />
-    </keybind>
-
-    <!-- Monitor Focus -->
     <keybind key="W-h">
-      <action name="FocusOutput" direction="left" />
+      <action name="ResizeRelative" left="-150" />
     </keybind>
 
     <keybind key="W-j">
-      <action name="FocusOutput" direction="down" />
+      <action name="ResizeRelative" bottom="-90" />
     </keybind>
 
     <keybind key="W-k">
-      <action name="FocusOutput" direction="up" />
+      <action name="ResizeRelative" top="-90" />
     </keybind>
 
     <keybind key="W-l">
-      <action name="FocusOutput" direction="right" />
+      <action name="ResizeRelative" right="-150" />
     </keybind>
 
-    <keybind key="W-S-h">
-      <action name="MoveToOutput" direction="left" />
+    <!-- switcher -->
+    <keybind key="W-Tab">
+      <action name="NextWindow" />
     </keybind>
 
-    <keybind key="W-S-j">
-      <action name="MoveToOutput" direction="down" />
+    <keybind key="W-S-Tab">
+      <action name="PreviousWindow" />
     </keybind>
 
-    <keybind key="W-S-k">
-      <action name="MoveToOutput" direction="up" />
+    <!-- 切换工作区：Super + PageUp / PageDown -->
+    <keybind key="W-Prior">
+      <action name="GoToDesktop" to="left" wrap="yes" />
+    </keybind>
+    <keybind key="W-Next">
+      <action name="GoToDesktop" to="right" wrap="yes" />
     </keybind>
 
-    <keybind key="W-S-l">
-      <action name="MoveToOutput" direction="right" />
+    <keybind key="W-S-Prior">
+      <action name="SendToDesktop" to="left" follow="yes" wrap="yes" />
+    </keybind>
+    <keybind key="W-S-Next">
+      <action name="SendToDesktop" to="right" follow="yes" wrap="yes" />
     </keybind>
 
     <!-- Workspaces -->
@@ -274,20 +258,11 @@
       <action name="Execute"
         command="brightnessctl set 3%-" />
     </keybind>
-
-    <keybind key="W-Tab">
-      <action name="NextWindow" />
-    </keybind>
-
-    <keybind key="W-S-Tab">
-      <action name="PreviousWindow" />
-    </keybind>
   </keyboard>
 
   <!-- ================================================================ -->
   <!-- Workspaces -->
   <!-- ================================================================ -->
-
   <desktops>
     <popupTime>800</popupTime>
     <names>
