@@ -1,5 +1,5 @@
 # ==============================================================================
-# SWAY CONFIG; dms, rofi, sway-alttab-gui
+# SWAY CONFIG; with dms + rofi
 # ==============================================================================
 # w管桌面通知、d定切分方向、f管悬浮聚焦、a选父子层级、s换堆叠切分。5
 # q是锁屏、t做标记互换、e编布局、x跑命令、c是关闭、z和v最大最小化。7
@@ -17,18 +17,24 @@ set $dmsc dms ipc call
 # 应用程序配置
 set $browser_launcher   firefox
 set $browser_focuser    "(?i)firefox"
-set $editor_launcher    neovide
-set $editor_focuser     "(?i)neovide"
+set $editor_launcher    nvim-qt
+set $editor_focuser     "(?i)nvim-qt"
 set $terminal_launcher  ghostty
 set $terminal_focuser   "(?i)ghostty"
 set $filer_launcher     nemo
 set $filer_focuser      "(?i)nemo"
+set $viewer_launcher    evince
+set $viewer_focuser     "(?i)evince"
 
 # === Appearance & General Behavior ===
 font pango:hack 12px
 show_marks yes
 focus_wrapping workspace
-workspace_auto_back_and_forth yes
+
+### better multiscreen experance:
+workspace_auto_back_and_forth no
+focus_follows_mouse no
+mouse_warping none
 
 # 窗口标题与边框：锁定为传统的浮动窗口样式
 for_window [all] title_window_icon yes
@@ -51,7 +57,6 @@ exec_always --no-startup-id /usr/bin/lxqt-policykit-agent
 # 启动常用应用组
 exec --no-startup-id dms run
 exec --no-startup-id fcitx5 -d --replace
-exec --no-startup-id sway-alttab-gui daemon
 
 # 显示器配置 swaymsg -t get_outputs
 output eDP-1 resolution 1920x1200@60Hz
@@ -73,16 +78,8 @@ bindsym XF86AudioRaiseVolume  exec --no-startup-id "pactl set-sink-volume @DEFAU
 bindsym XF86AudioLowerVolume  exec --no-startup-id "pactl set-sink-volume @DEFAULT_SINK@ -3%"
 bindsym XF86AudioMute         exec --no-startup-id "pactl set-sink-mute   @DEFAULT_SINK@ toggle"
 bindsym XF86AudioMicMute      exec --no-startup-id "pactl set-source-mute @DEFAULT_SOURCE@ toggle"
-
 bindsym XF86MonBrightnessUp   exec --no-startup-id "brightnessctl set 3%+"
 bindsym XF86MonBrightnessDown exec --no-startup-id "brightnessctl set 3%-"
-
-# 任务切换。backup: "rofi -theme gruvbox-dark -show combi -combi-modi window,drun,run -show-icons"
-bindsym $mod+Tab exec --no-startup-id sway-alttab-gui show
-bindsym $moS+Tab exec --no-startup-id sway-alttab-gui show
-
-bindsym Mod1+Tab       exec --no-startup-id sway-alttab-gui show
-bindsym Mod1+Shift+Tab exec --no-startup-id sway-alttab-gui show
 
 # 锁屏与休眠 Quit
 bindsym $moC+q exec --no-startup-id $dmsc lock lockAndOutputsOff
@@ -125,7 +122,7 @@ bindsym $mod+x exec --no-startup-id "rofi -theme gruvbox-dark -show combi -combi
 bindsym $moS+x exec --no-startup-id $dmsc spotlight toggle
 
 # 关闭窗口与底层命令透传 Close
-bindsym $mod+c exec --no-startup-id "rofi -dmenu -p 'Exec> ' -font 'Hack 16' | xargs swaymsg"
+bindsym $mod+c exec --no-startup-id "rofi -theme gruvbox-dark -dmenu -p 'Cmd> ' -font 'Hack 16' | xargs swaymsg"
 bindsym $moS+c kill
 
 # 暂存区 Vanish
@@ -141,14 +138,15 @@ bindsym $mod+Return    [app_id=$terminal_focuser] focus
 bindsym $moS+Return    exec --no-startup-id $terminal_launcher
 bindsym $mod+BackSpace [app_id=$filer_focuser] focus
 bindsym $moS+BackSpace exec --no-startup-id $filer_launcher
+bindsym $mod+Tab       [app_id=$viewer_focuser] focus
+bindsym $moS+Tab       exec --no-startup-id $viewer_launcher
 
-# 基础物理焦点切换（经典的上下左右）
+# 基础物理焦点切换+几何挪动（经典的上下左右）
 bindsym $mod+Left  focus left
 bindsym $mod+Down  focus down
 bindsym $mod+Up    focus up
 bindsym $mod+Right focus right
 
-# 基础物理几何挪动
 bindsym $moS+Left  move left
 bindsym $moS+Down  move down
 bindsym $moS+Up    move up
@@ -184,37 +182,44 @@ for_window [window_role="About"] floating enable
 # for_window [class=".*"] floating enable
 # for_window [app_id=".*"] floating enable
 
-# 手动编辑模式
-### 普通
+### 普通编辑模式
 mode "edit-normal" {
-    bindsym Left  move left  250px
-    bindsym Down  move down  200px
-    bindsym Up    move up    200px
-    bindsym Right move right 250px
+    bindsym $mod+Left  move left  250px
+    bindsym $mod+Down  move down  200px
+    bindsym $mod+Up    move up    200px
+    bindsym $mod+Right move right 250px
 
-    bindsym Shift+Left  resize shrink width  250px
-    bindsym Shift+Down  resize grow   height 200px
-    bindsym Shift+Up    resize shrink height 200px
-    bindsym Shift+Right resize grow   width  250px
+    bindsym $mod+Shift+Left  resize shrink width  250px
+    bindsym $mod+Shift+Down  resize grow   height 200px
+    bindsym $mod+Shift+Up    resize shrink height 200px
+    bindsym $mod+Shift+Right resize grow   width  250px
 
-    bindsym c move position center
+    # Super_L/R 不支持松开退出的机制
+    bindsym $mod+c move position center
+    bindsym Tab mode "default"
+    bindsym Space mode "default"
+    bindsym BackSpace mode "default"
     bindsym Return mode "default"
     bindsym Escape mode "default"
 }
 
-### 精细
+### 精细编辑模式
 mode "edit-refine" {
-    bindsym Left  move left  50px
-    bindsym Down  move down  40px
-    bindsym Up    move up    40px
-    bindsym Right move right 50px
+    bindsym $mod+Left  move left  50px
+    bindsym $mod+Down  move down  40px
+    bindsym $mod+Up    move up    40px
+    bindsym $mod+Right move right 50px
 
-    bindsym Shift+Left  resize shrink width  50px
-    bindsym Shift+Down  resize grow   height 40px
-    bindsym Shift+Up    resize shrink height 40px
-    bindsym Shift+Right resize grow   width  50px
+    bindsym $mod+Shift+Left  resize shrink width  50px
+    bindsym $mod+Shift+Down  resize grow   height 40px
+    bindsym $mod+Shift+Up    resize shrink height 40px
+    bindsym $mod+Shift+Right resize grow   width  50px
 
-    bindsym c move position center
+    # Super_L/R 不支持松开退出的机制
+    bindsym $mod+c move position center
+    bindsym Tab mode "default"
+    bindsym Space mode "default"
+    bindsym BackSpace mode "default"
     bindsym Return mode "default"
     bindsym Escape mode "default"
 }
