@@ -96,7 +96,7 @@ fn yz {|@args|
         e:yazi $@args --cwd-file=$tmp
         if (path:is-regular $tmp) {
             var cwd = (cat $tmp)
-            if ($cwd != $pwd and (path:is-dir $cwd)) {
+            if (and (not-eq $cwd $pwd) (path:is-dir $cwd)) {
                 cd $cwd
             }
         }
@@ -122,3 +122,33 @@ var local-rc = ~/.config/elvish/local.elv
 if (path:is-regular $local-rc) {
     eval (slurp < $local-rc)
 }
+
+# 8. 进程替换：模拟 Bash 的 diff <(cat a) <(cat b) 或 Fish 的 diff (cat a | psub) (cat b | psub)
+var -psub-files = []
+
+fn psub {|&suffix=''|
+    # 创建临时文件（支持可选后缀，方便某些按扩展名识别格式的程序，如 diff/vim/jq）
+    var tmp = (mktemp /tmp/elvish-psub.XXXXXXXXXX$suffix)
+
+    # 将标准输入完整写入临时文件，使用 only-bytes 保证二进制或纯文本原样落盘
+    only-bytes > $tmp
+
+    # 将文件路径加入待清理列表
+    set -psub-files = [$@-psub-files $tmp]
+
+    # 输出临时文件路径给外层命令
+    put $tmp
+}
+
+# 注册钩子：每当整行命令执行完毕、准备显示下一次提示符时，自动清理所有临时文件
+set edit:before-readline = [$@edit:before-readline {
+    if (not-eq $-psub-files []) {
+        rm -f $@-psub-files
+        set -psub-files = []
+    }
+}]
+
+# 使用示例：
+# 1. 通用命令输出对比：diff (sort file1.txt | psub) (sort file2.txt | psub)
+# 2. 对比远程 JSON 接口：diff (curl -s https://example.com | jq . | psub) (curl -s https://example.com | jq . | psub)
+# 3. 带后缀名使用：some-tool (generate-data | psub &suffix=.json)
