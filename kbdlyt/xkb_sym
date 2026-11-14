@@ -1,5 +1,43 @@
-// ~/.config/xkb/symbols/cell
-// 基于 ～/.Xmodmap 移植
+// This is: ~/.config/xkb/symbols/cell
+// to debug the layout: xkbcli compile-keymap --layout cell
+// --- For X11: ---
+// sudo cp ~/.config/xkb/symbols/cell /usr/share/X11/xkb/symbols/
+// edit /usr/share/X11/xkb/rules/evdev.xml :
+// <layout>
+//   <configItem>
+//     <name>cell</name>
+//     <shortDescription>cell</shortDescription>
+//     <description>ChnEngLayout</description>
+//   </configItem>
+// </layout>
+// --- For wayland: ---
+// gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'cell')]"
+//   then, use `Super + Space` to switch...
+// OR
+// mkdir -p ~/.config/xkb/rules
+// nvim ~/.config/xkb/rules/evdev.xml  ::
+// <?xml version="1.0" encoding="UTF-8"?>
+// <!DOCTYPE xkbConfigRegistry SYSTEM "xkb.dtd">
+// <xkbConfigRegistry version="1.1">
+//   <layoutList>
+//     <layout>
+//       <configItem>
+//         <name>cell</name>
+//         <shortDescription>cell</shortDescription>
+//         <description>Custom Cell Layout</description>
+//         <countryList>
+//           <iso3166Id>US</iso3166Id>
+//         </countryList>
+//         <languageList>
+//           <iso639Id>eng</iso639Id>
+//         </languageList>
+//       </configItem>
+//     </layout>
+//   </layoutList>
+// </xkbConfigRegistry>
+// gsettings set org.gnome.desktop.input-sources show-all-sources true
+// relogin to select it from the system setting kbd layouts
+// --- lastly, set it in the WM rc is an easier way...
 
 default partial alphanumeric_keys
 xkb_symbols "basic" {
@@ -8,12 +46,11 @@ xkb_symbols "basic" {
 
     // --- 功能键改写 ---
     key <CAPS> { [ Escape ] };      // CapsLock -> Escape
-    key <RTSH> { [ BackSpace ] };   // RightShift -> BackSpace
-    key <COMP> { [ BackSpace ] };   // 应用键/Menu -> BackSpace (keycode 62 映射逻辑)
-    key <ESC>  { [ Escape ] };      // 保持 Escape
+    // key <RTSH> { [ BackSpace ] };   // RightShift -> BackSpace (useless)
+    // key <ESC>  { [ Escape ] };      // 保持 Escape (do not have to write)
 
     // --- 字母区重排 (核心逻辑) ---
-    // 第一排 (QWERTY 位 -> CELL 位)
+    // 第一排 (QWERTY Row)
     key <AD03> { [ d, D ] };        // E 位 -> D
     key <AD04> { [ f, F ] };        // R 位 -> F
     key <AD05> { [ semicolon, colon ] }; // T 位 -> ;
@@ -33,7 +70,6 @@ xkb_symbols "basic" {
     key <AC09> { [ o, O ] };        // L 位 -> O
     key <AC10> { [ u, U ] };        // ; 位 -> U
 
-    // 注意：z, x, c, v, b, m, h, j, k, l 在您的配置中似乎也通过 keycode 进行了平移
     // 第三排 (Bottom Row)
     key <AB01> { [ z, Z ] };        // Z
     key <AB02> { [ x, X ] };        // X
@@ -47,6 +83,8 @@ xkb_symbols "basic" {
     key <AB10> { [ l, L ] };        // / 位 -> L
 
     // --- 其他特殊符号 ---
-    key <TLDE> { [ grave, asciitilde ] };
-    key <BKSL> { [ backslash, bar ] };
+    // key <TLDE> { [ grave, asciitilde ] };
+    // key <BKSL> { [ backslash, bar ] };
 };
+
+// the end
